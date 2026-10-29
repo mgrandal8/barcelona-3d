@@ -1,0 +1,291 @@
+:root {
+  --fondo-1: #fbefdc;
+  --fondo-2: #e9d3b4;
+  --texto: #2b2420;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--texto);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { margin: 0; height: 100%; }
+
+body {
+  background: radial-gradient(ellipse at 50% 35%, var(--fondo-1) 0%, var(--fondo-2) 100%);
+  overflow: hidden;
+}
+
+.app { position: fixed; inset: 0; }
+
+:root {
+  --tarjeta: rgba(255, 250, 242, 0.92);
+  --borde: rgba(90, 60, 30, 0.14);
+  --acento: #c8553a;
+  --acento-2: #f0b84a;
+  --sombra: 0 10px 30px rgba(60, 35, 15, 0.18);
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* etiqueta flotante del monumento (Html de drei) */
+.etiqueta {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra);
+  transform: translateY(-34px); font-size: 13px; pointer-events: none;
+}
+.etiqueta span { font-size: 11px; opacity: 0.65; }
+
+/* lista de lugares */
+.lista {
+  position: absolute; top: 16px; left: 16px; width: 260px; max-height: calc(100% - 64px); overflow: auto;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px; box-shadow: var(--sombra);
+  backdrop-filter: blur(8px); padding: 12px;
+}
+.lista:not(.abierta) { width: auto; }
+.lista-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lista-cabecera h1 { margin: 0 4px; font-size: 18px; letter-spacing: 0.01em; }
+.lista-cabecera h1 span { color: var(--acento); }
+.lista-cabecera button {
+  border: 1px solid var(--borde); background: transparent; border-radius: 999px; padding: 4px 10px; font-size: 12px;
+}
+.lista ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; }
+.lista li button {
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+  border: 0; background: transparent; border-radius: 10px; padding: 7px 8px;
+}
+.lista li button:hover, .lista li button.hover { background: rgba(200, 85, 58, 0.08); }
+.lista li button.activo { background: rgba(200, 85, 58, 0.16); }
+.lista strong { display: block; font-size: 14px; font-weight: 600; }
+.lista small { display: block; font-size: 11.5px; opacity: 0.6; }
+.lista-num {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--acento); color: #fff; font-size: 12px; font-weight: 700;
+}
+.lista li button.activo .lista-num { background: var(--acento-2); color: var(--texto); }
+
+/* ficha del monumento */
+.panel {
+  position: absolute; top: 16px; right: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); overflow: auto;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 20px; box-shadow: var(--sombra);
+  backdrop-filter: blur(10px); padding: 22px 22px 16px;
+  transform: translateX(calc(100% + 32px)); transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.panel.abierto { transform: none; }
+.panel h2 { margin: 2px 0 10px; font-size: 26px; line-height: 1.15; }
+.panel-cerrar {
+  position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--borde); background: #fff8;
+}
+.panel-etiqueta { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--acento); font-weight: 600; }
+.panel-texto { line-height: 1.55; font-size: 15px; }
+.panel-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+.panel-datos div:first-child { grid-column: 1 / -1; }
+.panel-datos div { background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); border-radius: 12px; padding: 8px 10px; }
+.panel-datos dt { font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; }
+.panel-datos dd { margin: 2px 0 0; font-size: 13.5px; font-weight: 600; }
+.panel-consejo { background: #fdf0d2; border-radius: 14px; padding: 12px 14px; }
+.panel-consejo strong { font-size: 13px; }
+.panel-consejo p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+.panel-nav { display: flex; gap: 6px; margin-top: 16px; }
+.panel-nav button { flex: 1; border: 1px solid var(--borde); background: #fff8; border-radius: 999px; padding: 8px 6px; font-size: 13px; }
+.panel-nav button.primario { background: var(--acento); color: #fff; border-color: transparent; flex: 1.3; }
+.panel-aviso { margin: 12px 0 0; font-size: 11px; opacity: 0.5; text-align: center; }
+
+.atribucion {
+  position: absolute; z-index: 25; bottom: 6px; left: 50%; transform: translateX(-50%); margin: 0;
+  font-size: 11px; padding: 3px 10px; border-radius: 999px; background: rgba(255, 250, 242, 0.75); white-space: nowrap;
+}
+.atribucion a { color: inherit; }
+
+/* selector de hora */
+.hora {
+  position: absolute; left: 16px; bottom: 16px; display: flex; gap: 2px; padding: 4px;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 999px; box-shadow: var(--sombra);
+  backdrop-filter: blur(8px);
+}
+.hora button {
+  display: flex; align-items: center; gap: 6px; border: 0; background: transparent;
+  border-radius: 999px; padding: 6px 12px; font-size: 15px; transition: background 0.2s;
+}
+.hora button small { font-size: 12.5px; }
+.hora button:hover { background: rgba(200, 85, 58, 0.08); }
+.hora button.activo { background: var(--acento); color: #fff; }
+
+/* con la portada delante se esconde la interfaz del mapa */
+.lista, .hora, .menu, .panel { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel { opacity: 0; pointer-events: none; }
+
+button:disabled { opacity: 0.4; cursor: default; }
+button.primario { background: var(--acento); color: #fff; border-color: transparent; }
+button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* menú: tours, guía y ayuda */
+.menu {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; padding: 4px;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 999px; box-shadow: var(--sombra);
+  backdrop-filter: blur(8px);
+}
+.menu button {
+  display: flex; align-items: center; gap: 6px; border: 0; background: transparent;
+  border-radius: 999px; padding: 6px 14px; font-size: 14px;
+}
+.menu button small { font-size: 13px; font-weight: 600; }
+.menu button:hover { background: rgba(200, 85, 58, 0.08); }
+.menu button.activo { background: rgba(200, 85, 58, 0.16); }
+.menu-ayuda {
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--texto); color: #fff; font-size: 12px; font-weight: 700;
+}
+
+/* portada "Descubre Barcelona" (y pantalla de carga) */
+.portada, .carga {
+  position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; padding: 24px 6vw;
+  background: radial-gradient(ellipse at 50% 35%, var(--fondo-1) 0%, var(--fondo-2) 100%);
+  transition: background 1.2s;
+}
+.portada.lista-ya {
+  background: linear-gradient(90deg, rgba(251, 239, 220, 0.92) 0%, rgba(251, 239, 220, 0.55) 38%, rgba(251, 239, 220, 0) 65%);
+}
+.portada-tarjeta { max-width: 470px; animation: aparecer 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.portada-antetitulo { margin: 0; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--acento); font-weight: 700; }
+.portada h1 { margin: 8px 0 14px; font-size: clamp(40px, 6vw, 68px); line-height: 0.98; letter-spacing: -0.02em; font-weight: 800; }
+.portada h1 span { display: block; color: var(--acento); }
+.portada-texto { font-size: 17px; line-height: 1.55; margin: 0; max-width: 42ch; }
+.portada-cifras { list-style: none; padding: 0; margin: 20px 0 24px; display: flex; gap: 22px; font-size: 13px; opacity: 0.8; }
+.portada-cifras strong { display: block; font-size: 24px; color: var(--texto); }
+.portada-botones { display: flex; gap: 10px; flex-wrap: wrap; animation: aparecer 0.5s both; }
+.portada-botones button {
+  border: 1px solid var(--borde); background: var(--tarjeta); border-radius: 999px; padding: 12px 22px; font-size: 15px; font-weight: 600;
+  box-shadow: var(--sombra);
+}
+.portada-botones button.primario { padding: 12px 28px; background: var(--acento); color: #fff; border-color: transparent; }
+.portada-botones button:hover { transform: translateY(-1px); }
+.portada-pie { margin: 22px 0 0; font-size: 11.5px; opacity: 0.55; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(14px); } }
+
+.carga { justify-content: center; transition: opacity 0.8s; }
+.carga.oculta { opacity: 0; pointer-events: none; }
+.carga-tarjeta { width: min(320px, 100%); text-align: center; }
+.carga-tarjeta > strong { font-size: 24px; }
+.carga-tarjeta > strong span { color: var(--acento); }
+
+.progreso { width: 100%; max-width: 340px; }
+.carga .progreso { margin: 14px auto 0; }
+.progreso-barra { height: 6px; border-radius: 999px; background: rgba(90, 60, 30, 0.12); overflow: hidden; }
+.progreso-barra span { display: block; height: 100%; background: linear-gradient(90deg, var(--acento), var(--acento-2)); border-radius: inherit; transition: width 0.3s; }
+.progreso small { display: block; margin-top: 8px; font-size: 12.5px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+
+/* pista de controles */
+.pista {
+  position: absolute; bottom: 70px; left: 50%; transform: translate(-50%, 10px); margin: 0; z-index: 25;
+  padding: 8px 16px; border-radius: 999px; background: rgba(43, 36, 32, 0.82); color: #fff; font-size: 13.5px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.5s, transform 0.5s;
+}
+.pista.visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* número de parada del tour sobre el mapa */
+.ruta-num {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 800;
+  border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); transform: translateY(-40px);
+}
+.ruta-num.activa { width: 28px; height: 28px; font-size: 14px; }
+
+/* tour en la ficha */
+.panel-tour { background: color-mix(in srgb, var(--color) 10%, #fff); border: 1px solid color-mix(in srgb, var(--color) 30%, transparent); border-radius: 14px; padding: 10px 12px; margin: 0 36px 14px 0; }
+.panel-tour p { margin: 0; font-size: 13px; font-weight: 700; color: color-mix(in srgb, var(--color) 80%, #000); }
+.panel-tour-pasos { display: flex; gap: 4px; margin: 8px 0; }
+.panel-tour-pasos span { flex: 1; height: 4px; border-radius: 999px; background: color-mix(in srgb, var(--color) 20%, transparent); }
+.panel-tour-pasos span.hecho { background: var(--color); }
+.panel-tour p.panel-tour-nota { font-weight: 400; color: var(--texto); line-height: 1.45; font-size: 13.5px; }
+
+/* diálogos */
+.dialogo-fondo {
+  position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px;
+  background: rgba(43, 36, 32, 0.35); backdrop-filter: blur(3px); animation: fundido 0.25s both;
+}
+.dialogo {
+  width: 100%; max-height: calc(100% - 16px); overflow: auto; outline: none;
+  background: #fffaf2; border: 1px solid var(--borde); border-radius: 22px; box-shadow: 0 24px 60px rgba(60, 35, 15, 0.3);
+  padding: 22px 24px 24px; animation: aparecer 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.dialogo-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dialogo-cabecera h2 { margin: 0; font-size: 24px; }
+.dialogo-cabecera .panel-cerrar { position: static; flex: none; }
+.dialogo-intro { margin: 6px 0 18px; opacity: 0.75; line-height: 1.5; font-size: 14.5px; }
+@keyframes fundido { from { opacity: 0; } }
+
+.tours { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.tour {
+  display: flex; flex-direction: column; background: #fff; border: 1px solid var(--borde); border-top: 5px solid var(--color);
+  border-radius: 16px; padding: 16px;
+}
+.tour-cabecera { display: flex; gap: 12px; align-items: center; }
+.tour-icono {
+  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
+  background: color-mix(in srgb, var(--color) 14%, #fff);
+}
+.tour h3 { margin: 0; font-size: 17px; }
+.tour-cabecera small { font-size: 12.5px; opacity: 0.65; }
+.tour > p { font-size: 14px; line-height: 1.5; margin: 12px 0; }
+.tour-paradas { margin: 0 0 14px; padding: 0; list-style: none; counter-reset: parada; display: grid; gap: 6px; flex: 1; align-content: start; }
+.tour-paradas li { counter-increment: parada; display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.tour-paradas li::before {
+  content: counter(parada); flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--color); color: #fff; font-size: 11px; font-weight: 700;
+}
+.tour footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px dashed var(--borde); padding-top: 12px; }
+.tour footer strong { font-size: 14px; }
+.tour footer button { white-space: nowrap; border: 0; border-radius: 999px; padding: 8px 16px; font-size: 13.5px; font-weight: 600; background: var(--color); }
+
+.guia { display: flex; gap: 16px; align-items: center; margin: 14px 0 4px; }
+.guia-avatar {
+  flex: none; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--acento), var(--acento-2)); color: #fff; font-size: 26px; font-weight: 800;
+  border: 3px solid #fff; box-shadow: var(--sombra);
+}
+.guia h3 { margin: 0; font-size: 20px; }
+.guia-sub { margin: 2px 0 0; font-size: 13.5px; opacity: 0.7; }
+.dialogo > p { line-height: 1.6; font-size: 15px; }
+.guia-datos { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 6px; font-size: 14px; }
+.guia-datos strong { display: inline-block; width: 92px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+.dialogo blockquote { margin: 0; padding: 12px 16px; background: #fdf0d2; border-radius: 14px; font-style: italic; line-height: 1.5; }
+
+.ayuda { display: grid; gap: 8px; margin: 16px 0; }
+.ayuda div { display: flex; align-items: center; gap: 12px; }
+.ayuda dt { flex: none; width: 190px; }
+.ayuda dd { margin: 0; font-size: 14.5px; }
+kbd {
+  display: inline-block; padding: 3px 9px; border-radius: 7px; background: #fff; border: 1px solid var(--borde);
+  border-bottom-width: 3px; font: 600 12.5px system-ui, sans-serif;
+}
+
+/* móvil: la ficha pasa a hoja inferior */
+@media (max-width: 720px) {
+  .lista { width: calc(100% - 24px); top: 12px; left: 12px; max-height: 45%; }
+  .panel {
+    top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 55%;
+    border-radius: 20px 20px 0 0; transform: translateY(105%);
+  }
+  .panel.abierto { transform: none; }
+  .panel-datos { grid-template-columns: 1fr 1fr 1fr; }
+  .atribucion {
+    left: auto; right: 8px; bottom: auto; top: 70px; transform: none;
+    max-width: 62%; white-space: normal; text-align: right; font-size: 9.5px; border-radius: 8px;
+  }
+  .lista:not(.abierta) { width: auto; right: auto; }
+  .hora { left: 12px; bottom: 12px; }
+  .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
+  .menu button { padding: 6px 9px; }
+  .menu button small { display: none; }
+  .portada { align-items: flex-end; padding: 20px; }
+  .portada.lista-ya { background: linear-gradient(0deg, rgba(251, 239, 220, 0.95) 0%, rgba(251, 239, 220, 0.75) 50%, rgba(251, 239, 220, 0) 80%); }
+  .portada-texto { font-size: 15px; }
+  .portada-cifras { margin: 14px 0 18px; }
+  .portada-botones button, .portada-botones button.primario { flex: 1; padding: 12px 14px; white-space: nowrap; }
+  .pista { bottom: 64px; font-size: 12px; }
+  .ayuda dt { width: 120px; }
+  .dialogo { padding: 18px 16px 20px; }
+  .hora button { padding: 6px 9px; }
+  .hora button small { display: none; }
+}

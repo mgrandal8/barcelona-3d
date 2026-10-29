@@ -1,0 +1,33 @@
+import { lazy, Suspense } from 'react'
+import { useEstado } from './store'
+import { Dialogos } from './ui/Dialogos'
+import { ListaLugares } from './ui/ListaLugares'
+import { Menu } from './ui/Menu'
+import { PanelInfo } from './ui/PanelInfo'
+import { Pista, Portada } from './ui/Portada'
+import { SelectorHora } from './ui/SelectorHora'
+
+// three y la escena van en otro chunk: la portada sale antes, mientras se descargan
+const Experience = lazy(() => import('./scene/Experience').then((m) => ({ default: m.Experience })))
+
+export default function App() {
+  // con la portada delante, el resto de la interfaz se esconde
+  const portada = useEstado((s) => s.portada)
+  return (
+    <main className={`app ${portada ? 'con-portada' : ''}`}>
+      <Suspense fallback={null}>
+        <Experience />
+      </Suspense>
+      <ListaLugares />
+      <SelectorHora />
+      <Menu />
+      <PanelInfo />
+      <p className="atribucion">
+        Mapa: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · Relieve: Mapzen/AWS Terrain Tiles · Contenido de ejemplo
+      </p>
+      <Dialogos />
+      <Portada />
+      <Pista />
+    </main>
+  )
+}
