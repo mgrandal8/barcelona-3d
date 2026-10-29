@@ -3,6 +3,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // en GitHub Pages la web cuelga de /barcelona-3d/ (lo pone el workflow); en local, en la raíz, como esperan los scripts
+  base: process.env.BASE ?? '/',
   plugins: [react()],
   build: {
     // three solo ya ocupa ~700 kB minificado

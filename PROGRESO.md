@@ -77,6 +77,12 @@ Plan de la sesión: `~/.claude/plans/elegant-riding-perlis.md`.
 - Medición A/B con `vite preview` y el build anterior servido a la vez (la máquina tenía mucha carga, así que hay ruido): hasta «listo», 5,4–5,6 s frente a 5,9–9,6 s; hilo principal bloqueado, 1,7–2,0 s frente a 3,0–3,7 s; red, 3,1 MB frente a 6,0 MB. La barra de carga sale a los 0,3 s. Lo que queda (unos 4 s en `(program)`) es SwiftShader compilando shaders y subiendo buffers por CPU; con GPU real no debería pasar.
 - Verificado: `tsc -b`, `npm run build`, oxlint (sin avisos nuevos), `prueba-ui.mjs` (7/7) y capturas `capturas/sesion6-*.png` (LOD con y sin, noche, Sagrada Família, Barceloneta y portada).
 
+## Sesión 7 (2026-10-29) — git y GitHub Pages
+- El proyecto pasa a ser un repo git (rama `main`). `.gitignore` deja fuera `node_modules`, `dist`, `capturas/` y `datos-crudos/`.
+- `vite.config.ts`: `base: process.env.BASE ?? '/'`. En local sigue en la raíz (los scripts no cambian); el workflow construye con `BASE=/barcelona-3d/`.
+- `.github/workflows/pages.yml`: en cada push a `main`, `npm ci` + `npm run build` y despliegue con `actions/deploy-pages`. En el repo: Settings → Pages → Source: «GitHub Actions».
+- Verificado: build con la base de Pages servido con `vite preview` en `/barcelona-3d/` y `prueba-ui.mjs` 7/7 (datos y worker cargan en la subruta).
+
 ## Pendiente / ideas detectadas
 - Ambiente: el reflejo del sol en el mar al atardecer queda algo quemado en el borde del encuadre; las estrellas apenas se ven desde la vista general; el ferri pasa a veces muy cerca de la playa.
 - Costa con dientes de sierra (rejilla de 20 m): suavizar con la línea de costa de OSM o con más resolución cerca del mar.
@@ -95,7 +101,7 @@ Plan de la sesión: `~/.claude/plans/elegant-riding-perlis.md`.
 Las 7 fases del plan están hechas. Lo que queda es probarlo de verdad y pulir:
 - Probar en el navegador del usuario (GPU, con postpro) y en un móvil real: hover, vuelos, rendimiento, los tres momentos del día (sobre todo la noche con bloom), la portada, los tours y los diálogos. Comprobar que el LOD no se nota al acercarse (cambia a 70 u del borde del trozo).
 - Pulir los puntos pendientes de los monumentos y del ambiente (lista de arriba).
-- Si se quiere publicar: `npm run build` y subir `dist/` a cualquier hosting estático (los datos ya van comprimidos).
+- Publicar: crear el repo `barcelona-3d` en GitHub, añadir el remoto, hacer push y activar Pages con «GitHub Actions». Quedará en `https://<usuario>.github.io/barcelona-3d/`.
 
 ## Notas
 - WebGL por software (SwiftShader) en WSL: `page.screenshot` se cuelga; por eso se lee `canvas.toDataURL`.
