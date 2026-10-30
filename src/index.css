@@ -132,9 +132,36 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel-distancia { margin: -4px 0 8px; font-size: 13.5px; font-weight: 600; color: #2563eb; }
 .lista-cerca { display: flex; align-items: center; gap: 6px; margin: 10px 6px 0; font-size: 12.5px; cursor: pointer; }
 
+/* metro: botón de la capa (encima de «dónde estoy»), insignias de línea y etiquetas de estación */
+.metro-boton {
+  position: absolute; left: 16px; bottom: 120px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.metro-boton span {
+  width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center;
+  font-weight: 800; font-size: 15px; background: transparent; border: 2px solid currentColor; color: var(--texto);
+}
+.metro-boton.activo span { background: #c8102e; border-color: #c8102e; color: #fff; }
+.lineas { display: inline-flex; gap: 3px; vertical-align: 1px; }
+.linea { display: inline-block; min-width: 26px; padding: 1px 5px; border-radius: 5px; font-size: 11px; font-weight: 800; text-align: center; line-height: 1.45; }
+.estacion-cercana { font-size: 13.5px; }
+.estacion-nombre { font-weight: 600; }
+.panel-metro { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; }
+.panel-metro > span:first-child, .ubicacion-metro small {
+  font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.ubicacion-metro { margin-top: 8px !important; display: grid; gap: 3px; }
+.estacion-etiqueta {
+  display: flex; align-items: center; gap: 5px; white-space: nowrap; transform: translateY(-20px);
+  padding: 3px 8px 3px 4px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: rgba(255, 250, 242, 0.88); border: 1px solid var(--borde); box-shadow: 0 3px 10px rgba(60, 35, 15, 0.15);
+}
+.estacion-etiqueta .linea { min-width: 22px; font-size: 10px; }
+.estacion-etiqueta.activa { background: #fff; font-size: 13.5px; }
+
 /* con la portada delante se esconde la interfaz del mapa */
-.lista, .hora, .menu, .panel, .ubicacion { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel, .con-portada .ubicacion { opacity: 0; pointer-events: none; }
+.lista, .hora, .menu, .panel, .ubicacion, .metro-boton { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel, .con-portada .ubicacion, .con-portada .metro-boton { opacity: 0; pointer-events: none; }
 
 button:disabled { opacity: 0.4; cursor: default; }
 button.primario { background: var(--acento); color: #fff; border-color: transparent; }
@@ -306,6 +333,7 @@ kbd {
   .lista:not(.abierta) { width: auto; right: auto; }
   .hora { left: 12px; bottom: 12px; }
   .ubicacion { left: 12px; bottom: 60px; }
+  .metro-boton { left: 12px; bottom: 110px; }
   .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
   .menu button { padding: 6px 9px; }
   .menu button small { display: none; }

@@ -8,6 +8,7 @@ import { Monumentos } from './Monumentos'
 import { Ambiente } from './Ambiente'
 import { Ruta } from './Ruta'
 import { MiPosicion } from './MiPosicion'
+import { Metro } from './Metro'
 import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
@@ -122,6 +123,7 @@ export function Experience() {
   const noche = useEstado((s) => s.momento) === 'noche'
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
+  const metro = useEstado((s) => s.metro)
 
   return (
     <Canvas
@@ -148,6 +150,8 @@ export function Experience() {
         <Monumentos />
         <Ruta />
         <MiPosicion />
+        {/* el metro no espera a los edificios, pero tampoco los retrasa: va en su propio Suspense */}
+        <Suspense fallback={null}>{metro && <Metro />}</Suspense>
         {/* los edificios llegan del worker: el resto de la ciudad no los espera */}
         <Suspense fallback={null}>
           <Edificios />

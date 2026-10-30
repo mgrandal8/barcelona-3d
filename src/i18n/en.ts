@@ -112,6 +112,13 @@ const textos: Textos = {
     deTi: (d: string, min: number) => `${d} from you · ~${min} min walk`,
     cerca: 'Near me',
   },
+  metro: {
+    capa: 'Metro',
+    mostrar: 'Show the metro',
+    ocultar: 'Hide the metro',
+    cercano: 'Nearest metro',
+    ficha: 'Metro',
+  },
   atribucion: { mapa: 'Map', relieve: 'Terrain', ejemplo: 'Sample content' },
 }
 

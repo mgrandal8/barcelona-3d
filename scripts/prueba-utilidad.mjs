@@ -97,6 +97,37 @@ if (bloques.includes('ubicacion')) {
   await ctx.close()
 }
 
+if (bloques.includes('metro')) {
+  const { ctx, page, errores } = await abrir('lugar=sagrada-familia')
+  await page.waitForSelector('.panel-metro', { timeout: 20000 })
+  const metro = await texto(page, '.panel-metro')
+  ok(/L2\s*L5\s*Sagrada Família · \d+ m/.test(metro), 'metro más cercano en la ficha: ' + metro.replace(/\s+/g, ' '))
+  ok((await estado(page, (s) => s.metro)) === false, 'la capa empieza apagada')
+  await page.locator('.metro-boton').click()
+  ok((await estado(page, (s) => s.metro)) === true && page.url().includes('metro=1'), 'el botón M enciende la capa (y ?metro=1)')
+  await page.waitForFunction(() => window.__estado.getState().carga.listo, null, { timeout: 120000 })
+  // con la cámara cerca de la Sagrada Família tiene que haber etiquetas de estación
+  // por software (SwiftShader) los primeros fotogramas tras la carga tardan
+  await page.waitForSelector('.estacion-etiqueta', { timeout: 60000 }).catch(() => {})
+  const etiquetas = await page.locator('.estacion-etiqueta').allInnerTexts()
+  ok(etiquetas.some((t) => t.includes('Sagrada Família')), 'etiquetas de estación cerca: ' + etiquetas.map((t) => t.replace(/\s+/g, ' ')).join(' | '))
+  await page.locator('.metro-boton').click()
+  ok((await estado(page, (s) => s.metro)) === false && !page.url().includes('metro='), 'el botón M la apaga')
+  await page.evaluate(() => window.__estado.getState().empezarTour('gaudi'))
+  ok((await estado(page, (s) => s.metro)) === true, 'empezar un tour enciende el metro')
+  if (errores.length) console.log('ERRORES:\n' + errores.join('\n'))
+  await ctx.close()
+
+  // la tarjeta de «dónde estoy» da el metro más cercano
+  const p2 = await abrir('pos=41.38704,2.17007')
+  await p2.page.evaluate(() => window.__estado.getState().cerrarPortada())
+  await p2.page.locator('.ubicacion-boton').click()
+  await p2.page.waitForSelector('.ubicacion-metro', { timeout: 20000 })
+  const cerca = await texto(p2.page, '.ubicacion-metro')
+  ok(/Catalunya/.test(cerca), 'metro más cercano a la Plaça de Catalunya: ' + cerca.replace(/\s+/g, ' '))
+  await p2.ctx.close()
+}
+
 if (fallos) console.log(`${fallos} fallo(s)`)
 await browser.close()
 process.exit(fallos ? 1 : 0)

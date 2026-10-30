@@ -6,7 +6,7 @@
 // Uso: node scripts/datos/procesar.mjs
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs'
 import { PNG } from 'pngjs'
-import { CRUDOS, RECT, SALIDA, desproyectar, proyectar } from './comun.mjs'
+import { CRUDOS, RECT, SALIDA, desproyectar, proyectar, simplificar } from './comun.mjs'
 import { escribirEdificios, escribirGz } from './formato.mjs'
 
 mkdirSync(SALIDA, { recursive: true })
@@ -17,39 +17,6 @@ function areaFirmada(p) {
   let a = 0
   for (let i = 0, j = p.length - 1; i < p.length; j = i++) a += (p[j][0] - p[i][0]) * (p[j][1] + p[i][1])
   return a / 2
-}
-
-function simplificar(pts, tol) {
-  if (pts.length < 4) return pts
-  const t2 = tol * tol
-  const marca = new Uint8Array(pts.length)
-  marca[0] = marca[pts.length - 1] = 1
-  const pila = [[0, pts.length - 1]]
-  while (pila.length) {
-    const [a, b] = pila.pop()
-    const [ax, ay] = pts[a]
-    const [bx, by] = pts[b]
-    const dx = bx - ax
-    const dy = by - ay
-    const l2 = dx * dx + dy * dy || 1e-9
-    let max = 0
-    let idx = -1
-    for (let i = a + 1; i < b; i++) {
-      const t = Math.max(0, Math.min(1, ((pts[i][0] - ax) * dx + (pts[i][1] - ay) * dy) / l2))
-      const ex = ax + t * dx - pts[i][0]
-      const ey = ay + t * dy - pts[i][1]
-      const d = ex * ex + ey * ey
-      if (d > max) {
-        max = d
-        idx = i
-      }
-    }
-    if (max > t2 && idx > 0) {
-      marca[idx] = 1
-      pila.push([a, idx], [idx, b])
-    }
-  }
-  return pts.filter((_, i) => marca[i])
 }
 
 /** Anillo cerrado de OSM → lista de puntos sin repetir el último. */

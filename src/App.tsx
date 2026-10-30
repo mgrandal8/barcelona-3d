@@ -8,6 +8,7 @@ import { PanelInfo } from './ui/PanelInfo'
 import { Pista, Portada } from './ui/Portada'
 import { SelectorHora } from './ui/SelectorHora'
 import { BotonUbicacion } from './ui/BotonUbicacion'
+import { BotonMetro } from './ui/BotonMetro'
 
 // three y la escena van en otro chunk: la portada sale antes, mientras se descargan
 const Experience = lazy(() => import('./scene/Experience').then((m) => ({ default: m.Experience })))
@@ -29,6 +30,7 @@ export default function App() {
       <ListaLugares />
       <SelectorHora />
       <BotonUbicacion />
+      <BotonMetro />
       <Menu />
       <PanelInfo />
       <p className="atribucion">

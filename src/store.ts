@@ -28,6 +28,8 @@ type Estado = {
   estadoUbicacion: EstadoUbicacion
   /** Petición de vuelo de cámara a un punto (n cambia en cada petición, aunque el punto se repita). */
   vuelo: { x: number; z: number; n: number } | null
+  /** Capa de metro y FGC encima de la maqueta. */
+  metro: boolean
   setSeleccionado: (id: string | null) => void
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
@@ -38,6 +40,7 @@ type Estado = {
   setIdioma: (i: Idioma) => void
   setUbicacion: (u: Ubicacion | null, estado: EstadoUbicacion) => void
   volarA: (x: number, z: number) => void
+  setMetro: (v: boolean) => void
 }
 
 const params = new URLSearchParams(location.search)
@@ -66,6 +69,7 @@ export const useEstado = create<Estado>((set, get) => ({
   ubicacion: null,
   estadoUbicacion: 'apagada',
   vuelo: null,
+  metro: params.get('metro') === '1',
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
@@ -81,7 +85,9 @@ export const useEstado = create<Estado>((set, get) => ({
   empezarTour: (id) => {
     const t = tourPorId(id)
     if (!t) return
+    // los tours se mueven en metro: se enciende la capa
     set({ tour: t.id, dialogo: null, portada: false })
+    get().setMetro(true)
     get().setMomento(t.momento)
     get().setSeleccionado(t.paradas[0].id)
   },
@@ -92,6 +98,10 @@ export const useEstado = create<Estado>((set, get) => ({
     set({ idioma: i })
     guardarIdioma(i)
     ponerParam('lang', i === 'es' ? null : i)
+  },
+  setMetro: (v) => {
+    set({ metro: v })
+    ponerParam('metro', v ? '1' : null)
   },
   setUbicacion: (u, estado) => set({ ubicacion: u, estadoUbicacion: estado }),
   volarA: (x, z) => {

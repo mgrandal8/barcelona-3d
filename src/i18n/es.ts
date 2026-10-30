@@ -109,6 +109,13 @@ export const es = {
     deTi: (d: string, min: number) => `A ${d} de ti · ~${min} min a pie`,
     cerca: 'Cerca de mí',
   },
+  metro: {
+    capa: 'Metro',
+    mostrar: 'Mostrar el metro',
+    ocultar: 'Ocultar el metro',
+    cercano: 'Metro más cercano',
+    ficha: 'Metro',
+  },
   atribucion: { mapa: 'Mapa', relieve: 'Relieve', ejemplo: 'Contenido de ejemplo' },
 }
 

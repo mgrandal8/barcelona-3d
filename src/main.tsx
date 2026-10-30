@@ -4,10 +4,12 @@ import './index.css'
 import App from './App.tsx'
 import { cargarDatos } from './scene/datos'
 import { ubicacionDeUrl } from './ubicacion'
+import { cargarTransporte } from './transporte'
 
 // los datos empiezan a bajar a la vez que el código de la escena
 cargarDatos()
 ubicacionDeUrl()
+cargarTransporte().catch(() => {})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useT } from '../i18n'
 import { useEstado } from '../store'
-import { activarUbicacion, PLAZA_CATALUNYA, simularPosicion } from '../ubicacion'
+import { activarUbicacion, formatoDistancia, PLAZA_CATALUNYA, simularPosicion } from '../ubicacion'
+import { useTransporte } from '../transporte'
+import { EstacionCercana } from './Lineas'
 
 /** Botón 📍 «dónde estoy» y una tarjeta con el estado (buscando, sin permiso, fuera de la maqueta…). */
 export function BotonUbicacion() {
@@ -10,6 +12,8 @@ export function BotonUbicacion() {
   const t = useT().ubicacion
   const tc = useT()
   const [abierta, setAbierta] = useState(false)
+  const transporte = useTransporte()
+  const idioma = useEstado((s) => s.idioma)
 
   const mensaje =
     estado === 'buscando'
@@ -51,6 +55,12 @@ export function BotonUbicacion() {
             ✕
           </button>
           <p>{mensaje}</p>
+          {estado === 'ok' && u?.dentro && transporte && (
+            <p className="ubicacion-metro">
+              <small>{tc.metro.cercano}</small>
+              <EstacionCercana t={transporte} x={u.x} z={u.z} formato={(d) => formatoDistancia(d, idioma)} />
+            </p>
+          )}
           {(estado === 'denegada' || estado === 'error' || estado === 'no-disponible' || (u && !u.dentro)) && (
             <button className="primario" onClick={() => simularPosicion(...PLAZA_CATALUNYA)}>
               {t.simular}

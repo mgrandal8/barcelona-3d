@@ -3,6 +3,8 @@ import { MONUMENTOS } from '../data/monumentos'
 import { useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
 import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
+import { useTransporte } from '../transporte'
+import { EstacionCercana } from './Lineas'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
@@ -14,6 +16,7 @@ export function PanelInfo() {
   const idioma = useEstado((s) => s.idioma)
   const u = useEstado((s) => s.ubicacion)
   const dist = m && u?.dentro ? distanciaM(u, m.pos) : null
+  const transporte = useTransporte()
   // en un tour, anterior y siguiente recorren sus paradas; si no, todos los lugares
   const lista = tour ? tour.paradas.map((p) => p.id) : MONUMENTOS.map((x) => x.id)
   const i = lista.indexOf(id ?? '')
@@ -54,6 +57,12 @@ export function PanelInfo() {
           </p>
           <h2>{m.nombre}</h2>
           {dist !== null && <p className="panel-distancia">📍 {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}</p>}
+          {transporte && (
+            <p className="panel-metro">
+              <span>{tt.metro.ficha}</span>
+              <EstacionCercana t={transporte} x={m.pos[0]} z={m.pos[1]} formato={(d) => formatoDistancia(d, idioma)} />
+            </p>
+          )}
           <p className="panel-texto">{m.descripcion}</p>
           <dl className="panel-datos">
             <div>
