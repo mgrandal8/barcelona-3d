@@ -75,7 +75,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel h2 { margin: 2px 0 10px; font-size: 26px; line-height: 1.15; }
 .panel-cerrar {
   position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
-  border: 1px solid var(--borde); background: #fff8;
+  border: 1px solid var(--borde); background: #fff8; display: grid; place-items: center; padding: 0;
 }
 .panel-etiqueta { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--acento); font-weight: 600; }
 .panel-texto { line-height: 1.55; font-size: 15px; }
@@ -119,7 +119,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: absolute; z-index: 25; right: 16px; bottom: 40px; display: flex; flex-direction: column; overflow: hidden;
   background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra);
 }
-.plano-zoom button { width: 40px; height: 40px; border: 0; background: transparent; font-size: 20px; font-weight: 600; }
+.plano-zoom button { width: 40px; height: 40px; border: 0; background: transparent; font-size: 20px; display: grid; place-items: center; }
 .plano-zoom button + button { border-top: 1px solid var(--borde); }
 .plano-zoom button:hover { background: rgba(200, 85, 58, 0.08); }
 .ligera-aviso {
@@ -213,6 +213,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 button:disabled { opacity: 0.4; cursor: default; }
 button.primario { background: var(--acento); color: #fff; border-color: transparent; }
+/* iconos SVG en línea (ui/Icono.tsx): se alinean con el texto */
+.icono { flex: none; vertical-align: -0.2em; }
+.panel-tour p .icono, .panel-distancia .icono, .tour-cabecera small .icono { vertical-align: -0.25em; }
+.panel-nav .icono { vertical-align: -0.2em; margin-left: 2px; }
+.estrellas { display: inline-flex; gap: 1px; color: #e3a21a; vertical-align: -0.15em; }
+.estrellas .icono { width: 15px; height: 15px; }
 button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 
 /* menú: tours, guía y ayuda */
@@ -228,10 +234,6 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .menu button small { font-size: 13px; font-weight: 600; }
 .menu button:hover { background: rgba(200, 85, 58, 0.08); }
 .menu button.activo { background: rgba(200, 85, 58, 0.16); }
-.menu-ayuda {
-  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--texto); color: #fff; font-size: 12px; font-weight: 700;
-}
 
 /* selector de idioma: en el menú y en la portada */
 .idioma { display: flex; gap: 1px; align-items: center; }
@@ -338,8 +340,8 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 }
 .tour-cabecera { display: flex; gap: 12px; align-items: center; }
 .tour-icono {
-  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
-  background: color-mix(in srgb, var(--color) 14%, #fff);
+  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 24px;
+  background: color-mix(in srgb, var(--color) 14%, #fff); color: color-mix(in srgb, var(--color) 85%, #000);
 }
 .tour h3 { margin: 0; font-size: 17px; }
 .tour-cabecera small { font-size: 12.5px; opacity: 0.65; }

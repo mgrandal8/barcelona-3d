@@ -5,6 +5,7 @@ import { useEstado } from '../store'
 import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 import { useTransporte } from '../transporte'
 import { EstacionCercana } from './Lineas'
+import { Icono } from './Icono'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
@@ -37,12 +38,12 @@ export function PanelInfo() {
       {m && (
         <>
           <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label={t.volverMapa}>
-            ✕
+            <Icono nombre="cerrar" />
           </button>
           {tour && parada && (
             <div className="panel-tour" style={{ ['--color' as string]: tour.color }}>
               <p>
-                <span aria-hidden>{tour.icono}</span> {tour.nombre} · {t.parada(i + 1, tour.paradas.length)}
+                <Icono nombre={tour.icono} /> {tour.nombre} · {t.parada(i + 1, tour.paradas.length)}
               </p>
               <div className="panel-tour-pasos" aria-hidden>
                 {tour.paradas.map((p, k) => (
@@ -56,7 +57,11 @@ export function PanelInfo() {
             {m.etiqueta} · {m.barrio}
           </p>
           <h2>{m.nombre}</h2>
-          {dist !== null && <p className="panel-distancia">📍 {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}</p>}
+          {dist !== null && (
+            <p className="panel-distancia">
+              <Icono nombre="pin" /> {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}
+            </p>
+          )}
           {transporte && (
             <p className="panel-metro">
               <span>{tt.metro.ficha}</span>
@@ -93,7 +98,7 @@ export function PanelInfo() {
                 </button>
               ) : (
                 <button className="primario" onClick={() => setSeleccionado(null)}>
-                  {t.terminarTour}
+                  {t.terminarTour} <Icono nombre="check" />
                 </button>
               )}
             </div>

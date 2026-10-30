@@ -3,6 +3,8 @@ import { traducirLugar, useT, useTours } from '../i18n'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
+import { Icono } from './Icono'
+import { ICONO_HORA } from './SelectorHora'
 
 /** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. */
 function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; children: ReactNode }) {
@@ -23,7 +25,7 @@ function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; 
         <header className="dialogo-cabecera">
           <h2>{titulo}</h2>
           <button className="panel-cerrar" onClick={() => setDialogo(null)} aria-label={t.cerrar}>
-            ✕
+            <Icono nombre="cerrar" />
           </button>
         </header>
         {children}
@@ -44,13 +46,13 @@ function Tours() {
         {useTours().map((t) => (
           <article key={t.id} className="tour" style={{ ['--color' as string]: t.color }}>
             <div className="tour-cabecera">
-              <span className="tour-icono" aria-hidden>
-                {t.icono}
+              <span className="tour-icono">
+                <Icono nombre={t.icono} />
               </span>
               <div>
                 <h3>{t.nombre}</h3>
                 <small>
-                  {t.duracion} · {horas[t.momento]}
+                  {t.duracion} · <Icono nombre={ICONO_HORA[t.momento]} /> {horas[t.momento]}
                 </small>
               </div>
             </div>
@@ -95,7 +97,13 @@ function Guia() {
           <strong>{t.gruposEt}</strong> {t.grupos}
         </li>
         <li>
-          <strong>{t.valoracionEt}</strong> {t.valoracion}
+          <strong>{t.valoracionEt}</strong>{' '}
+          <span className="estrellas">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Icono key={i} nombre="estrella" />
+            ))}
+          </span>{' '}
+          {t.valoracion}
         </li>
       </ul>
       <blockquote>{t.cita}</blockquote>

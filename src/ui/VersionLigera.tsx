@@ -4,6 +4,7 @@ import { useEstado } from '../store'
 import { cargarPlano, type Plano } from '../scene/datos'
 import { ESCALA } from '../scene/geo'
 import { sondeo } from '../calidad'
+import { Icono } from './Icono'
 
 // Versión ligera, sin three: el mapa del suelo en 2D (el mismo que pinta la maqueta), con los lugares,
 // la ruta del tour y tu posición. La lista, las fichas, los tours y la ayuda son los de siempre.
@@ -183,13 +184,13 @@ export function VersionLigera() {
       {!plano && <p className="plano-cargando">{t.cargando}</p>}
       <div className="plano-zoom">
         <button onClick={() => zoom(1.5)} aria-label={t.acercar} title={t.acercar}>
-          +
+          <Icono nombre="mas" />
         </button>
         <button onClick={() => zoom(1 / 1.5)} aria-label={t.alejar} title={t.alejar}>
-          −
+          <Icono nombre="menos" />
         </button>
         <button onClick={() => setVista(null)} aria-label={t.todo} title={t.todo}>
-          ⤢
+          <Icono nombre="ajustar" />
         </button>
       </div>
     </div>

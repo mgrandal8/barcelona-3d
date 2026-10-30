@@ -1,11 +1,12 @@
 import type { Momento } from '../scene/momento'
+import type { NombreIcono } from '../ui/Icono'
 
 // Tours de ejemplo para la demo: ni el guía ni los precios son reales.
 
 export type Tour = {
   id: string
   nombre: string
-  icono: string
+  icono: NombreIcono
   /** Color de la ruta en el mapa y de la tarjeta. */
   color: string
   resumen: string
@@ -20,7 +21,7 @@ export const TOURS: Tour[] = [
   {
     id: 'gaudi',
     nombre: 'Gaudí esencial',
-    icono: '🦎',
+    icono: 'lagarto',
     color: '#d8603f',
     resumen: 'Las tres obras imprescindibles del genio modernista, de la basílica al parque, pasando por el Passeig de Gràcia.',
     duracion: '5 h',
@@ -35,7 +36,7 @@ export const TOURS: Tour[] = [
   {
     id: 'ciutat-vella',
     nombre: 'Del Gótico al mar',
-    icono: '⛵',
+    icono: 'velero',
     color: '#2f7fa8',
     resumen: 'Dos mil años de historia en un paseo tranquilo: calles medievales, el puerto y la puesta de sol en Montjuïc.',
     duracion: '4 h',
@@ -50,7 +51,7 @@ export const TOURS: Tour[] = [
   {
     id: 'noche',
     nombre: 'Barcelona de noche',
-    icono: '🌙',
+    icono: 'luna',
     color: '#7a5bd6',
     resumen: 'La ciudad cuando se encienden las luces: la piel LED de la Glòries, la Font Màgica y la brisa del puerto.',
     duracion: '3 h',

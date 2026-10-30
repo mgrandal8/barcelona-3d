@@ -1,12 +1,10 @@
 import { useT } from '../i18n'
 import { useEstado } from '../store'
 import type { Momento } from '../scene/momento'
+import { Icono, type NombreIcono } from './Icono'
 
-const OPCIONES: { id: Momento; icono: string }[] = [
-  { id: 'dia', icono: '☀️' },
-  { id: 'atardecer', icono: '🌅' },
-  { id: 'noche', icono: '🌙' },
-]
+export const ICONO_HORA: Record<Momento, NombreIcono> = { dia: 'sol', atardecer: 'atardecer', noche: 'luna' }
+const OPCIONES: Momento[] = ['dia', 'atardecer', 'noche']
 
 /** Cambia la hora de la maqueta: luz, cielo y luces de la ciudad. */
 export function SelectorHora() {
@@ -16,9 +14,9 @@ export function SelectorHora() {
   return (
     <div className="hora" role="radiogroup" aria-label={t.etiqueta}>
       {OPCIONES.map((o) => (
-        <button key={o.id} role="radio" aria-checked={momento === o.id} className={momento === o.id ? 'activo' : ''} onClick={() => setMomento(o.id)} title={t[o.id]}>
-          <span aria-hidden>{o.icono}</span>
-          <small>{t[o.id]}</small>
+        <button key={o} role="radio" aria-checked={momento === o} className={momento === o ? 'activo' : ''} onClick={() => setMomento(o)} title={t[o]}>
+          <Icono nombre={ICONO_HORA[o]} />
+          <small>{t[o]}</small>
         </button>
       ))}
     </div>
