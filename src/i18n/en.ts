@@ -49,6 +49,17 @@ const textos: Textos = {
     ocultar: 'Hide',
     lugares: 'Places',
   },
+  maqueta: {
+    etiqueta: '3D model of Barcelona',
+    ayuda:
+      'With the model focused: arrow keys to pan, Shift and arrows to rotate, + and − to zoom and Home to go back to the overview. Every place is also in the list, and each one has its own text card.',
+    saltar: 'Skip to the list of places',
+    mostrando: (nombre: string) => `Showing ${nombre}`,
+    vistaGeneral: 'Map overview',
+    hora: (h: string) => `Time of day: ${h}`,
+    metroSi: 'Metro layer shown',
+    metroNo: 'Metro layer hidden',
+  },
   pines: {
     grupo: (nombres: string) => `${nombres}: zoom in to see them separately`,
     lugares: (n: number) => `${n} places`,
@@ -99,6 +110,11 @@ const textos: Textos = {
       ['Click a pin', 'Fly to the place and open its card'],
       ['Esc', 'Close the card and go back to the map'],
       ['?', 'Open this help'],
+      ['Tab', 'Move through the list, the pins and the buttons'],
+      ['Arrows', 'Pan the view (with the model focused)'],
+      ['Shift + arrows', 'Rotate and tilt the model'],
+      ['+ −', 'Zoom in and out'],
+      ['Home', 'Back to the overview'],
     ],
     intro:
       'The list on the left takes you to each place, and the buttons at the bottom change the time of day: at night the windows, the street lights and the Magic Fountain light up.',

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MONUMENTOS } from '../data/monumentos'
 import { useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
@@ -23,6 +23,21 @@ export function PanelInfo() {
   const i = lista.indexOf(id ?? '')
   const ir = (paso: number) => setSeleccionado(lista[(i + paso + lista.length) % lista.length])
   const parada = tour?.paradas[i]
+
+  // al abrirse, el foco va al título de la ficha; al cerrarse, vuelve adonde estaba (el pin o la lista)
+  const titulo = useRef<HTMLHeadingElement>(null)
+  const origen = useRef<HTMLElement | null>(null)
+  const abierta = !!m
+  useEffect(() => {
+    if (abierta) {
+      const activo = document.activeElement as HTMLElement | null
+      origen.current = activo && activo !== document.body ? activo : null
+      titulo.current?.focus({ preventScroll: true })
+    } else if (origen.current) {
+      if (origen.current.isConnected) origen.current.focus({ preventScroll: true })
+      origen.current = null
+    }
+  }, [abierta])
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
@@ -56,7 +71,9 @@ export function PanelInfo() {
           <p className="panel-etiqueta">
             {m.etiqueta} · {m.barrio}
           </p>
-          <h2>{m.nombre}</h2>
+          <h2 ref={titulo} tabIndex={-1}>
+            {m.nombre}
+          </h2>
           {dist !== null && (
             <p className="panel-distancia">
               <Icono nombre="pin" /> {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}

@@ -6,18 +6,37 @@ import { SinConexion } from './AvisoRed'
 import { Icono } from './Icono'
 import { ICONO_MOMENTO } from '../scene/momento'
 
-/** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. */
+const ENFOCABLES = 'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
+
+/** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. El foco no sale de ella y, al cerrar, vuelve adonde estaba. */
 function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; children: ReactNode }) {
   const setDialogo = useEstado((s) => s.setDialogo)
   const ref = useRef<HTMLDivElement>(null)
   const t = useT()
   useEffect(() => {
+    const antes = document.activeElement as HTMLElement | null
     ref.current?.focus()
     const tecla = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setDialogo(null)
+      if (e.key !== 'Tab' || !ref.current) return
+      // Tab da la vuelta dentro del diálogo
+      const lista = [...ref.current.querySelectorAll<HTMLElement>(ENFOCABLES)]
+      if (!lista.length) return
+      const [primero, ultimo] = [lista[0], lista[lista.length - 1]]
+      const fuera = !ref.current.contains(document.activeElement)
+      if (e.shiftKey && (document.activeElement === primero || document.activeElement === ref.current || fuera)) {
+        e.preventDefault()
+        ultimo.focus()
+      } else if (!e.shiftKey && (document.activeElement === ultimo || fuera)) {
+        e.preventDefault()
+        primero.focus()
+      }
     }
     window.addEventListener('keydown', tecla)
-    return () => window.removeEventListener('keydown', tecla)
+    return () => {
+      window.removeEventListener('keydown', tecla)
+      if (antes?.isConnected) antes.focus()
+    }
   }, [setDialogo])
   return (
     <div className="dialogo-fondo" onClick={(e) => e.target === e.currentTarget && setDialogo(null)}>

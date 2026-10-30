@@ -13,13 +13,21 @@ import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado, usePerfil } from '../store'
 import { calidadFija } from '../calidad'
+import { movimientoReducido } from '../movimiento'
+import { useT } from '../i18n'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
 // el postproceso no retrasa la ciudad: se descarga cuando ya está dibujada
 const Postpro = lazy(() => import('./Postpro'))
 
-export const VISTA_GENERAL = { pos: [6, 62, 78] as const, objetivo: [2, 0, -4] as const }
+/**
+ * Vista general. En escritorio se corre ~8 u al oeste: la lista de lugares ocupa la izquierda de la pantalla
+ * y, si no, tapaba los pines del Camp Nou y de Montjuïc.
+ */
+type Punto = readonly [number, number, number]
+const VISTA_GENERAL: { pos: Punto; objetivo: Punto } =
+  innerWidth > 720 ? { pos: [-2, 62, 78.4], objetivo: [-6, 0, -3.6] } : { pos: [6, 62, 78], objetivo: [2, 0, -4] }
 
 /** Encuadre de un lugar: cámara en pos + camara, mirando a media altura del marcador. */
 async function encuadre(id: string) {
@@ -34,8 +42,6 @@ async function encuadre(id: string) {
   return [x + cx, y + cy, z + cz, x, y + m.alturaMarcador * 0.4, z] as const
 }
 
-const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches
-
 function Camara() {
   const controles = useRef<CameraControlsImpl>(null)
   const seleccionado = useEstado((s) => s.seleccionado)
@@ -46,7 +52,7 @@ function Camara() {
 
   // con la portada delante, la maqueta gira despacio como en un escaparate
   useFrame((_, dt) => {
-    if (portada && !quieto) controles.current?.rotate(dt * 0.045, 0, false)
+    if (portada && !movimientoReducido()) controles.current?.rotate(dt * 0.045, 0, false)
   })
 
   useEffect(() => {
@@ -64,15 +70,16 @@ function Camara() {
   useEffect(() => {
     const c = controles.current
     if (!c) return
-    // la primera vez (?lugar=id) se coloca sin animación; después, vuelo
-    const animar = !inicio.current
+    // la primera vez (?lugar=id) se coloca sin animación; después, vuelo (salvo con «reducir movimiento»)
+    const primera = inicio.current
     inicio.current = false
+    const animar = !primera && !movimientoReducido()
     if (!seleccionado) {
       c.setFocalOffset(0, 0, 0, animar)
-      if (animar) c.setLookAt(...VISTA_GENERAL.pos, ...VISTA_GENERAL.objetivo, true)
+      if (!primera) c.setLookAt(...VISTA_GENERAL.pos, ...VISTA_GENERAL.objetivo, animar)
       return
     }
-    if (!animar && params.has('cam')) return
+    if (primera && params.has('cam')) return
     let vigente = true
     encuadre(seleccionado).then((v) => {
       if (!vigente || !v) return
@@ -98,12 +105,59 @@ function Camara() {
       // la vista cercana está a ~10 u; con `dist` se aleja o se acerca en la misma dirección
       const k = (vuelo.dist ?? 10) / 10
       c.setFocalOffset(0, 0, 0, true)
-      c.setLookAt(vuelo.x + 1.5 * k, y + 7 * k, vuelo.z + 7 * k, vuelo.x, y, vuelo.z, !quieto)
+      c.setLookAt(vuelo.x + 1.5 * k, y + 7 * k, vuelo.z + 7 * k, vuelo.x, y, vuelo.z, !movimientoReducido())
     })
     return () => {
       vigente = false
     }
   }, [vuelo])
+
+  // teclado, con el foco en la maqueta: flechas para desplazar, Mayús + flechas o Q/E para girar,
+  // +/− para acercar e Inicio para volver a la vista general
+  useEffect(() => {
+    const maqueta = gl.domElement.closest<HTMLElement>('.maqueta')
+    if (!maqueta) return
+    const tecla = (e: KeyboardEvent) => {
+      const c = controles.current
+      if (!c || useEstado.getState().portada || e.ctrlKey || e.metaKey || e.altKey) return
+      const animar = !movimientoReducido()
+      const paso = c.distance * 0.12
+      const giro = 0.18
+      const acciones: Record<string, () => unknown> = e.shiftKey
+        ? {
+            ArrowLeft: () => c.rotate(giro, 0, animar),
+            ArrowRight: () => c.rotate(-giro, 0, animar),
+            ArrowUp: () => c.rotate(0, giro / 2, animar),
+            ArrowDown: () => c.rotate(0, -giro / 2, animar),
+          }
+        : {
+            ArrowLeft: () => c.truck(-paso, 0, animar),
+            ArrowRight: () => c.truck(paso, 0, animar),
+            ArrowUp: () => c.forward(paso, animar),
+            ArrowDown: () => c.forward(-paso, animar),
+          }
+      Object.assign(acciones, {
+        q: () => c.rotate(giro, 0, animar),
+        e: () => c.rotate(-giro, 0, animar),
+        '+': () => c.dolly(c.distance * 0.2, animar),
+        '=': () => c.dolly(c.distance * 0.2, animar),
+        '-': () => c.dolly(-c.distance * 0.25, animar),
+        Home: () => {
+          if (useEstado.getState().seleccionado) useEstado.getState().setSeleccionado(null)
+          else {
+            c.setFocalOffset(0, 0, 0, animar)
+            c.setLookAt(...VISTA_GENERAL.pos, ...VISTA_GENERAL.objetivo, animar)
+          }
+        },
+      })
+      const accion = acciones[e.key.length === 1 ? e.key.toLowerCase() : e.key]
+      if (!accion) return
+      e.preventDefault()
+      accion()
+    }
+    maqueta.addEventListener('keydown', tecla)
+    return () => maqueta.removeEventListener('keydown', tecla)
+  }, [gl])
 
   return <CameraControls ref={controles} makeDefault enabled={!portada} minDistance={0.6} maxDistance={170} maxPolarAngle={1.32} smoothTime={0.7} />
 }
@@ -147,9 +201,16 @@ export function Experience() {
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
   const metro = useEstado((s) => s.metro)
+  const t = useT().maqueta
 
   return (
     <Canvas
+      // la maqueta se puede enfocar y mover con el teclado; para el lector de pantalla, la alternativa son la lista y las fichas
+      className="maqueta"
+      tabIndex={0}
+      role="application"
+      aria-label={t.etiqueta}
+      aria-describedby="maqueta-ayuda"
       shadows={perfil.sombras > 0}
       frameloop={listo ? 'always' : 'demand'}
       dpr={dpr}

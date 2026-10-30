@@ -46,6 +46,17 @@ export const es = {
     ocultar: 'Ocultar',
     lugares: 'Lugares',
   },
+  maqueta: {
+    etiqueta: 'Maqueta 3D de Barcelona',
+    ayuda:
+      'Con el foco en la maqueta: flechas para desplazar, Mayús y flechas para girar, + y − para acercar e Inicio para volver a la vista general. Todos los lugares están también en la lista, y cada uno tiene su ficha en texto.',
+    saltar: 'Ir a la lista de lugares',
+    mostrando: (nombre: string) => `Mostrando ${nombre}`,
+    vistaGeneral: 'Vista general del mapa',
+    hora: (h: string) => `Hora del día: ${h}`,
+    metroSi: 'Capa de metro visible',
+    metroNo: 'Capa de metro oculta',
+  },
   pines: {
     grupo: (nombres: string) => `${nombres}: acercar para verlos por separado`,
     lugares: (n: number) => `${n} lugares`,
@@ -96,6 +107,11 @@ export const es = {
       ['Clic en un pin', 'Ir al lugar y abrir su ficha'],
       ['Esc', 'Cerrar la ficha y volver al mapa'],
       ['?', 'Abrir esta ayuda'],
+      ['Tab', 'Recorrer la lista, los pines y los botones'],
+      ['Flechas', 'Desplazar la vista (con el foco en la maqueta)'],
+      ['Mayús + flechas', 'Girar e inclinar la maqueta'],
+      ['+ −', 'Acercar y alejar'],
+      ['Inicio', 'Volver a la vista general'],
     ] as [string, string][],
     intro:
       'La lista de la izquierda lleva a cada lugar, y los botones de abajo cambian la hora: de noche se encienden las ventanas, las farolas y la Font Màgica.',

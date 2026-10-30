@@ -138,7 +138,7 @@ export function Metro() {
         const e = estaciones[i]
         return (
           <Html key={e.n + i} position={e.pos} center zIndexRange={[14, 0]} style={{ pointerEvents: 'none' }}>
-            <div className={`estacion-etiqueta ${i === hover ? 'activa' : ''}`}>
+            <div aria-hidden="true" className={`estacion-etiqueta ${i === hover ? 'activa' : ''}`}>
               <Lineas refs={e.l} t={t} />
               <span>{e.n}</span>
             </div>

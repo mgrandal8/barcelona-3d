@@ -5,6 +5,7 @@ import { porId } from '../data/monumentos'
 import { tourPorId } from '../data/tours'
 import { useEstado } from '../store'
 import { cargarDatos } from './datos'
+import { movimientoReducido } from '../movimiento'
 
 type Tramo = { inicio: [number, number, number]; fin: [number, number, number]; medio: [number, number, number] }
 
@@ -13,7 +14,7 @@ function Arco({ t, color }: { t: Tramo; color: string }) {
   const ref = useRef<QuadraticBezierLineRef>(null)
   useFrame((_, dt) => {
     const m = ref.current?.material
-    if (m) m.dashOffset -= dt * 1.5
+    if (m && !movimientoReducido()) m.dashOffset -= dt * 1.5
   })
   return (
     <QuadraticBezierLine

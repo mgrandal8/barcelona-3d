@@ -5,6 +5,7 @@ import type { Monumento as Datos } from '../data/monumentos'
 import { useEstado } from '../store'
 import { cargarDatos } from './datos'
 import { OrigenCtx } from './monumentos/comun'
+import { movimientoReducido } from '../movimiento'
 
 function Anillo({ radio }: { radio: number }) {
   const ref = useRef<THREE.Mesh>(null)
@@ -12,7 +13,8 @@ function Anillo({ radio }: { radio: number }) {
   useFrame(({ clock }) => {
     const m = ref.current
     if (!m) return
-    const t = (clock.elapsedTime * 0.8) % 1
+    // con «reducir movimiento», quieto
+    const t = movimientoReducido() ? 0.3 : (clock.elapsedTime * 0.8) % 1
     m.scale.setScalar(1 + t * 0.25)
     ;(m.material as THREE.MeshBasicMaterial).opacity = 0.9 * (1 - t)
   })

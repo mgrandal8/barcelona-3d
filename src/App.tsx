@@ -11,6 +11,7 @@ import { BotonUbicacion } from './ui/BotonUbicacion'
 import { BotonMetro } from './ui/BotonMetro'
 import { AvisoRed } from './ui/AvisoRed'
 import { CapaPines } from './ui/CapaPines'
+import { Anunciador } from './ui/Anunciador'
 import { ErrorMaqueta } from './ui/ErrorMaqueta'
 import { AvisoLigera, VersionLigera } from './ui/VersionLigera'
 
@@ -31,6 +32,12 @@ export default function App() {
   }, [idioma, t])
   return (
     <main className={['app', portada && 'con-portada', ligera && 'en-ligera'].filter(Boolean).join(' ')}>
+      <a className="saltar" href="#lista">
+        {t.maqueta.saltar}
+      </a>
+      <p id="maqueta-ayuda" className="sr-only">
+        {t.maqueta.ayuda}
+      </p>
       {/* con un fallo, la escena se desmonta; «Reintentar» la vuelve a montar con otra key */}
       {ligera ? (
         <VersionLigera key={reintentos} />
@@ -56,6 +63,7 @@ export default function App() {
         Terrain Tiles · {t.atribucion.ejemplo}
       </p>
       <AvisoRed />
+      <Anunciador />
       <Dialogos />
       <Portada />
       <Pista />
