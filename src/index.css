@@ -138,6 +138,16 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
   background: var(--texto); color: #fff; font-size: 12px; font-weight: 700;
 }
 
+/* selector de idioma: en el menú y en la portada */
+.idioma { display: flex; gap: 1px; align-items: center; }
+.menu .idioma { margin-left: 4px; padding-left: 6px; border-left: 1px solid var(--borde); }
+.idioma button, .menu .idioma button {
+  border: 0; background: transparent; border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; opacity: 0.6;
+}
+.idioma button.activo, .menu .idioma button.activo { background: var(--texto); color: #fff; opacity: 1; }
+.portada-arriba { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.portada-arriba .idioma { background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); border-radius: 999px; padding: 2px; }
+
 /* portada "Descubre Barcelona" (y pantalla de carga) */
 .portada, .carga {
   position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; padding: 24px 6vw;
@@ -278,6 +288,8 @@ kbd {
   .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
   .menu button { padding: 6px 9px; }
   .menu button small { display: none; }
+  .menu .idioma { margin-left: 2px; padding-left: 3px; }
+  .menu .idioma button { padding: 5px 6px; font-size: 11px; }
   .portada { align-items: flex-end; padding: 20px; }
   .portada.lista-ya { background: linear-gradient(0deg, rgba(251, 239, 220, 0.95) 0%, rgba(251, 239, 220, 0.75) 50%, rgba(251, 239, 220, 0) 80%); }
   .portada-texto { font-size: 15px; }

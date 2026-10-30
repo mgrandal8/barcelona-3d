@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
-import { MONUMENTOS, porId } from '../data/monumentos'
-import { tourPorId } from '../data/tours'
+import { MONUMENTOS } from '../data/monumentos'
+import { useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
   const setSeleccionado = useEstado((s) => s.setSeleccionado)
-  const tour = tourPorId(useEstado((s) => s.tour))
-  const m = porId(id)
+  const tour = useTour(useEstado((s) => s.tour))
+  const m = useLugar(id)
+  const t = useT().panel
   // en un tour, anterior y siguiente recorren sus paradas; si no, todos los lugares
   const lista = tour ? tour.paradas.map((p) => p.id) : MONUMENTOS.map((x) => x.id)
   const i = lista.indexOf(id ?? '')
@@ -27,13 +28,13 @@ export function PanelInfo() {
     <aside className={`panel ${m ? 'abierto' : ''}`} aria-hidden={!m}>
       {m && (
         <>
-          <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label="Volver al mapa">
+          <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label={t.volverMapa}>
             ✕
           </button>
           {tour && parada && (
             <div className="panel-tour" style={{ ['--color' as string]: tour.color }}>
               <p>
-                <span aria-hidden>{tour.icono}</span> {tour.nombre} · parada {i + 1} de {tour.paradas.length}
+                <span aria-hidden>{tour.icono}</span> {tour.nombre} · {t.parada(i + 1, tour.paradas.length)}
               </p>
               <div className="panel-tour-pasos" aria-hidden>
                 {tour.paradas.map((p, k) => (
@@ -50,47 +51,47 @@ export function PanelInfo() {
           <p className="panel-texto">{m.descripcion}</p>
           <dl className="panel-datos">
             <div>
-              <dt>Horario</dt>
+              <dt>{t.horario}</dt>
               <dd>{m.horario}</dd>
             </div>
             <div>
-              <dt>Precio</dt>
+              <dt>{t.precio}</dt>
               <dd>{m.precio}</dd>
             </div>
             <div>
-              <dt>Duración</dt>
+              <dt>{t.duracion}</dt>
               <dd>{m.duracion}</dd>
             </div>
           </dl>
           <div className="panel-consejo">
-            <strong>Consejo del guía</strong>
+            <strong>{t.consejo}</strong>
             <p>{m.consejo}</p>
           </div>
           {tour ? (
             <div className="panel-nav">
               <button onClick={() => ir(-1)} disabled={i === 0}>
-                ← Anterior
+                {t.anterior}
               </button>
               {i < tour.paradas.length - 1 ? (
                 <button className="primario" onClick={() => ir(1)}>
-                  Siguiente parada →
+                  {t.siguienteParada}
                 </button>
               ) : (
                 <button className="primario" onClick={() => setSeleccionado(null)}>
-                  Terminar tour ✓
+                  {t.terminarTour}
                 </button>
               )}
             </div>
           ) : (
             <div className="panel-nav">
-              <button onClick={() => ir(-1)}>← Anterior</button>
+              <button onClick={() => ir(-1)}>{t.anterior}</button>
               <button className="primario" onClick={() => setSeleccionado(null)}>
-                Volver al mapa
+                {t.volverMapa}
               </button>
-              <button onClick={() => ir(1)}>Siguiente →</button>
+              <button onClick={() => ir(1)}>{t.siguiente}</button>
             </div>
           )}
-          <p className="panel-aviso">Datos orientativos de ejemplo.</p>
+          <p className="panel-aviso">{t.aviso}</p>
         </>
       )}
     </aside>

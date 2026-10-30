@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import { porId } from './data/monumentos'
 import { tourPorId } from './data/tours'
 import { momentoDeUrl, type Momento } from './scene/momento'
+import { guardarIdioma, idiomaInicial, type Idioma } from './i18n/idioma'
+import type { Textos } from './i18n/es'
+
+export type ClaveCarga = keyof Textos['carga']
 
 export type Dialogo = 'tours' | 'guia' | 'ayuda'
 
@@ -14,7 +18,8 @@ type Estado = {
   dialogo: Dialogo | null
   /** Portada "Descubre Barcelona" encima del mapa. */
   portada: boolean
-  carga: { progreso: number; texto: string; listo: boolean }
+  carga: { progreso: number; texto: ClaveCarga; listo: boolean }
+  idioma: Idioma
   setSeleccionado: (id: string | null) => void
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
@@ -22,6 +27,7 @@ type Estado = {
   setDialogo: (d: Dialogo | null) => void
   cerrarPortada: () => void
   setCarga: (c: Partial<Estado['carga']>) => void
+  setIdioma: (i: Idioma) => void
 }
 
 const params = new URLSearchParams(location.search)
@@ -45,7 +51,8 @@ export const useEstado = create<Estado>((set, get) => ({
   dialogo: null,
   // con un enlace a un lugar o en modo captura se entra directo al mapa
   portada: !inicial && !params.has('captura'),
-  carga: { progreso: 0, texto: 'Preparando la maqueta…', listo: false },
+  carga: { progreso: 0, texto: 'preparando', listo: false },
+  idioma: idiomaInicial(),
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
@@ -68,4 +75,9 @@ export const useEstado = create<Estado>((set, get) => ({
   setDialogo: (d) => set({ dialogo: d }),
   cerrarPortada: () => set({ portada: false }),
   setCarga: (c) => set({ carga: { ...get().carga, ...c } }),
+  setIdioma: (i) => {
+    set({ idioma: i })
+    guardarIdioma(i)
+    ponerParam('lang', i === 'es' ? null : i)
+  },
 }))

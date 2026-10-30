@@ -92,7 +92,7 @@ function AvisoListo() {
   useEffect(() => invalidate(), [invalidate])
   useFrame(() => {
     if (n.current < 3) invalidate()
-    if (++n.current === 3) useEstado.getState().setCarga({ progreso: 1, texto: 'Listo', listo: true })
+    if (++n.current === 3) useEstado.getState().setCarga({ progreso: 1, texto: 'listo', listo: true })
   })
   return null
 }

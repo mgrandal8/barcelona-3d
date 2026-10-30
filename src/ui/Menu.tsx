@@ -1,16 +1,19 @@
 import { useEffect } from 'react'
+import { useT } from '../i18n'
 import { useEstado, type Dialogo } from '../store'
+import { SelectorIdioma } from './SelectorIdioma'
 
-const OPCIONES: { id: Dialogo; icono: string; nombre: string }[] = [
-  { id: 'tours', icono: '🧭', nombre: 'Tours' },
-  { id: 'guia', icono: '👋', nombre: 'El guía' },
-  { id: 'ayuda', icono: '?', nombre: 'Ayuda' },
+const OPCIONES: { id: Dialogo; icono: string }[] = [
+  { id: 'tours', icono: '🧭' },
+  { id: 'guia', icono: '👋' },
+  { id: 'ayuda', icono: '?' },
 ]
 
 /** Accesos a los tours, al guía y a la ayuda de controles. */
 export function Menu() {
   const dialogo = useEstado((s) => s.dialogo)
   const setDialogo = useEstado((s) => s.setDialogo)
+  const t = useT().menu
 
   // «?» abre la ayuda desde cualquier sitio
   useEffect(() => {
@@ -22,15 +25,16 @@ export function Menu() {
   }, [setDialogo])
 
   return (
-    <nav className="menu" aria-label="Menú">
+    <nav className="menu" aria-label={t.etiqueta}>
       {OPCIONES.map((o) => (
-        <button key={o.id} className={dialogo === o.id ? 'activo' : ''} onClick={() => setDialogo(o.id)} title={o.nombre}>
+        <button key={o.id} className={dialogo === o.id ? 'activo' : ''} onClick={() => setDialogo(o.id)} title={t[o.id]}>
           <span aria-hidden className={o.id === 'ayuda' ? 'menu-ayuda' : ''}>
             {o.icono}
           </span>
-          <small>{o.nombre}</small>
+          <small>{t[o.id]}</small>
         </button>
       ))}
+      <SelectorIdioma />
     </nav>
   )
 }

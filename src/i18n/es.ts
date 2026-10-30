@@ -1,0 +1,102 @@
+// Textos de la interfaz en español. Es la referencia: los demás idiomas tienen que dar las mismas claves (tipo Textos).
+
+export const es = {
+  tituloPagina: 'Barcelona 3D · Guía',
+  cerrar: 'Cerrar',
+  carga: {
+    preparando: 'Preparando la maqueta…',
+    descargando: 'Descargando el mapa de OpenStreetMap…',
+    levantando: 'Levantando los edificios…',
+    listo: 'Listo',
+  },
+  portada: {
+    antetitulo: 'Guía de ejemplo · maqueta 3D',
+    titulo: 'Descubre',
+    texto:
+      'Vuela sobre una maqueta de la ciudad hecha con datos reales: sus calles, su relieve y más de 140.000 edificios. Elige un lugar, sigue un tour o cambia la hora para verla de noche.',
+    lugares: 'lugares',
+    tours: 'tours',
+    momentos: 'momentos del día',
+    explorar: 'Explorar el mapa',
+    verTours: 'Ver tours',
+    pie: 'Contenido ficticio para una demo: sin reservas ni pagos reales.',
+  },
+  pista: {
+    tactil: 'Desliza para girar · pellizca para acercar · toca un pin',
+    raton: 'Arrastra para girar · rueda para acercar · clic en un pin',
+  },
+  menu: {
+    etiqueta: 'Menú',
+    tours: 'Tours',
+    guia: 'El guía',
+    ayuda: 'Ayuda',
+    idioma: 'Idioma',
+  },
+  hora: {
+    etiqueta: 'Hora del día',
+    dia: 'Día',
+    atardecer: 'Atardecer',
+    noche: 'Noche',
+    tourDia: '☀️ De día',
+    tourAtardecer: '🌅 Al atardecer',
+    tourNoche: '🌙 De noche',
+  },
+  lista: {
+    etiqueta: 'Lugares',
+    ocultar: 'Ocultar',
+    lugares: 'Lugares',
+  },
+  panel: {
+    parada: (i: number, n: number) => `parada ${i} de ${n}`,
+    horario: 'Horario',
+    precio: 'Precio',
+    duracion: 'Duración',
+    consejo: 'Consejo del guía',
+    anterior: '← Anterior',
+    siguiente: 'Siguiente →',
+    siguienteParada: 'Siguiente parada →',
+    terminarTour: 'Terminar tour ✓',
+    volverMapa: 'Volver al mapa',
+    aviso: 'Datos orientativos de ejemplo.',
+  },
+  tours: {
+    titulo: 'Tours de ejemplo',
+    intro: 'Tres rutas a pie con guía. Al empezar una, la maqueta te lleva de parada en parada.',
+    empezar: 'Empezar tour',
+  },
+  guia: {
+    titulo: 'Sobre el guía',
+    sub: 'Guía oficial de Catalunya · 12 años enseñando la ciudad',
+    bio: 'Nací en Gràcia y estudié Historia del Arte en la Universitat de Barcelona. Me encanta contar la ciudad a pie, sin prisas: el detalle que se esconde en una fachada modernista, la plaza donde se toma el vermut o el mejor sitio para ver el atardecer.',
+    idiomasEt: 'Idiomas',
+    idiomas: 'español, catalán, inglés e italiano',
+    gruposEt: 'Grupos',
+    grupos: 'de 2 a 12 personas',
+    valoracionEt: 'Valoración',
+    valoracion: '★★★★★ 4,9 (ejemplo)',
+    cita: '«Barcelona se entiende mejor desde arriba… y luego se disfruta perdiéndose por sus calles.»',
+    aviso: 'Personaje ficticio creado para esta demo.',
+  },
+  ayuda: {
+    titulo: 'Cómo moverse',
+    tactil: [
+      ['Un dedo', 'Girar la maqueta'],
+      ['Pellizcar', 'Acercar y alejar'],
+      ['Dos dedos', 'Desplazar el mapa'],
+      ['Tocar un pin', 'Ir al lugar y abrir su ficha'],
+    ] as [string, string][],
+    raton: [
+      ['Arrastrar', 'Girar la maqueta'],
+      ['Rueda', 'Acercar y alejar'],
+      ['Clic derecho + arrastrar', 'Desplazar el mapa'],
+      ['Clic en un pin', 'Ir al lugar y abrir su ficha'],
+      ['Esc', 'Cerrar la ficha y volver al mapa'],
+      ['?', 'Abrir esta ayuda'],
+    ] as [string, string][],
+    intro:
+      'La lista de la izquierda lleva a cada lugar, y los botones de abajo cambian la hora: de noche se encienden las ventanas, las farolas y la Font Màgica.',
+  },
+  atribucion: { mapa: 'Mapa', relieve: 'Relieve', ejemplo: 'Contenido de ejemplo' },
+}
+
+export type Textos = typeof es
