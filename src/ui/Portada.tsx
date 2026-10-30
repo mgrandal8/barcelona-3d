@@ -4,6 +4,7 @@ import { TOURS } from '../data/tours'
 import { useT } from '../i18n'
 import { useEstado } from '../store'
 import { SelectorIdioma } from './SelectorIdioma'
+import { AvisoLento, TarjetaFallo } from './ErrorMaqueta'
 
 /** Barra de progreso con el paso de carga en curso. */
 function Progreso() {
@@ -17,6 +18,7 @@ function Progreso() {
       <small>
         {t.carga[texto]} {Math.round(progreso * 100)} %
       </small>
+      <AvisoLento />
     </div>
   )
 }
@@ -28,17 +30,20 @@ function Progreso() {
 export function Portada() {
   const portada = useEstado((s) => s.portada)
   const listo = useEstado((s) => s.carga.listo)
+  const fallo = useEstado((s) => s.fallo)
   const { cerrarPortada, setDialogo } = useEstado.getState()
   const t = useT().portada
 
   if (!portada) {
+    // la tarjeta de carga vuelve a salir si la maqueta falla, aunque ya estuviera lista
+    const oculta = listo && !fallo
     return (
-      <div className={`carga ${listo ? 'oculta' : ''}`} aria-hidden={listo}>
+      <div className={`carga ${oculta ? 'oculta' : ''}`} aria-hidden={oculta}>
         <div className="carga-tarjeta">
           <strong>
             Barcelona <span>3D</span>
           </strong>
-          <Progreso />
+          {fallo ? <TarjetaFallo /> : <Progreso />}
         </div>
       </div>
     )
@@ -66,7 +71,9 @@ export function Portada() {
             <strong>3</strong> {t.momentos}
           </li>
         </ul>
-        {listo ? (
+        {fallo ? (
+          <TarjetaFallo />
+        ) : listo ? (
           <div className="portada-botones">
             <button className="primario" onClick={cerrarPortada} autoFocus>
               {t.explorar}

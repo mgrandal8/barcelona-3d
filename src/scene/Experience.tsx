@@ -12,6 +12,7 @@ import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado, usePerfil } from '../store'
 import { calidadFija } from '../calidad'
+import { contextoPerdido } from '../ui/ErrorMaqueta'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
@@ -105,6 +106,23 @@ function Camara() {
   return <CameraControls ref={controles} makeDefault enabled={!portada} minDistance={0.6} maxDistance={170} maxPolarAngle={1.32} smoothTime={0.7} />
 }
 
+/**
+ * La GPU se reinicia o el navegador libera el contexto: se quita la escena y se ofrece reintentar.
+ * Va en un efecto para quitar el listener al desmontar: R3F fuerza la pérdida del contexto al cerrar el Canvas.
+ */
+function VigiaContexto() {
+  const canvas = useThree((s) => s.gl.domElement)
+  useEffect(() => {
+    const perdido = (e: Event) => {
+      e.preventDefault()
+      contextoPerdido()
+    }
+    canvas.addEventListener('webglcontextlost', perdido)
+    return () => canvas.removeEventListener('webglcontextlost', perdido)
+  }, [canvas])
+  return null
+}
+
 /** Avisa de que la ciudad ya se ha dibujado (unos fotogramas, para que compilen los shaders). */
 function AvisoListo() {
   const n = useRef(0)
@@ -144,6 +162,7 @@ export function Experience() {
       {CALIDAD_AUTO && listo && (
         <PerformanceMonitor onDecline={() => useEstado.getState().bajarCalidad()} onFallback={() => useEstado.getState().bajarCalidad(true)} />
       )}
+      <VigiaContexto />
       <Ambiente />
       <Suspense fallback={null}>
         <CiudadReal />

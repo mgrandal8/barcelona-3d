@@ -131,11 +131,11 @@ export function cargarDatos() {
     const pAlturas = descargar(base() + 'terreno.bin')
     // el worker arranca en cuanto tiene lo suyo, sin esperar al suelo
     const trozos = Promise.all([descargar(base() + 'edificios.bin.gz'), pAlturas, pMeta]).then(([e, a, m]) => levantarEdificios(e, a.slice(0), m))
+    // si falla antes de que la escena la pida, que no salga «Uncaught (in promise)»: el error llega por use()
+    trozos.catch(() => {})
     const [meta, alturasBuf] = await Promise.all([pMeta, pAlturas])
     const alturas = new Int16Array(alturasBuf)
     const suelo = levantarSuelo(meta, alturas)
-    // si fallan antes de que la escena las pida, que no salga «Uncaught (in promise)»: el error llega por use()
-    trozos.catch(() => {})
     suelo.catch(() => {})
     const { rect } = meta
     const alturaM = crearAlturaM(meta, alturas)

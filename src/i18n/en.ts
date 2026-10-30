@@ -131,6 +131,28 @@ const textos: Textos = {
     instalar: 'Install the app',
     ios: 'On iPhone or iPad: Share → “Add to Home Screen”.',
   },
+  fallo: {
+    datos: 'The map could not be downloaded. Check your connection and try again.',
+    codigo: 'The model could not be loaded: the connection may have dropped or there is a new version.',
+    webgl: 'This browser could not draw the 3D model.',
+    contexto: 'The 3D model has stopped: the browser released the graphics card.',
+    contextoOtraVez: 'The 3D model has stopped again. The light version will work better on this device.',
+    reintentar: 'Try again',
+    verLigera: 'Use the light version',
+    lento: 'This is taking longer than usual.',
+  },
+  ligera: {
+    aviso: 'Light version: map, place cards and tours without the 3D model.',
+    sinWebgl: 'Your browser cannot show the 3D model, so you are using the light version.',
+    probar3d: 'See the 3D model',
+    acercar: 'Zoom in',
+    alejar: 'Zoom out',
+    todo: 'Show the whole map',
+    cargando: 'Loading the map…',
+    error: 'The map could not be loaded.',
+    mapa: 'Map of Barcelona with the places in the guide',
+    tuPosicion: 'Your position',
+  },
   atribucion: { mapa: 'Map', relieve: 'Terrain', ejemplo: 'Sample content' },
 }
 
