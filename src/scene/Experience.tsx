@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CameraControls, CameraControlsImpl, PerformanceMonitor } from '@react-three/drei'
 import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from '@react-three/postprocessing'
@@ -11,7 +11,8 @@ import { MiPosicion } from './MiPosicion'
 import { Metro } from './Metro'
 import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
-import { useEstado } from '../store'
+import { useEstado, usePerfil } from '../store'
+import { calidadFija } from '../calidad'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
@@ -116,9 +117,12 @@ function AvisoListo() {
   return null
 }
 
+// en pruebas y capturas la calidad no cambia sola
+const CALIDAD_AUTO = !calidadFija && !params.has('captura')
+
 export function Experience() {
-  const [dpr, setDpr] = useState(1.5)
-  const [calidadAlta, setCalidadAlta] = useState(true)
+  const perfil = usePerfil()
+  const dpr = Math.min(perfil.dprMax, window.devicePixelRatio || 1)
   // de noche el bloom recoge las ventanas, las farolas y los LED
   const noche = useEstado((s) => s.momento) === 'noche'
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
@@ -127,7 +131,7 @@ export function Experience() {
 
   return (
     <Canvas
-      shadows
+      shadows={perfil.sombras > 0}
       frameloop={listo ? 'always' : 'demand'}
       dpr={dpr}
       gl={{ antialias: false, alpha: true, preserveDrawingBuffer: params.has('captura') }}
@@ -137,13 +141,10 @@ export function Experience() {
         gl.toneMapping = THREE.NeutralToneMapping
       }}
     >
-      <PerformanceMonitor
-        onDecline={() => {
-          setDpr(1)
-          setCalidadAlta(false)
-        }}
-        onIncline={() => setDpr(Math.min(2, window.devicePixelRatio))}
-      />
+      {/* si va a tirones se baja un nivel (no se vuelve a subir: así no oscila); mientras carga no se mide */}
+      {CALIDAD_AUTO && listo && (
+        <PerformanceMonitor onDecline={() => useEstado.getState().bajarCalidad()} onFallback={() => useEstado.getState().bajarCalidad(true)} />
+      )}
       <Ambiente />
       <Suspense fallback={null}>
         <CiudadReal />
@@ -159,9 +160,9 @@ export function Experience() {
         </Suspense>
       </Suspense>
       <Camara />
-      {POSTPRO && (
+      {POSTPRO && perfil.postpro !== 'no' && (
         <EffectComposer multisampling={0}>
-          {calidadAlta ? <N8AO aoRadius={0.6} intensity={2} distanceFalloff={0.5} halfRes /> : <></>}
+          {perfil.postpro === 'completo' ? <N8AO aoRadius={0.6} intensity={2} distanceFalloff={0.5} halfRes /> : <></>}
           <Bloom luminanceThreshold={noche ? 0.55 : 0.9} intensity={noche ? 0.9 : 0.4} mipmapBlur />
           <Vignette darkness={0.35} offset={0.3} />
           <SMAA />

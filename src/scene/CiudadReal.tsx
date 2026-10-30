@@ -6,6 +6,7 @@ import { crearMallaTerreno, crearZocalo, generarArboles } from './mallas'
 import type { Malla } from './edificios'
 import { crearTexturaLuces, crearTexturaSuelo } from './texturaSuelo'
 import { vivo } from './hora'
+import { usePerfil } from '../store'
 
 const NIVEL_MAR = -0.03
 
@@ -87,9 +88,6 @@ function geometria(m: Malla, esfera: THREE.Sphere) {
   return g
 }
 
-/** Más allá de esta distancia (al borde del trozo), de los edificios bajos y pequeños solo se dibujan los tejados. */
-const LEJOS = 70
-
 /** Los edificios llegan del worker después que el terreno: este componente va en su propio Suspense. */
 export function Edificios() {
   const d = use(cargarDatos())
@@ -109,6 +107,8 @@ export function Edificios() {
     [trozos],
   )
   const detalle = useRef<(THREE.Mesh | null)[]>([])
+  // más allá de esta distancia (al borde del trozo), de los edificios bajos y pequeños solo se dibujan los tejados
+  const { lejos } = usePerfil()
   const material = useMemo(() => conVentanas(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true })), [])
   // LOD: de lejos, de las casas bajas solo se distinguen los tejados (las tejas rojas dan color a los barrios);
   // sus paredes y su sombra ya no aportan y suponen un tercio de los triángulos de la vista general
@@ -116,7 +116,7 @@ export function Edificios() {
     mallas.forEach((m, i) => {
       const malla = detalle.current[i]
       if (!malla || !m.detalle) return
-      const cerca = camera.position.distanceTo(m.centro) - m.radio < LEJOS
+      const cerca = camera.position.distanceTo(m.centro) - m.radio < lejos
       malla.castShadow = cerca
       m.detalle.setDrawRange(0, cerca ? Infinity : m.techos)
     })
