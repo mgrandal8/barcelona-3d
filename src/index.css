@@ -27,14 +27,42 @@ body {
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-/* etiqueta flotante del monumento (Html de drei) */
-.etiqueta {
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
-  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra);
-  transform: translateY(-34px); font-size: 13px; pointer-events: none;
+/* pines de los lugares (ui/Pin.tsx): en la maqueta los coloca scene/Pines.tsx; en la versión ligera, el plano */
+.capa-pines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 15; transition: opacity 0.4s; }
+.con-portada .capa-pines { opacity: 0; }
+.pin {
+  position: absolute; left: 0; top: 0; padding: 0 0 8px; border: 0; background: none; pointer-events: auto;
+  transition: opacity 0.25s; will-change: transform;
 }
-.etiqueta span { font-size: 11px; opacity: 0.65; }
+.capa-pines .pin:not([data-ver="1"]) { opacity: 0; pointer-events: none; }
+.pin-num {
+  position: relative; display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 999px;
+  background: var(--color); color: #fff; font-size: 14px; font-weight: 800; white-space: nowrap;
+  border: 2px solid #fff; box-shadow: 0 3px 10px rgba(40, 25, 10, 0.35); transition: transform 0.2s;
+}
+/* colita que apunta al lugar */
+.pin-num::after {
+  content: ''; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%);
+  border: 6px solid transparent; border-top: 7px solid #fff; border-bottom: 0;
+}
+.pin-nombre {
+  position: absolute; left: calc(100% + 6px); top: 0; display: none; flex-direction: column; align-items: flex-start;
+  padding: 4px 10px; border-radius: 12px; white-space: nowrap; text-align: left; color: var(--texto);
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); font-size: 13px;
+}
+.pin-nombre small { font-size: 11.5px; color: #5c5048; }
+.pin.hover, .pin:focus-visible, .pin.activo { z-index: 2; }
+.pin.hover .pin-nombre, .pin:focus-visible .pin-nombre { display: flex; }
+.pin.hover .pin-num, .pin.activo .pin-num { transform: scale(1.12); }
+.pin.activo .pin-num { box-shadow: 0 0 0 3px var(--acento-2), 0 3px 10px rgba(40, 25, 10, 0.35); }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .pin-num { box-shadow: 0 0 0 3px var(--texto), 0 3px 10px rgba(40, 25, 10, 0.35); }
+.pin.apagado .pin-num { min-width: 24px; height: 24px; padding: 0 6px; font-size: 12px; background: #6f655d; }
+/* grupo: una pila de pines */
+.pin-grupo .pin-num {
+  background: var(--color, var(--texto)); padding: 0 10px;
+  box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 1px rgba(40, 25, 10, 0.25), 0 3px 10px rgba(40, 25, 10, 0.35);
+}
 
 /* lista de lugares */
 .lista {
@@ -102,14 +130,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .plano { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #6fa9c4; }
 .plano:active { cursor: grabbing; }
 .plano canvas { position: absolute; inset: 0; }
-.plano-pin {
-  position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 28px; height: 28px; padding: 0 8px;
-  display: flex; align-items: center; gap: 6px; border: 2px solid #fff; border-radius: 999px;
-  background: var(--acento); color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 3px 10px rgba(60, 35, 15, 0.35);
-}
-.plano-pin span { font-weight: 600; white-space: nowrap; }
-.plano-pin.hover, .plano-pin.activo { z-index: 3; background: var(--texto); }
-.plano-pin.activo { outline: 3px solid var(--acento-2); }
+.plano-pin { z-index: 2; transform: translate(-50%, -100%); }
+.plano-pin.hover, .plano-pin.activo, .plano-pin:focus-visible { z-index: 3; }
+.plano-pin.activo .pin-nombre { display: flex; }
 .plano-yo {
   position: absolute; z-index: 2; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%;
   background: #2a7de1; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(42, 125, 225, 0.25);
@@ -302,12 +325,6 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 }
 .pista.visible { opacity: 1; transform: translate(-50%, 0); }
 
-/* número de parada del tour sobre el mapa */
-.ruta-num {
-  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 800;
-  border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); transform: translateY(-40px);
-}
-.ruta-num.activa { width: 28px; height: 28px; font-size: 14px; }
 
 /* tour en la ficha */
 .panel-tour { background: color-mix(in srgb, var(--color) 10%, #fff); border: 1px solid color-mix(in srgb, var(--color) 30%, transparent); border-radius: 14px; padding: 10px 12px; margin: 0 36px 14px 0; }

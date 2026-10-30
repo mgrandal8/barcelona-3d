@@ -1,6 +1,6 @@
 import { use, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html, QuadraticBezierLine, type QuadraticBezierLineRef } from '@react-three/drei'
+import { QuadraticBezierLine, type QuadraticBezierLineRef } from '@react-three/drei'
 import { porId } from '../data/monumentos'
 import { tourPorId } from '../data/tours'
 import { useEstado } from '../store'
@@ -33,11 +33,10 @@ function Arco({ t, color }: { t: Tramo; color: string }) {
   )
 }
 
-/** Recorrido del tour en curso: arcos de parada a parada y su número sobre cada lugar. */
+/** Recorrido del tour en curso: arcos de parada a parada (el número de cada parada va en su pin, scene/Pines.tsx). */
 export function Ruta() {
   const d = use(cargarDatos())
   const tour = tourPorId(useEstado((s) => s.tour))
-  const seleccionado = useEstado((s) => s.seleccionado)
 
   const puntos = useMemo(
     () =>
@@ -64,13 +63,6 @@ export function Ruta() {
     <group>
       {tramos.map((t, i) => (
         <Arco key={`${tour.id}-${i}`} t={t} color={tour.color} />
-      ))}
-      {puntos.map((p, i) => (
-        <Html key={`${tour.id}-n${i}`} position={p} center zIndexRange={[15, 0]} style={{ pointerEvents: 'none' }}>
-          <span className={`ruta-num ${tour.paradas[i].id === seleccionado ? 'activa' : ''}`} style={{ background: tour.color }}>
-            {i + 1}
-          </span>
-        </Html>
       ))}
     </group>
   )

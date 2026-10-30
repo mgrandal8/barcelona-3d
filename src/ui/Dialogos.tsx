@@ -4,7 +4,7 @@ import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
 import { Icono } from './Icono'
-import { ICONO_HORA } from './SelectorHora'
+import { ICONO_MOMENTO } from '../scene/momento'
 
 /** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. */
 function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; children: ReactNode }) {
@@ -52,7 +52,7 @@ function Tours() {
               <div>
                 <h3>{t.nombre}</h3>
                 <small>
-                  {t.duracion} · <Icono nombre={ICONO_HORA[t.momento]} /> {horas[t.momento]}
+                  {t.duracion} · <Icono nombre={ICONO_MOMENTO[t.momento]} /> {horas[t.momento]}
                 </small>
               </div>
             </div>

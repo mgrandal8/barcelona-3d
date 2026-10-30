@@ -49,6 +49,10 @@ const textos: Textos = {
     ocultar: 'Hide',
     lugares: 'Places',
   },
+  pines: {
+    grupo: (nombres: string) => `${nombres}: zoom in to see them separately`,
+    lugares: (n: number) => `${n} places`,
+  },
   panel: {
     parada: (i: number, n: number) => `stop ${i} of ${n}`,
     horario: 'Opening hours',

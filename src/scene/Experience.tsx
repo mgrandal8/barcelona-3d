@@ -6,6 +6,7 @@ import { CiudadReal, Edificios } from './CiudadReal'
 import { Monumentos } from './Monumentos'
 import { Ambiente } from './Ambiente'
 import { Ruta } from './Ruta'
+import { Pines } from './Pines'
 import { MiPosicion } from './MiPosicion'
 import { Metro } from './Metro'
 import { cargarDatos } from './datos'
@@ -94,8 +95,10 @@ function Camara() {
     cargarDatos().then((d) => {
       if (!vigente) return
       const y = d.alturaY(vuelo.x, vuelo.z)
+      // la vista cercana está a ~10 u; con `dist` se aleja o se acerca en la misma dirección
+      const k = (vuelo.dist ?? 10) / 10
       c.setFocalOffset(0, 0, 0, true)
-      c.setLookAt(vuelo.x + 1.5, y + 7, vuelo.z + 7, vuelo.x, y, vuelo.z, !quieto)
+      c.setLookAt(vuelo.x + 1.5 * k, y + 7 * k, vuelo.z + 7 * k, vuelo.x, y, vuelo.z, !quieto)
     })
     return () => {
       vigente = false
@@ -167,6 +170,7 @@ export function Experience() {
         <CiudadReal />
         <Monumentos />
         <Ruta />
+        <Pines />
         <MiPosicion />
         {/* el metro no espera a los edificios, pero tampoco los retrasa: va en su propio Suspense */}
         <Suspense fallback={null}>{metro && <Metro />}</Suspense>

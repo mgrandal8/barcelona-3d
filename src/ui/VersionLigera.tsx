@@ -5,6 +5,7 @@ import { cargarPlano, type Plano } from '../scene/datos'
 import { ESCALA } from '../scene/geo'
 import { sondeo } from '../calidad'
 import { Icono } from './Icono'
+import { Pin } from './Pin'
 
 // Versión ligera, sin three: el mapa del suelo en 2D (el mismo que pinta la maqueta), con los lugares,
 // la ruta del tour y tu posición. La lista, las fichas, los tours y la ayuda son los de siempre.
@@ -149,6 +150,7 @@ export function VersionLigera() {
     return { left: v.ox + ix * v.s, top: v.oy + iy * v.s }
   }
   const { setSeleccionado, setHover } = useEstado.getState()
+  const paradas = tour?.paradas.map((p) => p.id) ?? []
 
   return (
     <div
@@ -166,19 +168,22 @@ export function VersionLigera() {
       <canvas ref={lienzo} style={{ width: tam.w, height: tam.h }} aria-hidden="true" />
       {plano &&
         lugares.map((m, i) => (
-          <button
+          <Pin
             key={m.id}
-            className={['plano-pin', m.id === seleccionado && 'activo', m.id === hover && 'hover'].filter(Boolean).join(' ')}
+            id={m.id}
+            className="plano-pin"
             style={enPantalla(m.pos[0], m.pos[1])}
+            num={paradas.includes(m.id) ? paradas.indexOf(m.id) + 1 : i + 1}
+            nombre={m.nombre}
+            sub={m.barrio}
+            etiqueta={`${i + 1}. ${m.nombre}`}
+            color={paradas.includes(m.id) ? tour?.color : undefined}
+            apagado={!!tour && !paradas.includes(m.id)}
+            activo={m.id === seleccionado}
+            hover={m.id === hover}
             onClick={() => setSeleccionado(m.id)}
-            onPointerEnter={() => setHover(m.id)}
-            onPointerLeave={() => setHover(null)}
-            aria-label={`${i + 1}. ${m.nombre}`}
-            title={m.nombre}
-          >
-            {i + 1}
-            {(m.id === seleccionado || m.id === hover) && <span>{m.nombre}</span>}
-          </button>
+            onHover={(dentro) => setHover(dentro ? m.id : null)}
+          />
         ))}
       {plano && ubicacion?.dentro && <span className="plano-yo" style={enPantalla(ubicacion.x, ubicacion.z)} title={t.tuPosicion} />}
       {!plano && <p className="plano-cargando">{t.cargando}</p>}

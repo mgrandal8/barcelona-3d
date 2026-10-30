@@ -46,6 +46,10 @@ export const es = {
     ocultar: 'Ocultar',
     lugares: 'Lugares',
   },
+  pines: {
+    grupo: (nombres: string) => `${nombres}: acercar para verlos por separado`,
+    lugares: (n: number) => `${n} lugares`,
+  },
   panel: {
     parada: (i: number, n: number) => `parada ${i} de ${n}`,
     horario: 'Horario',

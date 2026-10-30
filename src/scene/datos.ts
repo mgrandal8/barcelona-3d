@@ -1,5 +1,5 @@
 import { ESCALA, metrosAY } from './geo'
-import { crearAlturaM, type Meta } from './relieve'
+import { crearAlturaM, type Meta, type Rejilla } from './relieve'
 import type { Trozo } from './edificios'
 import type { Pedido, Respuesta } from './edificios.worker'
 import type { Pedido as PedidoSuelo, Respuesta as RespuestaSuelo } from './terreno.worker'
@@ -9,7 +9,7 @@ import { HUECOS } from '../data/monumentos'
 import { useEstado } from '../store'
 import { PERFILES, sondeo } from '../calidad'
 
-export type { Meta, Suelo }
+export type { Meta, Rejilla, Suelo }
 export { descomprimir }
 
 export type DatosCiudad = {
@@ -17,6 +17,8 @@ export type DatosCiudad = {
   alturas: Int16Array
   /** Edificios ya extruidos por el worker; llegan después que el resto. */
   trozos: Promise<Trozo[]>
+  /** Altura de los tejados por celdas, del mismo worker: dice si un edificio tapa un pin. */
+  tejados: Promise<Rejilla>
   /** Malla del terreno, zócalo, árboles, máscara y texturas, hechos en otro worker. */
   suelo: Promise<Suelo>
   /** Altura del terreno en metros reales (bilineal) en coordenadas de escena. */
@@ -67,7 +69,7 @@ const leerJson = async <T,>(url: string) => JSON.parse(new TextDecoder().decode(
 
 /** Extruye los edificios en un worker; la barra avanza del 70 al 95 %. */
 function levantarEdificios(edificios: ArrayBuffer, alturas: ArrayBuffer, meta: Meta) {
-  return new Promise<Trozo[]>((resolver, fallar) => {
+  return new Promise<{ trozos: Trozo[]; rejilla: Rejilla }>((resolver, fallar) => {
     const w = new Worker(new URL('./edificios.worker.ts', import.meta.url), { type: 'module' })
     w.onmessage = ({ data }: MessageEvent<Respuesta>) => {
       if (data.tipo === 'progreso') {
@@ -76,7 +78,7 @@ function levantarEdificios(edificios: ArrayBuffer, alturas: ArrayBuffer, meta: M
         return
       }
       w.terminate()
-      if (data.tipo === 'listo') resolver(data.trozos)
+      if (data.tipo === 'listo') resolver(data)
       else fallar(new Error(data.mensaje))
     }
     w.onerror = (e) => fallar(new Error(e.message))
@@ -130,9 +132,12 @@ export function cargarDatos() {
     const pMeta = leerJson<Meta>(base() + 'meta.json')
     const pAlturas = descargar(base() + 'terreno.bin')
     // el worker arranca en cuanto tiene lo suyo, sin esperar al suelo
-    const trozos = Promise.all([descargar(base() + 'edificios.bin.gz'), pAlturas, pMeta]).then(([e, a, m]) => levantarEdificios(e, a.slice(0), m))
+    const edificios = Promise.all([descargar(base() + 'edificios.bin.gz'), pAlturas, pMeta]).then(([e, a, m]) => levantarEdificios(e, a.slice(0), m))
+    const trozos = edificios.then((r) => r.trozos)
+    const tejados = edificios.then((r) => r.rejilla)
     // si falla antes de que la escena la pida, que no salga «Uncaught (in promise)»: el error llega por use()
     trozos.catch(() => {})
+    tejados.catch(() => {})
     const [meta, alturasBuf] = await Promise.all([pMeta, pAlturas])
     const alturas = new Int16Array(alturasBuf)
     const suelo = levantarSuelo(meta, alturas)
@@ -143,6 +148,7 @@ export function cargarDatos() {
       meta,
       alturas,
       trozos,
+      tejados,
       suelo,
       alturaM,
       alturaY: (x, z) => metrosAY(Math.max(alturaM(x, z), 0)),

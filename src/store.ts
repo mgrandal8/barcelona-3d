@@ -32,7 +32,7 @@ type Estado = {
   ubicacion: Ubicacion | null
   estadoUbicacion: EstadoUbicacion
   /** Petición de vuelo de cámara a un punto (n cambia en cada petición, aunque el punto se repita). */
-  vuelo: { x: number; z: number; n: number } | null
+  vuelo: { x: number; z: number; n: number; dist?: number } | null
   /** Capa de metro y FGC encima de la maqueta. */
   metro: boolean
   red: Red
@@ -53,7 +53,8 @@ type Estado = {
   setCarga: (c: Partial<Estado['carga']>) => void
   setIdioma: (i: Idioma) => void
   setUbicacion: (u: Ubicacion | null, estado: EstadoUbicacion) => void
-  volarA: (x: number, z: number) => void
+  /** Vuelo a (x, z); `dist` es la distancia de la cámara (por defecto, una vista cercana). */
+  volarA: (x: number, z: number, dist?: number) => void
   setMetro: (v: boolean) => void
   setRed: (r: Partial<Red>) => void
   setModo: (m: Modo) => void
@@ -146,10 +147,10 @@ export const useEstado = create<Estado>((set, get) => ({
   reintentar: () => set({ fallo: null, reintentos: get().reintentos + 1 }),
   perderContexto: () => set({ fallo: 'contexto', perdidas: get().perdidas + 1 }),
   setUbicacion: (u, estado) => set({ ubicacion: u, estadoUbicacion: estado }),
-  volarA: (x, z) => {
+  volarA: (x, z, dist) => {
     // se cierra la ficha para ver el sitio; la cámara procesa el vuelo después del cambio de lugar
     if (get().seleccionado) get().setSeleccionado(null)
-    set({ vuelo: { x, z, n: (get().vuelo?.n ?? 0) + 1 } })
+    set({ vuelo: { x, z, dist, n: (get().vuelo?.n ?? 0) + 1 } })
   },
 }))
 
