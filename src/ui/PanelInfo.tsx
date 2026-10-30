@@ -28,8 +28,12 @@ export function PanelInfo() {
   const titulo = useRef<HTMLHeadingElement>(null)
   const origen = useRef<HTMLElement | null>(null)
   const abierta = !!m
+  const primera = useRef(true)
   useEffect(() => {
-    if (abierta) {
+    // si la ficha ya viene abierta en el enlace (?lugar=), el foco se queda al principio de la página
+    const alCargar = primera.current
+    primera.current = false
+    if (abierta && !alCargar) {
       const activo = document.activeElement as HTMLElement | null
       origen.current = activo && activo !== document.body ? activo : null
       titulo.current?.focus({ preventScroll: true })

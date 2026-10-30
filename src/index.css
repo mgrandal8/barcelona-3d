@@ -255,7 +255,9 @@ button.primario { background: var(--acento); color: #fff; border-color: transpar
 .saltar:focus { top: 16px; }
 .maqueta:focus-visible { outline: 3px solid var(--acento); outline-offset: -3px; }
 .lista:focus { outline: none; }
-.panel h2:focus:not(:focus-visible) { outline: none; }
+.panel h2 { margin-right: 40px; }
+.panel h2:focus { outline: none; }
+.panel h2:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; border-radius: 4px; }
 button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 
 /* menú: tours, guía y ayuda */
