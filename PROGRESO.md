@@ -107,11 +107,19 @@ Plan: `~/.claude/plans/haz-lo-que-me-splendid-peacock.md`. Cuatro bloques, un co
 - Tours: los números de parada (`Html`) se ven aunque el lugar quede detrás de un edificio; la portada podría tener un recorrido de cámara más pensado que el giro sobre la vista general.
 - Hay otro Vite en el puerto 5173 (no es de esta sesión); en la sesión 4 se usó el 5174 y en la 5 el 5175 (`npx vite --port 5175 --strictPort`).
 
+## Plan para hacerla profesional (sesiones 9–15)
+Propuesto al final de la sesión 8. Orden: **9 → 12 → 10 → 13 → 11 → 14 → 15**.
+- **S9 · Que no falle nunca**: versión ligera sin WebGL o en móviles flojos (lista + fichas + mapa 2D) con aviso; calidad adaptativa desde el inicio (sombras, postproceso, edificios, dpr); terreno y textura del suelo en un worker (hoy ~0,9 s de hilo principal); postproceso (159 kB) cargado después de la ciudad; error boundary con «Reintentar».
+- **S12 · Interfaz de producto**: iconos SVG propios en vez de emojis; pines legibles desde la vista general (número o categoría, agrupados si se solapan); números de tour que no se vean a través de edificios; accesibilidad (teclado, alternativa en texto para lector de pantalla, contraste, reduced motion en todos los vuelos); repaso visual en escritorio y móvil.
+- **S10 · Ciudad más real**: costa con la línea real de OSM; nombres de barrios y calles principales según el zoom; ventanas de día y más variedad de color por barrio; revisar alturas de edificios emblemáticos; arreglar reflejo del sol quemado, estrellas que casi no se ven y el ferri cerca de la playa.
+- **S13 · Cámara y experiencia**: entrada cinematográfica en la portada; vuelos con curva y altura según la distancia; «Reproducir tour» automático con la nota del guía; botón compartir (enlace e imagen para redes).
+- **S11 · Monumentos**: pendientes de Park Güell, Montjuïc, Camp Nou, Hotel W y Casa Batlló; 2–3 nuevos (Casa Milà, Arc de Triomf, Palau de la Música o Colón).
+- **S14 · Contenido real y legal**: horarios y precios reales con fuente y fecha; fotos de Wikimedia con licencia; catalán; SEO (meta por lugar, imagen para redes, sitemap, URL indexable por ficha); política de privacidad, atribuciones y analítica sin cookies.
+- **S15 · Calidad continua y Lokalu**: tests en GitHub Actions; regresión visual; presupuesto de peso y carga; registro de errores; modo embebido `?embed=1` con datos de lugares y tours desde un JSON externo y aviso a la página anfitriona (postMessage) al pulsar «Reservar».
+
 ## Siguiente sesión
-- Revisar el PR de la fase 8 y hacer merge a `main`, que publica en Pages. Después, probar en un móvil real: el GPS paseando, instalar la app (Android: botón de la Ayuda; iPhone: Compartir → Añadir a pantalla de inicio), el modo avión con la app ya abierta una vez y el aviso «Nueva versión» tras otro despliegue.
-- Probar en el navegador del usuario (GPU, con postpro): hover, vuelos, rendimiento, los tres momentos del día, la capa de metro de noche, la portada, los tours y los diálogos. Comprobar que el LOD no se nota al acercarse.
-- Siguientes ideas de utilidad (de la lista que se propuso): más lugares (Casa Milà, el Born, la Boqueria, Sant Pau, el Tibidabo…) con fotos de Wikimedia, «mi tour» con favoritos, ruta a pie dibujada entre paradas, horario abierto/cerrado ahora, audioguía y catalán.
-- Pulir los puntos pendientes de los monumentos y del ambiente (lista de arriba).
+- **S9** (en curso, rama `worktree-s9-robustez`).
+- Pendiente de la fase 8: probar en un móvil real el GPS paseando, instalar la app, el modo avión con la app ya abierta una vez y el aviso «Nueva versión» tras otro despliegue; y en el navegador del usuario (GPU, con postpro) los tres momentos del día, el metro de noche y el LOD al acercarse.
 
 ## Notas
 - WebGL por software (SwiftShader) en WSL: `page.screenshot` se cuelga; por eso se lee `canvas.toDataURL`.
