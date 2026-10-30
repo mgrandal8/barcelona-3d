@@ -1,5 +1,6 @@
 // Metro y FGC urbano → public/datos/transporte.json.gz
-//   { lineas: [{ ref, color, tramos: [[u, v, u, v, ...], ...] }], estaciones: [{ n, p: [u, v], l: [ref, ...] }] }
+//   { lineas: [{ ref, color, tramos: [[u, v, u, v, ...], ...] }], estaciones: [{ n, p: [u, v, u, v, ...], l: [ref, ...] }] }
+//   p: un punto por nodo de OSM de la estación (vestíbulos o andenes de cada línea); la etiqueta va en el primero
 // Uso: node scripts/datos/procesar-transporte.mjs (después de descargar.mjs)
 import { readFileSync } from 'node:fs'
 import { CRUDOS, RECT, SALIDA, proyectar, simplificar } from './comun.mjs'
@@ -97,17 +98,18 @@ for (const s of paradas) {
 const estaciones = []
 for (const c of candidatas) {
   if (!c.l.size) continue
-  const igual = estaciones.find((e) => e.n === c.n && dist(e.p, c.p) < 500)
+  const igual = estaciones.find((e) => e.n === c.n && e.ps.some((p) => dist(p, c.p) < 500))
   if (!igual) {
-    estaciones.push(c)
+    estaciones.push({ ...c, ps: [c.p] })
     continue
   }
+  igual.ps.push(c.p)
   for (const x of c.l) igual.l.add(x)
 }
 
 const salida = {
   lineas: [...lineas.values()].filter((l) => l.tramos.length).sort((a, b) => numero(a.ref) - numero(b.ref)),
-  estaciones: estaciones.map((e) => ({ n: e.n, p: e.p.map(Math.round), l: [...e.l].sort((a, b) => numero(a) - numero(b)) })),
+  estaciones: estaciones.map((e) => ({ n: e.n, p: e.ps.flat().map(Math.round), l: [...e.l].sort((a, b) => numero(a) - numero(b)) })),
 }
 const bytes = escribirGz(`${SALIDA}transporte.json.gz`, JSON.stringify(salida))
 console.log(

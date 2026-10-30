@@ -6,7 +6,8 @@ import { ESCALA } from './scene/geo'
 // Va aparte de la ciudad: son pocos kB y no retrasan la carga.
 
 export type LineaMetro = { ref: string; color: string; tramos: number[][] }
-export type Estacion = { n: string; p: [number, number]; l: string[] }
+/** p: accesos de la estación en metros (u, v, u, v…); el primero es donde va su etiqueta. */
+export type Estacion = { n: string; p: number[]; l: string[] }
 export type Transporte = { lineas: LineaMetro[]; estaciones: Estacion[]; colores: Record<string, string> }
 
 let promesa: Promise<Transporte> | null = null
@@ -42,12 +43,14 @@ export function estacionCercana(t: Transporte, x: number, z: number) {
   let mejor: Estacion | null = null
   let d2 = Infinity
   for (const e of t.estaciones) {
-    const dx = e.p[0] / ESCALA - x
-    const dz = e.p[1] / ESCALA - z
-    const d = dx * dx + dz * dz
-    if (d < d2) {
-      d2 = d
-      mejor = e
+    for (let i = 0; i < e.p.length; i += 2) {
+      const dx = e.p[i] / ESCALA - x
+      const dz = e.p[i + 1] / ESCALA - z
+      const d = dx * dx + dz * dz
+      if (d < d2) {
+        d2 = d
+        mejor = e
+      }
     }
   }
   return mejor && { estacion: mejor, metros: Math.sqrt(d2) * ESCALA }
