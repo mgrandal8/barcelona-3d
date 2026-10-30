@@ -17,3 +17,12 @@ export function geoAEscena(lat: number, lon: number): [number, number] {
 }
 
 export const metrosAY = (m: number) => (m * EXAGERACION) / ESCALA
+
+/** Azar determinista (hash entero) en [0, 1): las mismas casas y árboles en cada carga. */
+export function aleatorio(i: number) {
+  let t = (i * 2654435761) >>> 0
+  t ^= t >>> 15
+  t = Math.imul(t, 0x2c1b3c6d)
+  t ^= t >>> 12
+  return ((t >>> 0) % 10000) / 10000
+}

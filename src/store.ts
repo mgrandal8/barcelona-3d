@@ -130,7 +130,8 @@ export const useEstado = create<Estado>((set, get) => ({
   setModo: (m) => {
     guardarModo(m)
     ponerParam('modo', null)
-    set({ modo: m, fallo: null })
+    // la carga vuelve a empezar: la tarjeta tapa la maqueta (o el plano) hasta que esté
+    set({ modo: m, fallo: null, carga: { progreso: 0, texto: 'preparando', listo: false } })
   },
   bajarCalidad: (aBaja) => {
     const i = NIVELES.indexOf(get().calidad)

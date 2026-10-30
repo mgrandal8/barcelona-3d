@@ -11,6 +11,7 @@ import { BotonUbicacion } from './ui/BotonUbicacion'
 import { BotonMetro } from './ui/BotonMetro'
 import { AvisoRed } from './ui/AvisoRed'
 import { ErrorMaqueta } from './ui/ErrorMaqueta'
+import { AvisoLigera, VersionLigera } from './ui/VersionLigera'
 
 // three y la escena van en otro chunk: la portada sale antes, mientras se descargan
 const Experience = lazy(() => import('./scene/Experience').then((m) => ({ default: m.Experience })))
@@ -21,25 +22,30 @@ export default function App() {
   const idioma = useEstado((s) => s.idioma)
   const fallo = useEstado((s) => s.fallo)
   const reintentos = useEstado((s) => s.reintentos)
+  const ligera = useEstado((s) => s.modo) === 'ligero'
   const t = useT()
   useEffect(() => {
     document.documentElement.lang = idioma
     document.title = t.tituloPagina
   }, [idioma, t])
   return (
-    <main className={`app ${portada ? 'con-portada' : ''}`}>
+    <main className={['app', portada && 'con-portada', ligera && 'en-ligera'].filter(Boolean).join(' ')}>
       {/* con un fallo, la escena se desmonta; «Reintentar» la vuelve a montar con otra key */}
-      {!fallo && (
+      {ligera ? (
+        <VersionLigera key={reintentos} />
+      ) : (
+        !fallo && (
         <ErrorMaqueta key={reintentos}>
           <Suspense fallback={null}>
             <Experience />
           </Suspense>
         </ErrorMaqueta>
+        )
       )}
       <ListaLugares />
-      <SelectorHora />
+      {ligera ? <AvisoLigera /> : <SelectorHora />}
       <BotonUbicacion />
-      <BotonMetro />
+      {!ligera && <BotonMetro />}
       <Menu />
       <PanelInfo />
       <p className="atribucion">

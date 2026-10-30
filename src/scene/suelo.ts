@@ -1,9 +1,8 @@
 // Suelo de la maqueta sin three ni DOM: texturas dibujadas desde OSM, máscara de agua y parques, malla del
 // terreno, zócalo y árboles. Lo usa terreno.worker.ts (con OffscreenCanvas) y, si el navegador no puede
 // dibujar en un worker, el hilo principal con canvas normales.
-import { ESCALA, metrosAY } from './geo'
+import { aleatorio, ESCALA, metrosAY } from './geo'
 import { crearAlturaM, type Meta } from './relieve'
-import { aleatorio } from './edificios'
 
 export type Area = { t: string; r: number[][] }
 export type Linea = { t: string; a: number; p: number[] }
@@ -55,6 +54,9 @@ const CIUDAD = [221, 213, 198]
 const MONTE = [190, 196, 150]
 const COLOR_FONDO_MAR = [96, 140, 150]
 const COLOR_ARENA_MAR = [205, 192, 150]
+// en el plano 2D no hay agua encima: el mar se pinta azul, más oscuro cuanto más hondo
+const COLOR_MAR = [125, 184, 210]
+const COLOR_MAR_HONDO = [86, 152, 186]
 
 type Colores = (t: string) => string | null
 
@@ -96,8 +98,8 @@ function dibujarMapa(ctx: Ctx2D, meta: Meta, mapa: Mapa, metrosPx: number, color
   }
 }
 
-/** Capa base a partir del relieve: mar, ciudad y monte. */
-function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array) {
+/** Capa base a partir del relieve: mar (o el fondo del mar, si la maqueta pone el agua encima), ciudad y monte. */
+function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array, plano: boolean) {
   const { nu, nv } = meta
   const c = crear(nu, nv)
   const ctx = ctx2d(c)
@@ -106,7 +108,7 @@ function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array) {
   for (let i = 0; i < nu * nv; i++) {
     const h = alturas[i] / 10
     let col: number[]
-    if (h <= 0.3) col = mezcla(COLOR_ARENA_MAR, COLOR_FONDO_MAR, Math.min(1, -h / 15))
+    if (h <= 0.3) col = plano ? mezcla(COLOR_MAR, COLOR_MAR_HONDO, Math.min(1, -h / 30)) : mezcla(COLOR_ARENA_MAR, COLOR_FONDO_MAR, Math.min(1, -h / 15))
     else col = mezcla(CIUDAD, MONTE, Math.min(1, Math.max(0, (h - 120) / 120)))
     img.data.set([col[0], col[1], col[2], 255], i * 4)
   }
@@ -121,12 +123,12 @@ function lienzoMaqueta(crear: CrearLienzo, meta: Meta, ancho: number) {
   return { c: crear(ancho, Math.round((vMax - vMin) / metrosPx)), metrosPx }
 }
 
-/** Textura del suelo: relieve, áreas y calles. También es el plano de la versión ligera. */
-export function pintarSuelo(crear: CrearLienzo, meta: Meta, alturas: Int16Array, mapa: Mapa, ancho: number) {
+/** Textura del suelo: relieve, áreas y calles. Con `plano`, el mapa 2D de la versión ligera. */
+export function pintarSuelo(crear: CrearLienzo, meta: Meta, alturas: Int16Array, mapa: Mapa, ancho: number, plano = false) {
   const { c, metrosPx } = lienzoMaqueta(crear, meta, ancho)
   const ctx = ctx2d(c)
   ctx.imageSmoothingEnabled = true
-  ctx.drawImage(capaRelieve(crear, meta, alturas), 0, 0, c.width, c.height)
+  ctx.drawImage(capaRelieve(crear, meta, alturas, plano), 0, 0, c.width, c.height)
   dibujarMapa(ctx, meta, mapa, metrosPx, (t) => COLOR_AREA[t], (t) => COLOR_LINEA[t])
   return c
 }

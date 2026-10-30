@@ -98,6 +98,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .atribucion a { color: inherit; }
 
+/* versión ligera: plano 2D con pines */
+.plano { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #6fa9c4; }
+.plano:active { cursor: grabbing; }
+.plano canvas { position: absolute; inset: 0; }
+.plano-pin {
+  position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 28px; height: 28px; padding: 0 8px;
+  display: flex; align-items: center; gap: 6px; border: 2px solid #fff; border-radius: 999px;
+  background: var(--acento); color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 3px 10px rgba(60, 35, 15, 0.35);
+}
+.plano-pin span { font-weight: 600; white-space: nowrap; }
+.plano-pin.hover, .plano-pin.activo { z-index: 3; background: var(--texto); }
+.plano-pin.activo { outline: 3px solid var(--acento-2); }
+.plano-yo {
+  position: absolute; z-index: 2; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%;
+  background: #2a7de1; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(42, 125, 225, 0.25);
+}
+.plano-cargando { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #fff; font-weight: 600; }
+.plano-zoom {
+  position: absolute; z-index: 25; right: 16px; bottom: 40px; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra);
+}
+.plano-zoom button { width: 40px; height: 40px; border: 0; background: transparent; font-size: 20px; font-weight: 600; }
+.plano-zoom button + button { border-top: 1px solid var(--borde); }
+.plano-zoom button:hover { background: rgba(200, 85, 58, 0.08); }
+.ligera-aviso {
+  position: absolute; z-index: 25; left: 16px; bottom: 16px; max-width: min(600px, calc(100% - 32px)); margin: 0;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 8px 8px 14px; font-size: 13px;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px; box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.ligera-aviso button { border: 0; border-radius: 999px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; background: var(--acento); color: #fff; }
+.con-portada .ligera-aviso, .con-portada .plano-zoom { opacity: 0; pointer-events: none; }
+/* el aviso ocupa el sitio del selector de hora y puede tener dos líneas */
+.en-ligera .ubicacion { bottom: 84px; }
+
 /* selector de hora */
 .hora {
   position: absolute; left: 16px; bottom: 16px; display: flex; gap: 2px; padding: 4px;
@@ -357,6 +391,10 @@ kbd {
   }
   .lista:not(.abierta) { width: auto; right: auto; }
   .hora { left: 12px; bottom: 12px; }
+  /* encima de la barra del menú, que en móvil va abajo */
+  .ligera-aviso { left: 12px; bottom: 64px; max-width: calc(100% - 24px); }
+  .en-ligera .ubicacion { bottom: 150px; }
+  .plano-zoom { right: 12px; bottom: 150px; }
   .ubicacion { left: 12px; bottom: 60px; }
   .metro-boton { left: 12px; bottom: 110px; }
   .aviso-red { top: auto; bottom: 64px; left: 50%; max-width: calc(100% - 140px); border-radius: 16px; font-size: 12.5px; }

@@ -39,7 +39,7 @@ onmessage = async ({ data }: MessageEvent<Pedido>) => {
     const mapa = JSON.parse(new TextDecoder().decode(await descomprimir(await descargar(data.url)))) as Mapa
     const alturas = new Int16Array(data.alturas)
     if (data.plano) {
-      const imagen = (pintarSuelo(crear, data.meta, alturas, mapa, data.ancho) as OffscreenCanvas).transferToImageBitmap()
+      const imagen = (pintarSuelo(crear, data.meta, alturas, mapa, data.ancho, true) as OffscreenCanvas).transferToImageBitmap()
       responder({ tipo: 'plano', imagen }, [imagen])
       return
     }

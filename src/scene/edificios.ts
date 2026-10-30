@@ -1,4 +1,5 @@
 import { Color, ShapeUtils, Vector2 } from 'three'
+import { aleatorio } from './geo'
 import { ESCALA, metrosAY } from './geo'
 
 // Lectura y extrusión de los edificios de OSM. Sin DOM ni WebGL: se ejecuta en edificios.worker.ts.
@@ -49,13 +50,6 @@ const COLOR_TIPO: Record<number, string[]> = {
 const AZOTEAS = ['#e6e1d8', '#dcd6cb', '#ece7de', '#d6cfc2', '#e9dccb']
 const TEJAS = ['#c4643f', '#b85a3b', '#cc744c']
 
-export function aleatorio(i: number) {
-  let t = (i * 2654435761) >>> 0
-  t ^= t >>> 15
-  t = Math.imul(t, 0x2c1b3c6d)
-  t ^= t >>> 12
-  return ((t >>> 0) % 10000) / 10000
-}
 
 /**
  * Geometría lista para un BufferGeometry: posiciones, colores (Uint8 normalizado) e índices.

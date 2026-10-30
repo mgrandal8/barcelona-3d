@@ -174,7 +174,7 @@ export function cargarPlano() {
     const ancho = Math.min(2048, sondeo.maxTextura || 2048)
     if (dibujaEnWorker) return { meta, imagen: await pedirAlWorker<ImageBitmap>({ meta, alturas: alturasBuf, ancho, plano: true }, 'plano') }
     const mapa = await leerJson<Mapa>(base() + 'mapa.json.gz')
-    return { meta, imagen: pintarSuelo(lienzo, meta, alturas, mapa, ancho) as HTMLCanvasElement }
+    return { meta, imagen: pintarSuelo(lienzo, meta, alturas, mapa, ancho, true) as HTMLCanvasElement }
   })()
   plano.catch(() => {
     plano = null

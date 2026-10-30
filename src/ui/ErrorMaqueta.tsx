@@ -41,11 +41,12 @@ export function contextoPerdido() {
 /** Mensaje del fallo con «Reintentar» y «Ver versión ligera». */
 export function TarjetaFallo() {
   const fallo = useEstado((s) => s.fallo)
+  const enLigera = useEstado((s) => s.modo) === 'ligero'
   const t = useT().fallo
   if (!fallo) return null
   const otraVez = fallo === 'contexto' && perdidas > 1
   // sin WebGL o si la GPU se cae una y otra vez, lo primero que se ofrece es la versión ligera
-  const ligeraPrimero = fallo === 'webgl' || otraVez || !sondeo.webgl
+  const ligeraPrimero = !enLigera && (fallo === 'webgl' || otraVez || !sondeo.webgl)
   const reintentar = () => {
     if (fallo === 'codigo') return location.reload()
     if (fallo === 'datos') reiniciarDatos()
@@ -59,9 +60,11 @@ export function TarjetaFallo() {
         <button className={ligeraPrimero ? '' : 'primario'} onClick={reintentar} autoFocus={!ligeraPrimero}>
           {t.reintentar}
         </button>
-        <button className={ligeraPrimero ? 'primario' : ''} onClick={ligera} autoFocus={ligeraPrimero}>
-          {t.verLigera}
-        </button>
+        {!enLigera && (
+          <button className={ligeraPrimero ? 'primario' : ''} onClick={ligera} autoFocus={ligeraPrimero}>
+            {t.verLigera}
+          </button>
+        )}
       </div>
     </div>
   )

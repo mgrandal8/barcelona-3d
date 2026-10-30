@@ -114,7 +114,9 @@ export function Pista() {
   // se lee una vez al montar: así StrictMode (efecto doble) no la da por vista antes de tiempo
   const [yaVista] = useState(pistaVista)
   const [caducada, setCaducada] = useState(false)
-  const activa = !portada && listo && !yaVista && !new URLSearchParams(location.search).has('captura')
+  // en la versión ligera no hay maqueta que girar
+  const en3d = useEstado((s) => s.modo) === '3d'
+  const activa = en3d && !portada && listo && !yaVista && !new URLSearchParams(location.search).has('captura')
 
   useEffect(() => {
     if (!activa) return
