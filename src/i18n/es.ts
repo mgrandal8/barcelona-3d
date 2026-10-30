@@ -128,6 +128,28 @@ export const es = {
     instalar: 'Instalar la app',
     ios: 'En iPhone o iPad: Compartir → «Añadir a pantalla de inicio».',
   },
+  fallo: {
+    datos: 'No se ha podido descargar el mapa. Comprueba la conexión y vuelve a intentarlo.',
+    codigo: 'No se ha podido cargar la maqueta: quizá se ha cortado la conexión o hay una versión nueva.',
+    webgl: 'Este navegador no ha podido dibujar la maqueta 3D.',
+    contexto: 'La maqueta 3D se ha detenido: el navegador ha liberado la tarjeta gráfica.',
+    contextoOtraVez: 'La maqueta 3D se ha vuelto a detener. En este dispositivo irá mejor la versión ligera.',
+    reintentar: 'Reintentar',
+    verLigera: 'Ver versión ligera',
+    lento: 'Está tardando más de lo normal.',
+  },
+  ligera: {
+    aviso: 'Versión ligera: mapa, fichas y tours sin la maqueta 3D.',
+    sinWebgl: 'Tu navegador no puede mostrar la maqueta 3D: estás en la versión ligera.',
+    probar3d: 'Ver la maqueta 3D',
+    acercar: 'Acercar',
+    alejar: 'Alejar',
+    todo: 'Ver todo el mapa',
+    cargando: 'Cargando el mapa…',
+    error: 'No se ha podido cargar el mapa.',
+    mapa: 'Mapa de Barcelona con los lugares de la guía',
+    tuPosicion: 'Tu posición',
+  },
   atribucion: { mapa: 'Mapa', relieve: 'Relieve', ejemplo: 'Contenido de ejemplo' },
 }
 

@@ -1,7 +1,6 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CameraControls, CameraControlsImpl, PerformanceMonitor } from '@react-three/drei'
-import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { CiudadReal, Edificios } from './CiudadReal'
 import { Monumentos } from './Monumentos'
@@ -11,10 +10,13 @@ import { MiPosicion } from './MiPosicion'
 import { Metro } from './Metro'
 import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
-import { useEstado } from '../store'
+import { useEstado, usePerfil } from '../store'
+import { calidadFija } from '../calidad'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
+// el postproceso no retrasa la ciudad: se descarga cuando ya está dibujada
+const Postpro = lazy(() => import('./Postpro'))
 
 export const VISTA_GENERAL = { pos: [6, 62, 78] as const, objetivo: [2, 0, -4] as const }
 
@@ -103,6 +105,23 @@ function Camara() {
   return <CameraControls ref={controles} makeDefault enabled={!portada} minDistance={0.6} maxDistance={170} maxPolarAngle={1.32} smoothTime={0.7} />
 }
 
+/**
+ * La GPU se reinicia o el navegador libera el contexto: se quita la escena y se ofrece reintentar.
+ * Va en un efecto para quitar el listener al desmontar: R3F fuerza la pérdida del contexto al cerrar el Canvas.
+ */
+function VigiaContexto() {
+  const canvas = useThree((s) => s.gl.domElement)
+  useEffect(() => {
+    const perdido = (e: Event) => {
+      e.preventDefault()
+      useEstado.getState().perderContexto()
+    }
+    canvas.addEventListener('webglcontextlost', perdido)
+    return () => canvas.removeEventListener('webglcontextlost', perdido)
+  }, [canvas])
+  return null
+}
+
 /** Avisa de que la ciudad ya se ha dibujado (unos fotogramas, para que compilen los shaders). */
 function AvisoListo() {
   const n = useRef(0)
@@ -116,18 +135,19 @@ function AvisoListo() {
   return null
 }
 
+// en pruebas y capturas la calidad no cambia sola
+const CALIDAD_AUTO = !calidadFija && !params.has('captura')
+
 export function Experience() {
-  const [dpr, setDpr] = useState(1.5)
-  const [calidadAlta, setCalidadAlta] = useState(true)
-  // de noche el bloom recoge las ventanas, las farolas y los LED
-  const noche = useEstado((s) => s.momento) === 'noche'
+  const perfil = usePerfil()
+  const dpr = Math.min(perfil.dprMax, window.devicePixelRatio || 1)
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
   const metro = useEstado((s) => s.metro)
 
   return (
     <Canvas
-      shadows
+      shadows={perfil.sombras > 0}
       frameloop={listo ? 'always' : 'demand'}
       dpr={dpr}
       gl={{ antialias: false, alpha: true, preserveDrawingBuffer: params.has('captura') }}
@@ -137,13 +157,11 @@ export function Experience() {
         gl.toneMapping = THREE.NeutralToneMapping
       }}
     >
-      <PerformanceMonitor
-        onDecline={() => {
-          setDpr(1)
-          setCalidadAlta(false)
-        }}
-        onIncline={() => setDpr(Math.min(2, window.devicePixelRatio))}
-      />
+      {/* si va a tirones se baja un nivel (no se vuelve a subir: así no oscila); mientras carga no se mide */}
+      {CALIDAD_AUTO && listo && (
+        <PerformanceMonitor onDecline={() => useEstado.getState().bajarCalidad()} onFallback={() => useEstado.getState().bajarCalidad(true)} />
+      )}
+      <VigiaContexto />
       <Ambiente />
       <Suspense fallback={null}>
         <CiudadReal />
@@ -159,13 +177,10 @@ export function Experience() {
         </Suspense>
       </Suspense>
       <Camara />
-      {POSTPRO && (
-        <EffectComposer multisampling={0}>
-          {calidadAlta ? <N8AO aoRadius={0.6} intensity={2} distanceFalloff={0.5} halfRes /> : <></>}
-          <Bloom luminanceThreshold={noche ? 0.55 : 0.9} intensity={noche ? 0.9 : 0.4} mipmapBlur />
-          <Vignette darkness={0.35} offset={0.3} />
-          <SMAA />
-        </EffectComposer>
+      {POSTPRO && listo && perfil.postpro !== 'no' && (
+        <Suspense fallback={null}>
+          <Postpro />
+        </Suspense>
       )}
     </Canvas>
   )

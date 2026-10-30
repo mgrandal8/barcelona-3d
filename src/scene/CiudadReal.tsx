@@ -2,20 +2,20 @@ import { use, useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { cargarDatos } from './datos'
-import { crearMallaTerreno, crearZocalo, generarArboles } from './mallas'
+import { geometriaTerreno, geometriaZocalo, textura } from './mallas'
 import type { Malla } from './edificios'
-import { crearTexturaLuces, crearTexturaSuelo } from './texturaSuelo'
 import { vivo } from './hora'
+import { usePerfil } from '../store'
 
 const NIVEL_MAR = -0.03
 
 function Terreno() {
-  const d = use(cargarDatos())
+  const suelo = use(use(cargarDatos()).suelo)
   const gl = useThree((s) => s.gl)
-  const geo = useMemo(() => crearMallaTerreno(d), [d])
-  const zocalo = useMemo(() => crearZocalo(d, geo), [d, geo])
-  const tex = useMemo(() => crearTexturaSuelo(d, gl), [d, gl])
-  const luces = useMemo(() => crearTexturaLuces(d, gl), [d, gl])
+  const geo = useMemo(() => geometriaTerreno(suelo), [suelo])
+  const zocalo = useMemo(() => geometriaZocalo(suelo), [suelo])
+  const tex = useMemo(() => textura(suelo.texSuelo, gl, 16), [suelo, gl])
+  const luces = useMemo(() => textura(suelo.texLuces, gl, 4), [suelo, gl])
   const material = useRef<THREE.MeshStandardMaterial>(null)
   // farolas: las calles brillan en ámbar al caer la noche
   useFrame(() => {
@@ -87,9 +87,6 @@ function geometria(m: Malla, esfera: THREE.Sphere) {
   return g
 }
 
-/** Más allá de esta distancia (al borde del trozo), de los edificios bajos y pequeños solo se dibujan los tejados. */
-const LEJOS = 70
-
 /** Los edificios llegan del worker después que el terreno: este componente va en su propio Suspense. */
 export function Edificios() {
   const d = use(cargarDatos())
@@ -109,6 +106,8 @@ export function Edificios() {
     [trozos],
   )
   const detalle = useRef<(THREE.Mesh | null)[]>([])
+  // más allá de esta distancia (al borde del trozo), de los edificios bajos y pequeños solo se dibujan los tejados
+  const { lejos } = usePerfil()
   const material = useMemo(() => conVentanas(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true })), [])
   // LOD: de lejos, de las casas bajas solo se distinguen los tejados (las tejas rojas dan color a los barrios);
   // sus paredes y su sombra ya no aportan y suponen un tercio de los triángulos de la vista general
@@ -116,7 +115,7 @@ export function Edificios() {
     mallas.forEach((m, i) => {
       const malla = detalle.current[i]
       if (!malla || !m.detalle) return
-      const cerca = camera.position.distanceTo(m.centro) - m.radio < LEJOS
+      const cerca = camera.position.distanceTo(m.centro) - m.radio < lejos
       malla.castShadow = cerca
       m.detalle.setDrawRange(0, cerca ? Infinity : m.techos)
     })
@@ -147,8 +146,8 @@ const VERDES = ['#6f9e4f', '#5f8f45', '#7ba957', '#567f3f', '#86b15e', '#4f7a3a'
 const tmp = new THREE.Object3D()
 
 function Arboles() {
-  const d = use(cargarDatos())
-  const datos = useMemo(() => generarArboles(d), [d])
+  // x, y, z, escala y azar de cada árbol, del worker del suelo
+  const datos = use(use(cargarDatos()).suelo).arboles
   const ref = useRef<THREE.InstancedMesh>(null)
   // copa y tronco en una sola geometría: el tronco queda oscuro por el color de vértice
   const geo = useMemo(() => {
@@ -169,20 +168,21 @@ function Arboles() {
   }, [])
   useLayoutEffect(() => {
     const m = ref.current!
-    datos.forEach((a, i) => {
-      tmp.position.set(a.x, a.y, a.z)
-      tmp.rotation.set(0, a.c * 6.28, 0)
-      tmp.scale.setScalar(a.s)
+    for (let i = 0; i < datos.length / 5; i++) {
+      const [x, y, z, s, c] = datos.subarray(i * 5, i * 5 + 5)
+      tmp.position.set(x, y, z)
+      tmp.rotation.set(0, c * 6.28, 0)
+      tmp.scale.setScalar(s)
       tmp.updateMatrix()
       m.setMatrixAt(i, tmp.matrix)
-      m.setColorAt(i, VERDES[Math.floor(a.c * 61) % VERDES.length])
-    })
+      m.setColorAt(i, VERDES[Math.floor(c * 61) % VERDES.length])
+    }
     m.instanceMatrix.needsUpdate = true
     m.instanceColor!.needsUpdate = true
     m.computeBoundingSphere()
   }, [datos])
   return (
-    <instancedMesh ref={ref} args={[geo, undefined, datos.length]} castShadow receiveShadow>
+    <instancedMesh ref={ref} args={[geo, undefined, datos.length / 5]} castShadow receiveShadow>
       <meshStandardMaterial vertexColors roughness={0.9} flatShading />
     </instancedMesh>
   )

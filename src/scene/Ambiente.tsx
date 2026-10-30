@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { useEstado } from '../store'
+import { useEstado, usePerfil } from '../store'
 import { PRESETS, vivo, type Preset } from './hora'
 import { Barcos } from './Barcos'
 import { Gaviotas } from './Gaviotas'
@@ -141,6 +141,17 @@ function Luces() {
     e.t = e.pintado ? 0 : 1
   }, [momento, estado])
 
+  // sombras según la calidad: al cambiar el tamaño hay que tirar el mapa para que three cree otro
+  const { sombras } = usePerfil()
+  useEffect(() => {
+    const s = sol.current!
+    s.castShadow = sombras > 0
+    if (!sombras) return
+    s.shadow.map?.dispose()
+    s.shadow.map = null
+    s.shadow.mapSize.set(sombras, sombras)
+  }, [sombras])
+
   useEffect(() => {
     scene.background = cielo.tex
     scene.fog = new THREE.Fog(PRESETS[momento].niebla, 130, 420)
@@ -179,8 +190,6 @@ function Luces() {
       <hemisphereLight ref={hemi} />
       <directionalLight
         ref={sol}
-        castShadow
-        shadow-mapSize={[4096, 4096]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
         shadow-camera-left={-85}
