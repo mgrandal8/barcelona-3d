@@ -1,9 +1,8 @@
 import { use, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { cargarDatos, type DatosCiudad } from './datos'
+import { cargarDatos, esAgua, type DatosCiudad, type Suelo } from './datos'
 import { vivo } from './hora'
-import { esAgua } from './mallas'
 import { azar, mat } from './monumentos/comun'
 
 // Barcos que navegan en rutas elípticas por el mar real (se comprueba que toda la ruta sea agua).
@@ -26,7 +25,7 @@ function puntoRuta(r: Ruta, a: number): [number, number] {
 }
 
 /** Busca una elipse que quede entera sobre el agua, con margen por si la costa es irregular. */
-function buscarRuta(d: DatosCiudad, semilla: number, tipo: Tipo, tam: [number, number]): Ruta | null {
+function buscarRuta(d: DatosCiudad, s: Suelo, semilla: number, tipo: Tipo, tam: [number, number]): Ruta | null {
   const { xMin, xMax, zMax } = d.limites
   for (let k = 0; k < 300; k++) {
     const q = (i: number) => azar(semilla * 1009 + k * 31 + i)
@@ -45,7 +44,7 @@ function buscarRuta(d: DatosCiudad, semilla: number, tipo: Tipo, tam: [number, n
     let ok = true
     for (let i = 0; i < 40 && ok; i++) {
       const [x, z] = puntoRuta(r, (i / 40) * Math.PI * 2)
-      ok = x > xMin + 1 && x < xMax - 1 && z < zMax - 0.6 && [[0, 0], [margen, 0], [-margen, 0], [0, margen], [0, -margen]].every(([dx, dz]) => esAgua(d, x + dx, z + dz))
+      ok = x > xMin + 1 && x < xMax - 1 && z < zMax - 0.6 && [[0, 0], [margen, 0], [-margen, 0], [0, margen], [0, -margen]].every(([dx, dz]) => esAgua(d, s, x + dx, z + dz))
     }
     if (ok) return r
   }
@@ -153,12 +152,13 @@ const VELAS = ['#ffffff', '#f7f1e3', '#f0b84a', '#c8553a', '#ffffff', '#5e86b4']
 
 export function Barcos() {
   const d = use(cargarDatos())
+  const suelo = use(d.suelo)
   const g = useGeometrias()
   const rutas = useMemo(() => {
     const out: Ruta[] = []
     const añadir = (tipo: Tipo, n: number, tam: [number, number], vel: number) => {
       for (let i = 0; i < n; i++) {
-        const r = buscarRuta(d, out.length + 1, tipo, tam)
+        const r = buscarRuta(d, suelo, out.length + 1, tipo, tam)
         if (r) out.push({ ...r, vel: vel * (0.8 + azar(out.length * 7) * 0.4) })
       }
     }
@@ -166,7 +166,7 @@ export function Barcos() {
     añadir('yate', 4, [5, 1.6], 0.7)
     añadir('ferri', 1, [16, 3.5], 0.55)
     return out
-  }, [d])
+  }, [d, suelo])
   const grupo = useRef<THREE.Group>(null)
   const estela = useMemo(() => new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }), [])
 
