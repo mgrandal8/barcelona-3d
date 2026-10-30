@@ -1,7 +1,6 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CameraControls, CameraControlsImpl, PerformanceMonitor } from '@react-three/drei'
-import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { CiudadReal, Edificios } from './CiudadReal'
 import { Monumentos } from './Monumentos'
@@ -16,6 +15,8 @@ import { calidadFija } from '../calidad'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
+// el postproceso no retrasa la ciudad: se descarga cuando ya está dibujada
+const Postpro = lazy(() => import('./Postpro'))
 
 export const VISTA_GENERAL = { pos: [6, 62, 78] as const, objetivo: [2, 0, -4] as const }
 
@@ -123,8 +124,6 @@ const CALIDAD_AUTO = !calidadFija && !params.has('captura')
 export function Experience() {
   const perfil = usePerfil()
   const dpr = Math.min(perfil.dprMax, window.devicePixelRatio || 1)
-  // de noche el bloom recoge las ventanas, las farolas y los LED
-  const noche = useEstado((s) => s.momento) === 'noche'
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
   const metro = useEstado((s) => s.metro)
@@ -160,13 +159,10 @@ export function Experience() {
         </Suspense>
       </Suspense>
       <Camara />
-      {POSTPRO && perfil.postpro !== 'no' && (
-        <EffectComposer multisampling={0}>
-          {perfil.postpro === 'completo' ? <N8AO aoRadius={0.6} intensity={2} distanceFalloff={0.5} halfRes /> : <></>}
-          <Bloom luminanceThreshold={noche ? 0.55 : 0.9} intensity={noche ? 0.9 : 0.4} mipmapBlur />
-          <Vignette darkness={0.35} offset={0.3} />
-          <SMAA />
-        </EffectComposer>
+      {POSTPRO && listo && perfil.postpro !== 'no' && (
+        <Suspense fallback={null}>
+          <Postpro />
+        </Suspense>
       )}
     </Canvas>
   )
