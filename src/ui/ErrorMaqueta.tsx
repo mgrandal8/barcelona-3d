@@ -30,18 +30,11 @@ export class ErrorMaqueta extends Component<{ children: ReactNode }, { error: bo
   }
 }
 
-let perdidas = 0
-
-/** Contexto WebGL perdido (GPU reiniciada, demasiadas pestañas…): se quita la escena y se ofrece reintentar. */
-export function contextoPerdido() {
-  perdidas++
-  useEstado.getState().setFallo('contexto')
-}
-
 /** Mensaje del fallo con «Reintentar» y «Ver versión ligera». */
 export function TarjetaFallo() {
   const fallo = useEstado((s) => s.fallo)
   const enLigera = useEstado((s) => s.modo) === 'ligero'
+  const perdidas = useEstado((s) => s.perdidas)
   const t = useT().fallo
   if (!fallo) return null
   const otraVez = fallo === 'contexto' && perdidas > 1

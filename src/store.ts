@@ -42,6 +42,8 @@ type Estado = {
   fallo: Fallo | null
   /** Cambia en cada «Reintentar»: es la key de la escena. */
   reintentos: number
+  /** Veces que se ha perdido el contexto WebGL en esta visita. */
+  perdidas: number
   setSeleccionado: (id: string | null) => void
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
@@ -59,6 +61,8 @@ type Estado = {
   bajarCalidad: (aBaja?: boolean) => void
   setFallo: (f: Fallo | null) => void
   reintentar: () => void
+  /** El navegador ha liberado la GPU: se quita la escena y se ofrece reintentar. */
+  perderContexto: () => void
 }
 
 const params = new URLSearchParams(location.search)
@@ -93,6 +97,7 @@ export const useEstado = create<Estado>((set, get) => ({
   calidad: nivelInicial(),
   fallo: null,
   reintentos: 0,
+  perdidas: 0,
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
@@ -139,6 +144,7 @@ export const useEstado = create<Estado>((set, get) => ({
   },
   setFallo: (f) => set({ fallo: f }),
   reintentar: () => set({ fallo: null, reintentos: get().reintentos + 1 }),
+  perderContexto: () => set({ fallo: 'contexto', perdidas: get().perdidas + 1 }),
   setUbicacion: (u, estado) => set({ ubicacion: u, estadoUbicacion: estado }),
   volarA: (x, z) => {
     // se cierra la ficha para ver el sitio; la cámara procesa el vuelo después del cambio de lugar

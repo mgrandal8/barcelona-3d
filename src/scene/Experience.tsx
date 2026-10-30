@@ -12,7 +12,6 @@ import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado, usePerfil } from '../store'
 import { calidadFija } from '../calidad'
-import { contextoPerdido } from '../ui/ErrorMaqueta'
 
 const params = new URLSearchParams(location.search)
 const POSTPRO = params.get('postpro') !== '0'
@@ -115,7 +114,7 @@ function VigiaContexto() {
   useEffect(() => {
     const perdido = (e: Event) => {
       e.preventDefault()
-      contextoPerdido()
+      useEstado.getState().perderContexto()
     }
     canvas.addEventListener('webglcontextlost', perdido)
     return () => canvas.removeEventListener('webglcontextlost', perdido)
