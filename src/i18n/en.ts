@@ -1,0 +1,251 @@
+import type { Textos } from './es'
+import type { Traduccion } from './idioma'
+
+// English. Places and tours keep their Spanish data (src/data) and only override the text fields here.
+
+const textos: Textos = {
+  tituloPagina: 'Barcelona 3D · Guide',
+  cerrar: 'Close',
+  carga: {
+    preparando: 'Preparing the model…',
+    descargando: 'Downloading the OpenStreetMap data…',
+    levantando: 'Raising the buildings…',
+    listo: 'Ready',
+  },
+  portada: {
+    antetitulo: 'Sample guide · 3D model',
+    titulo: 'Discover',
+    texto:
+      'Fly over a model of the city built from real data: its streets, its hills and more than 140,000 buildings. Pick a place, follow a tour or change the time of day to see it at night.',
+    lugares: 'places',
+    tours: 'tours',
+    momentos: 'times of day',
+    explorar: 'Explore the map',
+    verTours: 'See tours',
+    pie: 'Fictional content for a demo: no real bookings or payments.',
+  },
+  pista: {
+    tactil: 'Swipe to rotate · pinch to zoom · tap a pin',
+    raton: 'Drag to rotate · scroll to zoom · click a pin',
+  },
+  menu: {
+    etiqueta: 'Menu',
+    tours: 'Tours',
+    guia: 'Your guide',
+    ayuda: 'Help',
+    idioma: 'Language',
+  },
+  hora: {
+    etiqueta: 'Time of day',
+    dia: 'Day',
+    atardecer: 'Sunset',
+    noche: 'Night',
+    tourDia: '☀️ By day',
+    tourAtardecer: '🌅 At sunset',
+    tourNoche: '🌙 At night',
+  },
+  lista: {
+    etiqueta: 'Places',
+    ocultar: 'Hide',
+    lugares: 'Places',
+  },
+  panel: {
+    parada: (i: number, n: number) => `stop ${i} of ${n}`,
+    horario: 'Opening hours',
+    precio: 'Price',
+    duracion: 'Time needed',
+    consejo: 'Guide’s tip',
+    anterior: '← Previous',
+    siguiente: 'Next →',
+    siguienteParada: 'Next stop →',
+    terminarTour: 'Finish tour ✓',
+    volverMapa: 'Back to the map',
+    aviso: 'Sample data, for guidance only.',
+  },
+  tours: {
+    titulo: 'Sample tours',
+    intro: 'Three guided walking routes. Start one and the model takes you from stop to stop.',
+    empezar: 'Start tour',
+  },
+  guia: {
+    titulo: 'About your guide',
+    sub: 'Official Catalan tourist guide · 12 years showing people the city',
+    bio: 'I was born in Gràcia and studied Art History at the University of Barcelona. I love showing the city on foot, without rushing: the detail hidden in a modernist façade, the square where locals have their vermouth or the best spot to watch the sunset.',
+    idiomasEt: 'Languages',
+    idiomas: 'Spanish, Catalan, English and Italian',
+    gruposEt: 'Groups',
+    grupos: '2 to 12 people',
+    valoracionEt: 'Rating',
+    valoracion: '★★★★★ 4.9 (sample)',
+    cita: '“Barcelona is best understood from above… and then enjoyed by getting lost in its streets.”',
+    aviso: 'Fictional character created for this demo.',
+  },
+  ayuda: {
+    titulo: 'Getting around',
+    tactil: [
+      ['One finger', 'Rotate the model'],
+      ['Pinch', 'Zoom in and out'],
+      ['Two fingers', 'Pan the map'],
+      ['Tap a pin', 'Fly to the place and open its card'],
+    ],
+    raton: [
+      ['Drag', 'Rotate the model'],
+      ['Scroll', 'Zoom in and out'],
+      ['Right-click + drag', 'Pan the map'],
+      ['Click a pin', 'Fly to the place and open its card'],
+      ['Esc', 'Close the card and go back to the map'],
+      ['?', 'Open this help'],
+    ],
+    intro:
+      'The list on the left takes you to each place, and the buttons at the bottom change the time of day: at night the windows, the street lights and the Magic Fountain light up.',
+  },
+  ubicacion: {
+    boton: 'Where am I',
+    buscando: 'Finding your position…',
+    ok: (m: number) => `You are here · accuracy ±${m} m`,
+    simulada: 'Simulated position',
+    denegada: 'Location permission was denied. You can allow it for this site in your browser settings.',
+    error: 'Your position could not be found. Try again outdoors.',
+    noDisponible: 'This browser does not provide location.',
+    fuera: 'You are outside the model: it only covers central Barcelona.',
+    simular: 'Pretend I am in Plaça de Catalunya',
+    deTi: (d: string, min: number) => `${d} from you · ~${min} min walk`,
+    cerca: 'Near me',
+  },
+  metro: {
+    capa: 'Metro',
+    mostrar: 'Show the metro',
+    ocultar: 'Hide the metro',
+    cercano: 'Nearest metro',
+    ficha: 'Metro',
+  },
+  red: {
+    sinConexion: 'Offline: you are using the copy saved on this device.',
+    sinConexionSinCopia: 'Offline: some parts may not load.',
+    nueva: 'A new version of the guide is available.',
+    recargar: 'Reload',
+    titulo: 'Take it with you',
+    lista: 'Available offline ✓ The guide is saved on this device: it works without data, and so does GPS.',
+    guardando: 'Saving the guide for offline use…',
+    noDisponible: 'To use it offline, open it from the published website (https).',
+    instalar: 'Install the app',
+    ios: 'On iPhone or iPad: Share → “Add to Home Screen”.',
+  },
+  atribucion: { mapa: 'Map', relieve: 'Terrain', ejemplo: 'Sample content' },
+}
+
+export const en: Traduccion = {
+  textos,
+  lugares: {
+    'sagrada-familia': {
+      etiqueta: 'Gaudí',
+      descripcion:
+        'Antoni Gaudí’s unfinished masterpiece, under construction since 1882. Its Nativity and Passion façades tell the life of Jesus in stone, and the interior is a forest of columns bathed in light from the stained-glass windows.',
+      horario: '9:00 – 18:00 (until 20:00 in summer)',
+      precio: 'from €26',
+      duracion: '1.5 – 2 h',
+      consejo: 'Book your ticket in advance and go in the early afternoon: the western light shines through the warm-coloured windows.',
+    },
+    'casa-batllo': {
+      etiqueta: 'Modernisme',
+      descripcion:
+        'Gaudí remodelled this building in 1904 and turned it into an underwater dream: balconies like masks, columns like bones and a roof that recalls the back of a dragon.',
+      horario: '9:00 – 20:00',
+      precio: 'from €35',
+      duracion: '1 – 1.5 h',
+      consejo: 'Right next door is Casa Amatller, by Puig i Cadafalch. From the opposite pavement you can see both façades together.',
+    },
+    'park-guell': {
+      etiqueta: 'Gaudí',
+      descripcion:
+        'A park designed as a garden city, with the famous wavy mosaic bench, the dragon on the stairway and fairy-tale gatehouses. From the square you can see the whole city down to the sea.',
+      horario: '9:30 – 19:30',
+      precio: '€18 (monumental area)',
+      duracion: '1.5 h',
+      consejo: 'Take the L3 to Lesseps, walk up Carrer de Larrard and arrive at sunset to see the city turn golden.',
+    },
+    'torre-glories': {
+      etiqueta: 'Contemporary architecture',
+      descripcion:
+        'Jean Nouvel’s skyscraper, inspired by Montserrat and by geysers. At night thousands of LED lights paint its skin in colour. The dome houses a viewpoint with an immersive installation.',
+      horario: '10:00 – 21:00 (viewpoint)',
+      precio: 'from €15',
+      duracion: '1 h',
+      consejo: 'Combine it with the Design Museum and Els Encants, the flea market right next door.',
+    },
+    'camp-nou': {
+      etiqueta: 'Sport',
+      descripcion:
+        'FC Barcelona’s stadium, one of the largest in the world and now being rebuilt. The museum covers more than a century of Barça history.',
+      horario: '10:00 – 18:00',
+      precio: 'from €28 (museum and tour)',
+      duracion: '1.5 h',
+      consejo: 'Check the match calendar before you go: on match days the tour runs on different hours.',
+    },
+    catedral: {
+      nombre: 'Cathedral & Gothic Quarter',
+      etiqueta: 'Gothic',
+      descripcion:
+        'The Gothic cathedral of the Holy Cross and Saint Eulalia presides over a maze of medieval streets and hidden squares built on the remains of Roman Barcino.',
+      horario: '9:30 – 18:30',
+      precio: '€9 (with rooftops)',
+      duracion: '1 h + stroll',
+      consejo: 'Look for the cloister with its 13 white geese and go up to the rooftop terraces.',
+    },
+    montjuic: {
+      nombre: 'Montjuïc & the MNAC',
+      etiqueta: 'Museums & views',
+      descripcion:
+        'The hill of the 1929 International Exhibition: the Palau Nacional with the National Art Museum of Catalonia, the Magic Fountain at its feet and the castle on top, overlooking the port.',
+      horario: '10:00 – 18:00 (MNAC)',
+      precio: '€12 (MNAC)',
+      duracion: 'Half a day',
+      consejo: 'Take the cable car up from the port and walk down through the gardens to the Magic Fountain.',
+    },
+    barceloneta: {
+      nombre: 'Barceloneta & the beach',
+      etiqueta: 'Seaside',
+      descripcion:
+        'The old fishermen’s quarter, with its narrow streets and laundry hanging from the balconies, leads to the city’s most famous urban beach, with the W Hotel in the background.',
+      horario: 'Always open',
+      precio: 'Free',
+      duracion: 'As long as you like',
+      consejo: 'For an authentic paella, leave the seafront promenade and head into the neighbourhood.',
+    },
+  },
+  tours: {
+    gaudi: {
+      nombre: 'Essential Gaudí',
+      resumen: 'The three must-see works of the modernist genius, from the basilica to the park by way of Passeig de Gràcia.',
+      duracion: '5 h',
+      precio: '€65 per person',
+      notas: [
+        'We start at 9:00 in front of the Nativity façade, the only one Gaudí saw finished.',
+        'We walk through the Eixample to the Block of Discord. Coffee break.',
+        'We take the metro up to Lesseps and finish in the square, with the whole city at our feet.',
+      ],
+    },
+    'ciutat-vella': {
+      nombre: 'From the Gothic Quarter to the sea',
+      resumen: 'Two thousand years of history on a relaxed walk: medieval streets, the port and sunset on Montjuïc.',
+      duracion: '4 h',
+      precio: '€45 per person',
+      notas: [
+        'We meet in Plaça Nova, next to the Roman towers of Barcino.',
+        'We cross El Born to the fishermen’s quarter. A “bomba” tapa in an old-school bodega.',
+        'Cable car up the hill and sunset on the steps of the Palau Nacional.',
+      ],
+    },
+    noche: {
+      nombre: 'Barcelona by night',
+      resumen: 'The city when the lights come on: the LED skin of Torre Glòries, the Magic Fountain and the sea breeze at the port.',
+      duracion: '3 h',
+      precio: '€40 per person',
+      notas: [
+        'At 21:00 the tower lights up; we watch it from Plaça de les Glòries.',
+        'Water, light and music show at the Magic Fountain (Thursday to Sunday).',
+        'We end with a seaside stroll to the W Hotel.',
+      ],
+    },
+  },
+}

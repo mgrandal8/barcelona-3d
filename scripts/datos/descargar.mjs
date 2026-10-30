@@ -67,6 +67,16 @@ await overpass(
   `${CRUDOS}mapa.json`,
 )
 
+// Metro (TMB) y FGC urbano: líneas con su trazado y estaciones
+await overpass(
+  `[out:json][timeout:300];
+  relation["route"~"^(subway|light_rail)$"](poly:"${poly}");
+  out geom qt;
+  node["railway"="station"]["station"~"^(subway|light_rail)$"](poly:"${poly}");
+  out qt;`,
+  `${CRUDOS}transporte.json`,
+)
+
 // Teselas de elevación (zoom 13 ≈ 14 m/px a esta latitud)
 const Z = 13
 const tx = (lon) => Math.floor(((lon + 180) / 360) * 2 ** Z)

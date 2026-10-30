@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
 import { MONUMENTOS } from '../data/monumentos'
 import { TOURS } from '../data/tours'
+import { useT } from '../i18n'
 import { useEstado } from '../store'
+import { SelectorIdioma } from './SelectorIdioma'
 
 /** Barra de progreso con el paso de carga en curso. */
 function Progreso() {
   const { progreso, texto } = useEstado((s) => s.carga)
+  const t = useT()
   return (
     <div className="progreso" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progreso * 100)}>
       <div className="progreso-barra">
         <span style={{ width: `${Math.max(4, progreso * 100)}%` }} />
       </div>
       <small>
-        {texto} {Math.round(progreso * 100)} %
+        {t.carga[texto]} {Math.round(progreso * 100)} %
       </small>
     </div>
   )
@@ -26,6 +29,7 @@ export function Portada() {
   const portada = useEstado((s) => s.portada)
   const listo = useEstado((s) => s.carga.listo)
   const { cerrarPortada, setDialogo } = useEstado.getState()
+  const t = useT().portada
 
   if (!portada) {
     return (
@@ -43,29 +47,29 @@ export function Portada() {
   return (
     <section className={`portada ${listo ? 'lista-ya' : ''}`} aria-labelledby="portada-titulo">
       <div className="portada-tarjeta">
-        <p className="portada-antetitulo">Guía de ejemplo · maqueta 3D</p>
+        <div className="portada-arriba">
+          <p className="portada-antetitulo">{t.antetitulo}</p>
+          <SelectorIdioma />
+        </div>
         <h1 id="portada-titulo">
-          Descubre <span>Barcelona</span>
+          {t.titulo} <span>Barcelona</span>
         </h1>
-        <p className="portada-texto">
-          Vuela sobre una maqueta de la ciudad hecha con datos reales: sus calles, su relieve y más de 140.000 edificios. Elige un
-          lugar, sigue un tour o cambia la hora para verla de noche.
-        </p>
+        <p className="portada-texto">{t.texto}</p>
         <ul className="portada-cifras">
           <li>
-            <strong>{MONUMENTOS.length}</strong> lugares
+            <strong>{MONUMENTOS.length}</strong> {t.lugares}
           </li>
           <li>
-            <strong>{TOURS.length}</strong> tours
+            <strong>{TOURS.length}</strong> {t.tours}
           </li>
           <li>
-            <strong>3</strong> momentos del día
+            <strong>3</strong> {t.momentos}
           </li>
         </ul>
         {listo ? (
           <div className="portada-botones">
             <button className="primario" onClick={cerrarPortada} autoFocus>
-              Explorar el mapa
+              {t.explorar}
             </button>
             <button
               onClick={() => {
@@ -73,13 +77,13 @@ export function Portada() {
                 setDialogo('tours')
               }}
             >
-              Ver tours
+              {t.verTours}
             </button>
           </div>
         ) : (
           <Progreso />
         )}
-        <p className="portada-pie">Contenido ficticio para una demo: sin reservas ni pagos reales.</p>
+        <p className="portada-pie">{t.pie}</p>
       </div>
     </section>
   )
@@ -99,6 +103,7 @@ function pistaVista() {
 export function Pista() {
   const portada = useEstado((s) => s.portada)
   const listo = useEstado((s) => s.carga.listo)
+  const t = useT().pista
   // se lee una vez al montar: así StrictMode (efecto doble) no la da por vista antes de tiempo
   const [yaVista] = useState(pistaVista)
   const [caducada, setCaducada] = useState(false)
@@ -119,7 +124,7 @@ export function Pista() {
   const tactil = matchMedia('(pointer: coarse)').matches
   return (
     <p className={`pista ${visible ? 'visible' : ''}`} role="status">
-      {tactil ? 'Desliza para girar · pellizca para acercar · toca un pin' : 'Arrastra para girar · rueda para acercar · clic en un pin'}
+      {tactil ? t.tactil : t.raton}
     </p>
   )
 }

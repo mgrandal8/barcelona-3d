@@ -7,6 +7,8 @@ import { CiudadReal, Edificios } from './CiudadReal'
 import { Monumentos } from './Monumentos'
 import { Ambiente } from './Ambiente'
 import { Ruta } from './Ruta'
+import { MiPosicion } from './MiPosicion'
+import { Metro } from './Metro'
 import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
@@ -35,6 +37,7 @@ function Camara() {
   const controles = useRef<CameraControlsImpl>(null)
   const seleccionado = useEstado((s) => s.seleccionado)
   const portada = useEstado((s) => s.portada)
+  const vuelo = useEstado((s) => s.vuelo)
   const inicio = useRef(true)
   const gl = useThree((s) => s.gl)
 
@@ -81,6 +84,22 @@ function Camara() {
     }
   }, [seleccionado])
 
+  // «dónde estoy»: vista cercana desde el sur, algo inclinada (va después del efecto de la ficha, que se cierra a la vez)
+  useEffect(() => {
+    const c = controles.current
+    if (!c || !vuelo) return
+    let vigente = true
+    cargarDatos().then((d) => {
+      if (!vigente) return
+      const y = d.alturaY(vuelo.x, vuelo.z)
+      c.setFocalOffset(0, 0, 0, true)
+      c.setLookAt(vuelo.x + 1.5, y + 7, vuelo.z + 7, vuelo.x, y, vuelo.z, !quieto)
+    })
+    return () => {
+      vigente = false
+    }
+  }, [vuelo])
+
   return <CameraControls ref={controles} makeDefault enabled={!portada} minDistance={0.6} maxDistance={170} maxPolarAngle={1.32} smoothTime={0.7} />
 }
 
@@ -92,7 +111,7 @@ function AvisoListo() {
   useEffect(() => invalidate(), [invalidate])
   useFrame(() => {
     if (n.current < 3) invalidate()
-    if (++n.current === 3) useEstado.getState().setCarga({ progreso: 1, texto: 'Listo', listo: true })
+    if (++n.current === 3) useEstado.getState().setCarga({ progreso: 1, texto: 'listo', listo: true })
   })
   return null
 }
@@ -104,6 +123,7 @@ export function Experience() {
   const noche = useEstado((s) => s.momento) === 'noche'
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
+  const metro = useEstado((s) => s.metro)
 
   return (
     <Canvas
@@ -129,6 +149,9 @@ export function Experience() {
         <CiudadReal />
         <Monumentos />
         <Ruta />
+        <MiPosicion />
+        {/* el metro no espera a los edificios, pero tampoco los retrasa: va en su propio Suspense */}
+        <Suspense fallback={null}>{metro && <Metro />}</Suspense>
         {/* los edificios llegan del worker: el resto de la ciudad no los espera */}
         <Suspense fallback={null}>
           <Edificios />

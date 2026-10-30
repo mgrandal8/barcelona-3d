@@ -57,7 +57,7 @@ async function descargar(url: string): Promise<ArrayBuffer> {
 }
 
 /** gzip (1f 8b) → descomprime; si el servidor ya lo ha descomprimido, se usa tal cual. */
-async function descomprimir(buf: ArrayBuffer) {
+export async function descomprimir(buf: ArrayBuffer) {
   const b = new Uint8Array(buf, 0, 2)
   if (b[0] !== 0x1f || b[1] !== 0x8b) return buf
   return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()
@@ -72,7 +72,7 @@ function levantarEdificios(edificios: ArrayBuffer, alturas: ArrayBuffer, meta: M
     w.onmessage = ({ data }: MessageEvent<Respuesta>) => {
       if (data.tipo === 'progreso') {
         const { progreso } = useEstado.getState().carga
-        useEstado.getState().setCarga({ progreso: Math.max(progreso, 0.7 + data.f * 0.25), texto: 'Levantando los edificios…' })
+        useEstado.getState().setCarga({ progreso: Math.max(progreso, 0.7 + data.f * 0.25), texto: 'levantando' })
         return
       }
       w.terminate()
@@ -88,13 +88,13 @@ function levantarEdificios(edificios: ArrayBuffer, alturas: ArrayBuffer, meta: M
 export function cargarDatos() {
   promesa ??= (async () => {
     const base = import.meta.env.BASE_URL + 'datos/'
-    useEstado.getState().setCarga({ texto: 'Descargando el mapa de OpenStreetMap…' })
+    useEstado.getState().setCarga({ texto: 'descargando' })
     const pMeta = leerJson<Meta>(base + 'meta.json')
     const pAlturas = descargar(base + 'terreno.bin')
     // el worker arranca en cuanto tiene lo suyo, sin esperar al mapa
     const trozos = Promise.all([descargar(base + 'edificios.bin.gz'), pAlturas, pMeta]).then(([e, a, m]) => levantarEdificios(e, a.slice(0), m))
     const [meta, alturasBuf, mapa] = await Promise.all([pMeta, pAlturas, leerJson<{ areas: Area[]; lineas: Linea[] }>(base + 'mapa.json.gz')])
-    useEstado.getState().setCarga({ texto: 'Levantando los edificios…' })
+    useEstado.getState().setCarga({ texto: 'levantando' })
     const alturas = new Int16Array(alturasBuf)
     const { rect } = meta
     const alturaM = crearAlturaM(meta, alturas)

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Monumento as Datos } from '../data/monumentos'
+import { useLugar } from '../i18n'
 import { useEstado } from '../store'
 import { cargarDatos } from './datos'
 import { OrigenCtx } from './monumentos/comun'
@@ -64,6 +65,7 @@ export function Monumento({ m, children }: { m: Datos; children: ReactNode }) {
   const hover = useEstado((s) => s.hover === m.id)
   const seleccionado = useEstado((s) => s.seleccionado === m.id)
   const { setHover, setSeleccionado } = useEstado.getState()
+  const nombre = useLugar(m.id)?.nombre
 
   return (
     <group position={[x, origen.y, z]}>
@@ -89,7 +91,7 @@ export function Monumento({ m, children }: { m: Datos; children: ReactNode }) {
       {hover && !seleccionado && (
         <Html position={[0, m.alturaMarcador, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
           <div className="etiqueta">
-            <strong>{m.nombre}</strong>
+            <strong>{nombre}</strong>
             <span>{m.barrio}</span>
           </div>
         </Html>

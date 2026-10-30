@@ -112,9 +112,70 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hora button:hover { background: rgba(200, 85, 58, 0.08); }
 .hora button.activo { background: var(--acento); color: #fff; }
 
+/* «dónde estoy»: botón redondo encima del selector de hora, con tarjeta de estado */
+.ubicacion { position: absolute; left: 16px; bottom: 68px; display: flex; align-items: flex-end; gap: 8px; }
+.ubicacion-boton {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); backdrop-filter: blur(8px); color: var(--texto);
+}
+.ubicacion-boton:hover { background: #fff; }
+.ubicacion-boton.activo { color: #2563eb; }
+.ubicacion-boton.buscando svg { animation: girar 1.4s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.ubicacion-tarjeta {
+  position: relative; width: min(290px, calc(100vw - 92px)); padding: 10px 34px 10px 12px; font-size: 13.5px; line-height: 1.4;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.ubicacion-tarjeta p { margin: 0; }
+.ubicacion-tarjeta button.primario { margin-top: 8px; border: 0; border-radius: 999px; padding: 7px 12px; font-size: 12.5px; }
+.ubicacion-cerrar { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 24px; height: 24px; opacity: 0.6; }
+.panel-distancia { margin: -4px 0 8px; font-size: 13.5px; font-weight: 600; color: #2563eb; }
+.lista-cerca { display: flex; align-items: center; gap: 6px; margin: 10px 6px 0; font-size: 12.5px; cursor: pointer; }
+
+/* metro: botón de la capa (encima de «dónde estoy»), insignias de línea y etiquetas de estación */
+.metro-boton {
+  position: absolute; left: 16px; bottom: 120px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.metro-boton span {
+  width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center;
+  font-weight: 800; font-size: 15px; background: transparent; border: 2px solid currentColor; color: var(--texto);
+}
+.metro-boton.activo span { background: #c8102e; border-color: #c8102e; color: #fff; }
+.lineas { display: inline-flex; gap: 3px; vertical-align: 1px; }
+.linea { display: inline-block; min-width: 26px; padding: 1px 5px; border-radius: 5px; font-size: 11px; font-weight: 800; text-align: center; line-height: 1.45; }
+.estacion-cercana { font-size: 13.5px; }
+.estacion-nombre { font-weight: 600; }
+.panel-metro { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; }
+.panel-metro > span:first-child, .ubicacion-metro small {
+  font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.ubicacion-metro { margin-top: 8px !important; display: grid; gap: 3px; }
+.estacion-etiqueta {
+  display: flex; align-items: center; gap: 5px; white-space: nowrap; transform: translateY(-20px);
+  padding: 3px 8px 3px 4px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: rgba(255, 250, 242, 0.88); border: 1px solid var(--borde); box-shadow: 0 3px 10px rgba(60, 35, 15, 0.15);
+}
+.estacion-etiqueta .linea { min-width: 22px; font-size: 10px; }
+.estacion-etiqueta.activa { background: #fff; font-size: 13.5px; }
+
+/* sin conexión / versión nueva, y la sección «Llévatela» de la ayuda */
+.aviso-red {
+  position: absolute; z-index: 26; top: 74px; left: 50%; transform: translateX(-50%); margin: 0;
+  display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 8px 10px 8px 16px; font-size: 13.5px;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 999px; box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.aviso-red button { border: 0; border-radius: 999px; padding: 5px 12px; font-size: 12.5px; }
+.aviso-red.sin-red { padding-right: 16px; background: #2b2420; color: #fbefdc; }
+.sin-conexion { margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); }
+.sin-conexion h3 { margin: 0 0 4px; font-size: 14px; }
+.sin-conexion p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+.sin-conexion button { margin-top: 10px; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; }
+.sin-conexion-ios { margin-top: 6px !important; opacity: 0.75; }
+
 /* con la portada delante se esconde la interfaz del mapa */
-.lista, .hora, .menu, .panel { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel { opacity: 0; pointer-events: none; }
+.lista, .hora, .menu, .panel, .ubicacion, .metro-boton { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel, .con-portada .ubicacion, .con-portada .metro-boton { opacity: 0; pointer-events: none; }
 
 button:disabled { opacity: 0.4; cursor: default; }
 button.primario { background: var(--acento); color: #fff; border-color: transparent; }
@@ -137,6 +198,16 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
   width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
   background: var(--texto); color: #fff; font-size: 12px; font-weight: 700;
 }
+
+/* selector de idioma: en el menú y en la portada */
+.idioma { display: flex; gap: 1px; align-items: center; }
+.menu .idioma { margin-left: 4px; padding-left: 6px; border-left: 1px solid var(--borde); }
+.idioma button, .menu .idioma button {
+  border: 0; background: transparent; border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; opacity: 0.6;
+}
+.idioma button.activo, .menu .idioma button.activo { background: var(--texto); color: #fff; opacity: 1; }
+.portada-arriba { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.portada-arriba .idioma { background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); border-radius: 999px; padding: 2px; }
 
 /* portada "Descubre Barcelona" (y pantalla de carga) */
 .portada, .carga {
@@ -275,9 +346,14 @@ kbd {
   }
   .lista:not(.abierta) { width: auto; right: auto; }
   .hora { left: 12px; bottom: 12px; }
+  .ubicacion { left: 12px; bottom: 60px; }
+  .metro-boton { left: 12px; bottom: 110px; }
+  .aviso-red { top: auto; bottom: 64px; left: 50%; max-width: calc(100% - 140px); border-radius: 16px; font-size: 12.5px; }
   .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
   .menu button { padding: 6px 9px; }
   .menu button small { display: none; }
+  .menu .idioma { margin-left: 2px; padding-left: 3px; }
+  .menu .idioma button { padding: 5px 6px; font-size: 11px; }
   .portada { align-items: flex-end; padding: 20px; }
   .portada.lista-ya { background: linear-gradient(0deg, rgba(251, 239, 220, 0.95) 0%, rgba(251, 239, 220, 0.75) 50%, rgba(251, 239, 220, 0) 80%); }
   .portada-texto { font-size: 15px; }
