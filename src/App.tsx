@@ -9,6 +9,7 @@ import { Pista, Portada } from './ui/Portada'
 import { SelectorHora } from './ui/SelectorHora'
 import { BotonUbicacion } from './ui/BotonUbicacion'
 import { BotonMetro } from './ui/BotonMetro'
+import { AvisoRed } from './ui/AvisoRed'
 
 // three y la escena van en otro chunk: la portada sale antes, mientras se descargan
 const Experience = lazy(() => import('./scene/Experience').then((m) => ({ default: m.Experience })))
@@ -37,6 +38,7 @@ export default function App() {
         {t.atribucion.mapa}: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · {t.atribucion.relieve}: Mapzen/AWS
         Terrain Tiles · {t.atribucion.ejemplo}
       </p>
+      <AvisoRed />
       <Dialogos />
       <Portada />
       <Pista />

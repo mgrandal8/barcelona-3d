@@ -11,6 +11,8 @@ export type Dialogo = 'tours' | 'guia' | 'ayuda'
 
 /** Posición del usuario (GPS o simulada) en grados y en la escena. */
 export type Ubicacion = { lat: number; lon: number; precision: number; x: number; z: number; dentro: boolean; simulada: boolean }
+/** Uso sin conexión: si hay red, si la copia del service worker está lista, si hay versión nueva y si se puede instalar. */
+export type Red = { enLinea: boolean; copia: 'no-disponible' | 'guardando' | 'lista'; nueva: boolean; instalable: boolean }
 export type EstadoUbicacion = 'apagada' | 'buscando' | 'ok' | 'denegada' | 'error' | 'no-disponible'
 
 type Estado = {
@@ -30,6 +32,7 @@ type Estado = {
   vuelo: { x: number; z: number; n: number } | null
   /** Capa de metro y FGC encima de la maqueta. */
   metro: boolean
+  red: Red
   setSeleccionado: (id: string | null) => void
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
@@ -41,6 +44,7 @@ type Estado = {
   setUbicacion: (u: Ubicacion | null, estado: EstadoUbicacion) => void
   volarA: (x: number, z: number) => void
   setMetro: (v: boolean) => void
+  setRed: (r: Partial<Red>) => void
 }
 
 const params = new URLSearchParams(location.search)
@@ -70,6 +74,7 @@ export const useEstado = create<Estado>((set, get) => ({
   estadoUbicacion: 'apagada',
   vuelo: null,
   metro: params.get('metro') === '1',
+  red: { enLinea: navigator.onLine, copia: 'no-disponible', nueva: false, instalable: false },
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
@@ -103,6 +108,7 @@ export const useEstado = create<Estado>((set, get) => ({
     set({ metro: v })
     ponerParam('metro', v ? '1' : null)
   },
+  setRed: (r) => set({ red: { ...get().red, ...r } }),
   setUbicacion: (u, estado) => set({ ubicacion: u, estadoUbicacion: estado }),
   volarA: (x, z) => {
     // se cierra la ficha para ver el sitio; la cámara procesa el vuelo después del cambio de lugar

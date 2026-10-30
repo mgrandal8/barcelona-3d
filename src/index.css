@@ -159,6 +159,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .estacion-etiqueta .linea { min-width: 22px; font-size: 10px; }
 .estacion-etiqueta.activa { background: #fff; font-size: 13.5px; }
 
+/* sin conexión / versión nueva, y la sección «Llévatela» de la ayuda */
+.aviso-red {
+  position: absolute; z-index: 26; top: 74px; left: 50%; transform: translateX(-50%); margin: 0;
+  display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 8px 10px 8px 16px; font-size: 13.5px;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 999px; box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.aviso-red button { border: 0; border-radius: 999px; padding: 5px 12px; font-size: 12.5px; }
+.aviso-red.sin-red { padding-right: 16px; background: #2b2420; color: #fbefdc; }
+.sin-conexion { margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); }
+.sin-conexion h3 { margin: 0 0 4px; font-size: 14px; }
+.sin-conexion p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+.sin-conexion button { margin-top: 10px; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; }
+.sin-conexion-ios { margin-top: 6px !important; opacity: 0.75; }
+
 /* con la portada delante se esconde la interfaz del mapa */
 .lista, .hora, .menu, .panel, .ubicacion, .metro-boton { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel, .con-portada .ubicacion, .con-portada .metro-boton { opacity: 0; pointer-events: none; }
@@ -334,6 +348,7 @@ kbd {
   .hora { left: 12px; bottom: 12px; }
   .ubicacion { left: 12px; bottom: 60px; }
   .metro-boton { left: 12px; bottom: 110px; }
+  .aviso-red { top: auto; bottom: 64px; left: 50%; max-width: calc(100% - 140px); border-radius: 16px; font-size: 12.5px; }
   .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
   .menu button { padding: 6px 9px; }
   .menu button small { display: none; }

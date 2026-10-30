@@ -119,6 +119,18 @@ const textos: Textos = {
     cercano: 'Nearest metro',
     ficha: 'Metro',
   },
+  red: {
+    sinConexion: 'Offline: you are using the copy saved on this device.',
+    sinConexionSinCopia: 'Offline: some parts may not load.',
+    nueva: 'A new version of the guide is available.',
+    recargar: 'Reload',
+    titulo: 'Take it with you',
+    lista: 'Available offline ✓ The guide is saved on this device: it works without data, and so does GPS.',
+    guardando: 'Saving the guide for offline use…',
+    noDisponible: 'To use it offline, open it from the published website (https).',
+    instalar: 'Install the app',
+    ios: 'On iPhone or iPad: Share → “Add to Home Screen”.',
+  },
   atribucion: { mapa: 'Map', relieve: 'Terrain', ejemplo: 'Sample content' },
 }
 

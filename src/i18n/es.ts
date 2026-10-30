@@ -116,6 +116,18 @@ export const es = {
     cercano: 'Metro más cercano',
     ficha: 'Metro',
   },
+  red: {
+    sinConexion: 'Sin conexión: estás usando la copia guardada en este dispositivo.',
+    sinConexionSinCopia: 'Sin conexión: puede que algunas partes no carguen.',
+    nueva: 'Hay una versión nueva de la guía.',
+    recargar: 'Recargar',
+    titulo: 'Llévatela',
+    lista: 'Disponible sin conexión ✓ La guía está guardada en este dispositivo: funciona sin datos, y el GPS también.',
+    guardando: 'Guardando la guía para usarla sin conexión…',
+    noDisponible: 'Para usarla sin conexión, ábrela desde la web publicada (https).',
+    instalar: 'Instalar la app',
+    ios: 'En iPhone o iPad: Compartir → «Añadir a pantalla de inicio».',
+  },
   atribucion: { mapa: 'Mapa', relieve: 'Relieve', ejemplo: 'Contenido de ejemplo' },
 }
 

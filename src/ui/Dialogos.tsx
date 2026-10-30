@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { traducirLugar, useT, useTours } from '../i18n'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
+import { SinConexion } from './AvisoRed'
 
 /** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. */
 function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; children: ReactNode }) {
@@ -120,6 +121,7 @@ function Ayuda() {
         ))}
       </dl>
       <p className="dialogo-intro">{t.intro}</p>
+      <SinConexion />
     </Dialogo>
   )
 }
