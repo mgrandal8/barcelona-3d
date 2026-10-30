@@ -96,6 +96,19 @@ export const es = {
     intro:
       'La lista de la izquierda lleva a cada lugar, y los botones de abajo cambian la hora: de noche se encienden las ventanas, las farolas y la Font Màgica.',
   },
+  ubicacion: {
+    boton: 'Dónde estoy',
+    buscando: 'Buscando tu posición…',
+    ok: (m: number) => `Estás aquí · precisión ±${m} m`,
+    simulada: 'Posición simulada',
+    denegada: 'No hay permiso para usar tu ubicación. Puedes darlo en los ajustes del navegador para este sitio.',
+    error: 'No se ha podido obtener tu posición. Prueba otra vez al aire libre.',
+    noDisponible: 'Este navegador no da la ubicación.',
+    fuera: 'Estás fuera de la maqueta: solo cubre el centro de Barcelona.',
+    simular: 'Simular que estoy en la Plaça de Catalunya',
+    deTi: (d: string, min: number) => `A ${d} de ti · ~${min} min a pie`,
+    cerca: 'Cerca de mí',
+  },
   atribucion: { mapa: 'Mapa', relieve: 'Relieve', ejemplo: 'Contenido de ejemplo' },
 }
 

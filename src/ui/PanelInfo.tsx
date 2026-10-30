@@ -2,13 +2,18 @@ import { useEffect } from 'react'
 import { MONUMENTOS } from '../data/monumentos'
 import { useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
+import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
   const setSeleccionado = useEstado((s) => s.setSeleccionado)
   const tour = useTour(useEstado((s) => s.tour))
   const m = useLugar(id)
-  const t = useT().panel
+  const tt = useT()
+  const t = tt.panel
+  const idioma = useEstado((s) => s.idioma)
+  const u = useEstado((s) => s.ubicacion)
+  const dist = m && u?.dentro ? distanciaM(u, m.pos) : null
   // en un tour, anterior y siguiente recorren sus paradas; si no, todos los lugares
   const lista = tour ? tour.paradas.map((p) => p.id) : MONUMENTOS.map((x) => x.id)
   const i = lista.indexOf(id ?? '')
@@ -48,6 +53,7 @@ export function PanelInfo() {
             {m.etiqueta} · {m.barrio}
           </p>
           <h2>{m.nombre}</h2>
+          {dist !== null && <p className="panel-distancia">📍 {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}</p>}
           <p className="panel-texto">{m.descripcion}</p>
           <dl className="panel-datos">
             <div>

@@ -9,6 +9,10 @@ export type ClaveCarga = keyof Textos['carga']
 
 export type Dialogo = 'tours' | 'guia' | 'ayuda'
 
+/** Posición del usuario (GPS o simulada) en grados y en la escena. */
+export type Ubicacion = { lat: number; lon: number; precision: number; x: number; z: number; dentro: boolean; simulada: boolean }
+export type EstadoUbicacion = 'apagada' | 'buscando' | 'ok' | 'denegada' | 'error' | 'no-disponible'
+
 type Estado = {
   seleccionado: string | null
   hover: string | null
@@ -20,6 +24,10 @@ type Estado = {
   portada: boolean
   carga: { progreso: number; texto: ClaveCarga; listo: boolean }
   idioma: Idioma
+  ubicacion: Ubicacion | null
+  estadoUbicacion: EstadoUbicacion
+  /** Petición de vuelo de cámara a un punto (n cambia en cada petición, aunque el punto se repita). */
+  vuelo: { x: number; z: number; n: number } | null
   setSeleccionado: (id: string | null) => void
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
@@ -28,6 +36,8 @@ type Estado = {
   cerrarPortada: () => void
   setCarga: (c: Partial<Estado['carga']>) => void
   setIdioma: (i: Idioma) => void
+  setUbicacion: (u: Ubicacion | null, estado: EstadoUbicacion) => void
+  volarA: (x: number, z: number) => void
 }
 
 const params = new URLSearchParams(location.search)
@@ -53,6 +63,9 @@ export const useEstado = create<Estado>((set, get) => ({
   portada: !inicial && !params.has('captura'),
   carga: { progreso: 0, texto: 'preparando', listo: false },
   idioma: idiomaInicial(),
+  ubicacion: null,
+  estadoUbicacion: 'apagada',
+  vuelo: null,
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
@@ -79,5 +92,11 @@ export const useEstado = create<Estado>((set, get) => ({
     set({ idioma: i })
     guardarIdioma(i)
     ponerParam('lang', i === 'es' ? null : i)
+  },
+  setUbicacion: (u, estado) => set({ ubicacion: u, estadoUbicacion: estado }),
+  volarA: (x, z) => {
+    // se cierra la ficha para ver el sitio; la cámara procesa el vuelo después del cambio de lugar
+    if (get().seleccionado) get().setSeleccionado(null)
+    set({ vuelo: { x, z, n: (get().vuelo?.n ?? 0) + 1 } })
   },
 }))

@@ -47,6 +47,56 @@ if (bloques.includes('idioma')) {
   await ctx.close()
 }
 
+if (bloques.includes('ubicacion')) {
+  // GPS junto a la Sagrada Família
+  let { ctx, page, errores } = await abrir('', { geolocation: { latitude: 41.4027, longitude: 2.1745, accuracy: 25 }, permissions: ['geolocation'] })
+  await page.evaluate(() => window.__estado.getState().cerrarPortada())
+  await page.locator('.ubicacion-boton').click()
+  await page.waitForFunction(() => window.__estado.getState().estadoUbicacion === 'ok', null, { timeout: 20000 })
+  let s = await estado(page, (s) => ({ u: s.ubicacion, vuelo: s.vuelo }))
+  ok(s.u?.dentro && !s.u.simulada && s.vuelo?.n === 1, 'GPS dentro de la maqueta y vuelo ' + JSON.stringify(s))
+  ok((await texto(page, '.ubicacion-tarjeta')).includes('±25 m'), 'tarjeta con la precisión')
+  await page.evaluate(() => window.__estado.getState().setSeleccionado('sagrada-familia'))
+  await page.waitForTimeout(300)
+  const dist = await texto(page, '.panel-distancia')
+  ok(/A 1[0-9]0 m de ti · ~\d+ min a pie/.test(dist), 'distancia en la ficha: ' + dist)
+  await page.locator('.ubicacion-boton').click()
+  await page.waitForTimeout(300)
+  s = await estado(page, (s) => ({ sel: s.seleccionado, n: s.vuelo?.n }))
+  ok(s.sel === null && s.n === 2, 'el segundo toque cierra la ficha y vuelve a centrar')
+  await page.locator('.lista-cerca input').check()
+  ok((await texto(page, '.lista li strong')) === 'Sagrada Família', '«cerca de mí» pone primero la Sagrada Família')
+  if (errores.length) console.log('ERRORES:\n' + errores.join('\n'))
+  await ctx.close()
+
+  // GPS en Madrid: fuera de la maqueta, con la opción de simular
+  ;({ ctx, page, errores } = await abrir('', { geolocation: { latitude: 40.4168, longitude: -3.7038 }, permissions: ['geolocation'] }))
+  await page.evaluate(() => window.__estado.getState().cerrarPortada())
+  await page.locator('.ubicacion-boton').click()
+  await page.waitForFunction(() => window.__estado.getState().estadoUbicacion === 'ok', null, { timeout: 20000 })
+  ok((await texto(page, '.ubicacion-tarjeta')).includes('fuera de la maqueta'), 'aviso fuera de la maqueta')
+  ok((await estado(page, (s) => s.vuelo)) === null, 'fuera de la maqueta no hay vuelo')
+  await page.locator('.ubicacion-tarjeta button.primario').click()
+  s = await estado(page, (s) => s.ubicacion)
+  ok(s?.dentro && s.simulada, 'simular la Plaça de Catalunya')
+  await ctx.close()
+
+  // sin permiso
+  ;({ ctx, page, errores } = await abrir(''))
+  await page.evaluate(() => window.__estado.getState().cerrarPortada())
+  await page.locator('.ubicacion-boton').click()
+  await page.waitForFunction(() => ['denegada', 'error'].includes(window.__estado.getState().estadoUbicacion), null, { timeout: 30000 })
+  ok((await texto(page, '.ubicacion-tarjeta')).length > 10, 'sin permiso: ' + (await estado(page, (s) => s.estadoUbicacion)))
+  await ctx.close()
+
+  // ?pos= simula desde el principio
+  ;({ ctx, page, errores } = await abrir('pos=41.38704,2.17007&lugar=catedral&lang=en'))
+  await page.waitForTimeout(300)
+  const d2 = await texto(page, '.panel-distancia')
+  ok(/from you · ~\d+ min walk/.test(d2), '?pos= y distancia en inglés: ' + d2)
+  await ctx.close()
+}
+
 if (fallos) console.log(`${fallos} fallo(s)`)
 await browser.close()
 process.exit(fallos ? 1 : 0)

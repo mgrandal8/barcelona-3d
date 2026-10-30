@@ -99,6 +99,19 @@ const textos: Textos = {
     intro:
       'The list on the left takes you to each place, and the buttons at the bottom change the time of day: at night the windows, the street lights and the Magic Fountain light up.',
   },
+  ubicacion: {
+    boton: 'Where am I',
+    buscando: 'Finding your position…',
+    ok: (m: number) => `You are here · accuracy ±${m} m`,
+    simulada: 'Simulated position',
+    denegada: 'Location permission was denied. You can allow it for this site in your browser settings.',
+    error: 'Your position could not be found. Try again outdoors.',
+    noDisponible: 'This browser does not provide location.',
+    fuera: 'You are outside the model: it only covers central Barcelona.',
+    simular: 'Pretend I am in Plaça de Catalunya',
+    deTi: (d: string, min: number) => `${d} from you · ~${min} min walk`,
+    cerca: 'Near me',
+  },
   atribucion: { mapa: 'Map', relieve: 'Terrain', ejemplo: 'Sample content' },
 }
 

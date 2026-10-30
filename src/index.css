@@ -112,9 +112,29 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hora button:hover { background: rgba(200, 85, 58, 0.08); }
 .hora button.activo { background: var(--acento); color: #fff; }
 
+/* «dónde estoy»: botón redondo encima del selector de hora, con tarjeta de estado */
+.ubicacion { position: absolute; left: 16px; bottom: 68px; display: flex; align-items: flex-end; gap: 8px; }
+.ubicacion-boton {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); backdrop-filter: blur(8px); color: var(--texto);
+}
+.ubicacion-boton:hover { background: #fff; }
+.ubicacion-boton.activo { color: #2563eb; }
+.ubicacion-boton.buscando svg { animation: girar 1.4s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.ubicacion-tarjeta {
+  position: relative; width: min(290px, calc(100vw - 92px)); padding: 10px 34px 10px 12px; font-size: 13.5px; line-height: 1.4;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra); backdrop-filter: blur(8px);
+}
+.ubicacion-tarjeta p { margin: 0; }
+.ubicacion-tarjeta button.primario { margin-top: 8px; border: 0; border-radius: 999px; padding: 7px 12px; font-size: 12.5px; }
+.ubicacion-cerrar { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 24px; height: 24px; opacity: 0.6; }
+.panel-distancia { margin: -4px 0 8px; font-size: 13.5px; font-weight: 600; color: #2563eb; }
+.lista-cerca { display: flex; align-items: center; gap: 6px; margin: 10px 6px 0; font-size: 12.5px; cursor: pointer; }
+
 /* con la portada delante se esconde la interfaz del mapa */
-.lista, .hora, .menu, .panel { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel { opacity: 0; pointer-events: none; }
+.lista, .hora, .menu, .panel, .ubicacion { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.con-portada .lista, .con-portada .hora, .con-portada .menu, .con-portada .panel, .con-portada .ubicacion { opacity: 0; pointer-events: none; }
 
 button:disabled { opacity: 0.4; cursor: default; }
 button.primario { background: var(--acento); color: #fff; border-color: transparent; }
@@ -285,6 +305,7 @@ kbd {
   }
   .lista:not(.abierta) { width: auto; right: auto; }
   .hora { left: 12px; bottom: 12px; }
+  .ubicacion { left: 12px; bottom: 60px; }
   .menu { top: auto; left: auto; right: 12px; bottom: 12px; transform: none; }
   .menu button { padding: 6px 9px; }
   .menu button small { display: none; }

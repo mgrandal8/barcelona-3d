@@ -7,6 +7,7 @@ import { CiudadReal, Edificios } from './CiudadReal'
 import { Monumentos } from './Monumentos'
 import { Ambiente } from './Ambiente'
 import { Ruta } from './Ruta'
+import { MiPosicion } from './MiPosicion'
 import { cargarDatos } from './datos'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
@@ -35,6 +36,7 @@ function Camara() {
   const controles = useRef<CameraControlsImpl>(null)
   const seleccionado = useEstado((s) => s.seleccionado)
   const portada = useEstado((s) => s.portada)
+  const vuelo = useEstado((s) => s.vuelo)
   const inicio = useRef(true)
   const gl = useThree((s) => s.gl)
 
@@ -80,6 +82,22 @@ function Camara() {
       vigente = false
     }
   }, [seleccionado])
+
+  // «dónde estoy»: vista cercana desde el sur, algo inclinada (va después del efecto de la ficha, que se cierra a la vez)
+  useEffect(() => {
+    const c = controles.current
+    if (!c || !vuelo) return
+    let vigente = true
+    cargarDatos().then((d) => {
+      if (!vigente) return
+      const y = d.alturaY(vuelo.x, vuelo.z)
+      c.setFocalOffset(0, 0, 0, true)
+      c.setLookAt(vuelo.x + 1.5, y + 7, vuelo.z + 7, vuelo.x, y, vuelo.z, !quieto)
+    })
+    return () => {
+      vigente = false
+    }
+  }, [vuelo])
 
   return <CameraControls ref={controles} makeDefault enabled={!portada} minDistance={0.6} maxDistance={170} maxPolarAngle={1.32} smoothTime={0.7} />
 }
@@ -129,6 +147,7 @@ export function Experience() {
         <CiudadReal />
         <Monumentos />
         <Ruta />
+        <MiPosicion />
         {/* los edificios llegan del worker: el resto de la ciudad no los espera */}
         <Suspense fallback={null}>
           <Edificios />
