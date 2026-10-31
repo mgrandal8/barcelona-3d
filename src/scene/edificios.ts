@@ -5,7 +5,8 @@ import { elevarRejilla, type Rejilla } from './relieve'
 
 // Lectura y extrusión de los edificios de OSM. Sin DOM ni WebGL: se ejecuta en edificios.worker.ts.
 
-export type Edificio = { pts: Float32Array; alto: number; base: number; tipo: number }
+/** `zona`: distrito de Barcelona o municipio (ver ZONAS en scripts/datos/nombres.mjs), para la paleta. */
+export type Edificio = { pts: Float32Array; alto: number; base: number; tipo: number; zona: number }
 
 /** Formato v2 (ver scripts/datos/formato.mjs): columnas y coordenadas en deltas. */
 export function leerEdificios(buf: ArrayBuffer): Edificio[] {
@@ -35,7 +36,8 @@ export function leerEdificios(buf: ArrayBuffer): Edificio[] {
       pts[j * 2] = u * k
       pts[j * 2 + 1] = v * k
     }
-    out[i] = { pts, alto: altos[i] / 10, base: bases[i] / 10, tipo: tipos[i] }
+    // el tipo lleva la zona en los 4 bits altos
+    out[i] = { pts, alto: altos[i] / 10, base: bases[i] / 10, tipo: tipos[i] & 15, zona: tipos[i] >> 4 }
   }
   return out
 }
@@ -125,7 +127,8 @@ export function crearEdificios(
       let suelo = Infinity
       for (let k = 0; k < n; k++) suelo = Math.min(suelo, alturaY(e.pts[k * 2], e.pts[k * 2 + 1]))
       const r = aleatorio(i)
-      const y0 = suelo + metrosAY(e.base) - (e.base > 0 ? 0 : 0.02)
+      // sin base, la pared baja algo más: junto a la costa el suelo cae en rampa hasta el agua
+      const y0 = suelo + metrosAY(e.base) - (e.base > 0 ? 0 : 0.06)
       const y1 = suelo + metrosAY(e.alto)
       if (rejilla) {
         let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity
