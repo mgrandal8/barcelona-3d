@@ -1,6 +1,7 @@
 // Uso: node scripts/capturas-lote.mjs vistas.json [url-base] [carpeta-salida]
 // vistas.json: [{ "nombre": "x", "cam": [px, py, pz, tx, ty, tz] } | { "nombre": "x", "lugar": "id" }, ...]
-// Cualquier vista admite "hora": "dia" | "atardecer" | "noche" (espera a que termine la transición).
+// Cualquier vista admite "hora": "dia" | "atardecer" | "noche" (espera a que termine la transición)
+// y "ui": true para que la captura incluya la interfaz HTML (pines, nombres).
 // Con "lugar" se selecciona como si se hiciera clic (vuelo + ficha) y la captura incluye la interfaz.
 // Carga la escena una vez y saca una captura por vista moviendo la cámara (modo ?captura=1).
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -41,8 +42,14 @@ for (const v of vistas) {
     await page.evaluate((c) => window.__controles.setLookAt(...c, false), v.cam)
     await page.waitForTimeout(Number(process.env.ESPERA_VISTA ?? 4000) / 2)
   }
-  const dataUrl = await page.evaluate(() => document.querySelector('canvas').toDataURL('image/png'))
-  writeFileSync(`${salida}/${v.nombre}.png`, Buffer.from(dataUrl.split(',')[1], 'base64'))
+  if (v.ui) {
+    // con la interfaz HTML (pines, nombres): captura de página, más lenta
+    await page.waitForTimeout(1500)
+    await page.screenshot({ path: `${salida}/${v.nombre}.png`, timeout: 120000 })
+  } else {
+    const dataUrl = await page.evaluate(() => document.querySelector('canvas').toDataURL('image/png'))
+    writeFileSync(`${salida}/${v.nombre}.png`, Buffer.from(dataUrl.split(',')[1], 'base64'))
+  }
   console.log('captura:', v.nombre)
 }
 if (errores.length) console.log('ERRORES DE CONSOLA:\n' + errores.join('\n'))

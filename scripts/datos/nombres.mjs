@@ -154,7 +154,9 @@ function centroEn(g, rect) {
   return { p, km2: (n * paso * paso) / 1e6 }
 }
 
-const CALLES = new Set(['trunk', 'primary', 'secondary', 'pedestrian'])
+const CALLES = new Set(['trunk', 'primary', 'secondary', 'tertiary', 'pedestrian'])
+/** Calles que un visitante busca: salen antes que otras más largas. */
+const FAMOSAS = /^(Passeig de Gràcia|La Rambla|Rambla de Catalunya|Avinguda Diagonal|Gran Via de les Corts Catalanes|Via Laietana|Avinguda del Paral·lel|Passeig de Colom|Avinguda del Portal de l'Àngel|Passeig de Joan de Borbó|Rambla del Poblenou|Passeig Marítim de la Barceloneta|Carrer de Sants)$/
 const r2 = (x) => Math.round(x * 100) / 100
 const enRect = (r, [u, v], m = 0) => u > r.uMin + m && u < r.uMax - m && v > r.vMin + m && v < r.vMax - m
 
@@ -189,7 +191,7 @@ export function nombres(L, mapa, proyectar, rect) {
     if (out.some((o) => o.l === 0 && o.n === b.nombre)) continue
     out.push({ n: b.nombre, x: r2(p[0] / 100), z: r2(p[1] / 100), l: 1, p: c.km2 })
   }
-  // 2: calles principales, unidas por nombre; una etiqueta por cada ~1,5 km, en tramos rectos
+  // 2: calles principales, unidas por nombre; una etiqueta cada ~600 m, en tramos rectos
   const porNombre = new Map()
   for (const e of mapa) {
     const t = e.tags ?? {}
@@ -200,15 +202,15 @@ export function nombres(L, mapa, proyectar, rect) {
   for (const [n, vias] of porNombre) {
     const tramos = juntarTramos(vias)
     const total = tramos.reduce((s, t) => s + largo(t), 0)
-    const peatonal = /rambla|passeig|portal de l'àngel|plaça/i.test(n)
-    if (total < (peatonal ? 300 : 700)) continue
+    const famosa = FAMOSAS.test(n)
+    if (total < (famosa ? 300 : 1000)) continue
     const principal = tramos.sort((a, b) => largo(b) - largo(a))[0]
     const L0 = largo(principal)
-    const k = Math.max(1, Math.min(4, Math.round(L0 / 1500)))
+    const k = Math.max(1, Math.min(10, Math.round(L0 / 600)))
     for (let i = 0; i < k; i++) {
       const anc = puntoRecto(principal, ((i + 0.5) / k) * L0, Math.min(90, L0 / 4))
       if (!anc || !enRect(rect, anc.p, 100)) continue
-      out.push({ n, x: r2(anc.p[0] / 100), z: r2(anc.p[1] / 100), l: 2, a: Math.round(anc.a * 1000) / 1000, p: r2(total / 1000) })
+      out.push({ n, x: r2(anc.p[0] / 100), z: r2(anc.p[1] / 100), l: 2, a: Math.round(anc.a * 1000) / 1000, p: r2(total / 1000 + (famosa ? 100 : 0)) })
     }
   }
   return out.sort((a, b) => a.l - b.l || b.p - a.p)

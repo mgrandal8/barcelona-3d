@@ -7,6 +7,8 @@ import { Monumentos } from './Monumentos'
 import { Ambiente } from './Ambiente'
 import { Ruta } from './Ruta'
 import { Pines } from './Pines'
+import { Nombres } from './Nombres'
+import { useNombres } from '../nombres'
 import { MiPosicion } from './MiPosicion'
 import { Metro } from './Metro'
 import { cargarDatos } from './datos'
@@ -201,6 +203,7 @@ export function Experience() {
   // mientras carga no se ve nada detrás de la portada: sin bucle de render, React y el worker van más rápido
   const listo = useEstado((s) => s.carga.listo)
   const metro = useEstado((s) => s.metro)
+  const nombres = useNombres()
   const t = useT().maqueta
 
   return (
@@ -232,6 +235,7 @@ export function Experience() {
         <Monumentos />
         <Ruta />
         <Pines />
+        {nombres && <Nombres nombres={nombres} />}
         <MiPosicion />
         {/* el metro no espera a los edificios, pero tampoco los retrasa: va en su propio Suspense */}
         <Suspense fallback={null}>{metro && <Metro />}</Suspense>

@@ -11,6 +11,7 @@ import { BotonUbicacion } from './ui/BotonUbicacion'
 import { BotonMetro } from './ui/BotonMetro'
 import { AvisoRed } from './ui/AvisoRed'
 import { CapaPines } from './ui/CapaPines'
+import { CapaNombres } from './ui/CapaNombres'
 import { Anunciador } from './ui/Anunciador'
 import { ErrorMaqueta } from './ui/ErrorMaqueta'
 import { AvisoLigera, VersionLigera } from './ui/VersionLigera'
@@ -52,6 +53,7 @@ export default function App() {
       )}
       <ListaLugares />
       {/* los pines de la maqueta van después de la lista en el orden del tabulador */}
+      {!ligera && !fallo && <CapaNombres />}
       {!ligera && !fallo && <CapaPines />}
       {ligera ? <AvisoLigera /> : <SelectorHora />}
       <BotonUbicacion />

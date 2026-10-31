@@ -29,6 +29,28 @@ body {
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
+/* nombres de distritos, barrios y calles (ui/CapaNombres.tsx), por debajo de los pines */
+.capa-nombres {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 14; transition: opacity 0.4s;
+  --tinta: #3d3029; --halo: rgba(255, 248, 236, 0.9);
+}
+.capa-nombres.de-noche { --tinta: #f3ead8; --halo: rgba(20, 24, 48, 0.85); }
+.con-portada .capa-nombres { opacity: 0; }
+.capa-nombres span {
+  position: absolute; left: 0; top: 0; white-space: nowrap; color: var(--tinta); will-change: transform;
+  text-shadow: 0 0 3px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo);
+  transition: opacity 0.35s; opacity: 1;
+}
+.capa-nombres span[data-ver="0"] { opacity: 0; }
+.plano-nombres { position: absolute; inset: 0; pointer-events: none; z-index: 1; --tinta: #3d3029; --halo: rgba(255, 248, 236, 0.9); }
+.plano-nombres span {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap; color: var(--tinta);
+  text-shadow: 0 0 3px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo);
+}
+.nombre-distrito { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; font-variant: small-caps; text-transform: lowercase; }
+.nombre-barrio { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+.nombre-calle { font-size: 11px; font-style: italic; font-weight: 500; }
+
 /* pines de los lugares (ui/Pin.tsx): en la maqueta los coloca scene/Pines.tsx; en la versión ligera, el plano */
 .capa-pines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 15; transition: opacity 0.4s; }
 .con-portada .capa-pines { opacity: 0; }
