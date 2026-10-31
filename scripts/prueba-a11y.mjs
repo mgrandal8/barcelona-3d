@@ -1,12 +1,12 @@
 // Uso: node scripts/prueba-a11y.mjs [url-base] [bloques]
 // Comprueba la sesión 12: axe en cada pantalla, recorrido solo con teclado, «reducir movimiento»,
-// y oclusión y grupos de los pines.
-// bloques: lista separada por comas (axe,teclado,movimiento,pines); por defecto, todos.
+// y oclusión y grupos de los pines. Y, de la sesión 10, los nombres de distritos, barrios y calles.
+// bloques: lista separada por comas (axe,teclado,movimiento,pines,nombres); por defecto, todos.
 import { chromium } from 'playwright'
 import { AxeBuilder } from '@axe-core/playwright'
 
 const base = new URL(process.argv[2] ?? 'http://localhost:5181/')
-const bloques = (process.argv[3] ?? 'axe,teclado,movimiento,pines').split(',')
+const bloques = (process.argv[3] ?? 'axe,teclado,movimiento,pines,nombres').split(',')
 const ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 const browser = await chromium.launch({ args: ARGS })
 let fallos = 0
@@ -177,6 +177,51 @@ if (bloques.includes('pines')) {
     ok(grupos[0].every((id) => !despues.includes(id)), 'al pulsar el grupo se separan: ' + JSON.stringify(despues))
     await ctx.close()
   }
+}
+
+if (bloques.includes('nombres')) {
+  // qué nombres se ven (nivel y caja en pantalla), leídos del DOM
+  const vistos = (page) =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.capa-nombres span[data-ver="1"]')].map((s) => {
+        const r = s.getBoundingClientRect()
+        return { n: s.textContent, clase: s.className, caja: [r.left, r.top, r.right, r.bottom] }
+      }),
+    )
+  const cajasPines = (page) =>
+    page.evaluate(() => [...document.querySelectorAll('.capa-pines .pin[data-ver="1"] .pin-num')].map((p) => { const r = p.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom] }))
+  const choca = (a, b) => a[0] < b[2] - 2 && b[0] < a[2] - 2 && a[1] < b[3] - 2 && b[1] < a[3] - 2
+  const { ctx, page, errores } = await abrir('?captura=1&postpro=0', { reducedMotion: 'reduce' })
+  await listo(page)
+  await page.waitForFunction(() => document.querySelectorAll('.capa-nombres span[data-ver="1"]').length > 0, null, { timeout: 60000 })
+  await page.waitForTimeout(2000)
+  let n = await vistos(page)
+  ok(n.filter((x) => x.clase === 'nombre-distrito').length >= 6 && n.every((x) => x.clase === 'nombre-distrito'), `vista general: ${n.length} distritos y municipios, sin barrios ni calles`)
+  const p = await cajasPines(page)
+  ok(!n.some((x) => p.some((c) => choca(x.caja, c))), 'ningún nombre pisa un pin')
+  ok(!n.some((x, i) => n.some((y, j) => i < j && choca(x.caja, y.caja))), 'ningún nombre pisa a otro')
+  const lista = await page.locator('#lista').boundingBox()
+  ok(!n.some((x) => choca(x.caja, [lista.x, lista.y, lista.x + lista.width, lista.y + lista.height])), 'ninguno queda debajo de la lista')
+  // a media altura, barrios; de cerca, calles (con el Passeig de Gràcia)
+  // dos veces: la primera vista tras cargar a veces no se aplica; con la máquina cargada, se espera a que salgan
+  const esperar = (clase) =>
+    page.waitForFunction((c) => document.querySelectorAll(`.capa-nombres .${c}[data-ver="1"]`).length > 0, clase, { timeout: 60000 }).catch(() => {})
+  for (let k = 0; k < 2; k++) {
+    await page.evaluate(() => window.__controles.setLookAt(2, 26, 32, 0, 0, 6, false))
+    await page.waitForTimeout(1500)
+  }
+  await esperar('nombre-barrio')
+  await page.waitForTimeout(1500)
+  n = await vistos(page)
+  ok(n.filter((x) => x.clase === 'nombre-barrio').length >= 5, `a media altura: ${n.filter((x) => x.clase === 'nombre-barrio').length} barrios`)
+  await page.evaluate(() => window.__controles.setLookAt(0, 7, 12, 0, 0, 3, false))
+  await esperar('nombre-calle')
+  await page.waitForTimeout(3000)
+  n = await vistos(page)
+  ok(n.some((x) => x.n === 'Passeig de Gràcia') && n.filter((x) => x.clase === 'nombre-calle').length >= 3, `de cerca: ${n.filter((x) => x.clase === 'nombre-calle').map((x) => x.n).join(', ')}`)
+  ok(await page.locator('.capa-nombres').getAttribute('aria-hidden') === 'true', 'la capa de nombres no la lee el lector de pantalla')
+  ok(!errores.length, 'sin errores: ' + errores.join(' | '))
+  await ctx.close()
 }
 
 await browser.close()
