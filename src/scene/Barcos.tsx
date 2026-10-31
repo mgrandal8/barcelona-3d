@@ -40,11 +40,14 @@ function buscarRuta(d: DatosCiudad, s: Suelo, semilla: number, tipo: Tipo, tam: 
       vel: 0,
       sentido: q(7) < 0.5 ? 1 : -1,
     }
-    const margen = tipo === 'ferri' ? 1.2 : 0.5
+    // el ferri va mar adentro: al menos 4 u (400 m) de la costa en todas direcciones; si no hay sitio, se afloja
+    const margen = tipo === 'ferri' ? Math.max(1.2, 4 - Math.floor(k / 60) * 0.7) : 0.5
+    const dirs = tipo === 'ferri' ? 8 : 4
+    const alrededor = [[0, 0], ...Array.from({ length: dirs }, (_, j) => [Math.cos((j / dirs) * Math.PI * 2) * margen, Math.sin((j / dirs) * Math.PI * 2) * margen])]
     let ok = true
     for (let i = 0; i < 40 && ok; i++) {
       const [x, z] = puntoRuta(r, (i / 40) * Math.PI * 2)
-      ok = x > xMin + 1 && x < xMax - 1 && z < zMax - 0.6 && [[0, 0], [margen, 0], [-margen, 0], [0, margen], [0, -margen]].every(([dx, dz]) => esAgua(d, s, x + dx, z + dz))
+      ok = x > xMin + 1 && x < xMax - 1 && z < zMax - 0.6 && alrededor.every(([dx, dz]) => esAgua(d, s, x + dx, z + dz))
     }
     if (ok) return r
   }

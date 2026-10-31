@@ -229,6 +229,7 @@ function Mar() {
   const fondo = useRef<THREE.MeshStandardMaterial>(null)
   useFrame(({ clock }) => {
     agua.current!.color.copy(vivo.mar)
+    agua.current!.roughness = vivo.marRugosidad
     fondo.current!.color.copy(vivo.mar).multiplyScalar(0.8)
     tiempoOlas.value = clock.elapsedTime
   })
