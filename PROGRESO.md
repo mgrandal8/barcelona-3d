@@ -102,8 +102,8 @@ Plan: `~/.claude/plans/haz-lo-que-me-splendid-peacock.md`. Cuatro bloques, un co
 - Hotel W: forma de vela aceptable; podría afinarse el perfil y añadir el reflejo del cielo.
 - Camp Nou: la fachada es lisa; faltan detalles de la nueva fachada y las letras.
 - Casa Batlló: a esta escala es pequeña (15 m de fachada); se reconoce de cerca, no desde la vista general.
-- Los pines se ven pequeños desde la vista general; quizá subir la escala mínima o añadir el número del lugar.
-- Tours: los números de parada (`Html`) se ven aunque el lugar quede detrás de un edificio; la portada podría tener un recorrido de cámara más pensado que el giro sobre la vista general.
+- Tours: la portada podría tener un recorrido de cámara más pensado que el giro sobre la vista general.
+- Móvil (vertical): la vista general solo enseña 5 de los 8 pines (Glòries, Camp Nou y Montjuïc quedan fuera). Los pines ocupan ~50 u en cualquier dirección y no caben a buena escala; probado mirar a lo largo del eje x (6 de 8, pero se pierde el mar). Para la S13: una vista o un recorrido de entrada pensado para móvil.
 - Hay otro Vite en el puerto 5173 (no es de esta sesión); en la sesión 4 se usó el 5174 y en la 5 el 5175 (`npx vite --port 5175 --strictPort`).
 
 ## Sesión 9 (2026-10-30) — S9 «Que no falle nunca» (rama `worktree-s9-robustez`)
@@ -119,6 +119,23 @@ Plan: `~/.claude/plans/twinkling-spinning-possum.md`. Un commit por bloque:
 - Capturas: `capturas/sesion9-*.png` (versión ligera en escritorio, con ficha y en móvil; error en la portada; calidad baja).
 - Lecciones: en el worktree, la sandbox también rechaza heredocs y `mkdir` con varias rutas: los ficheros se escriben con Write y los comandos van de uno en uno. Los workers no deben importar nada que llegue al store o a three (`datos.ts`, `edificios.ts`), o se los llevan enteros.
 
+## Sesión 12 (2026-10-30) — S12 «Interfaz de producto» (rama `worktree-s12-interfaz`)
+Plan: `~/.claude/plans/zippy-sleeping-sutton.md`. Un commit por bloque:
+- **Iconos** (`ui/Icono.tsx`): SVG en línea (viewBox 24, trazo 2, `currentColor`, `aria-hidden`) en lugar de los emojis del menú, la hora, la ficha, los tours, la ubicación y el zoom de la versión ligera. `Tour.icono` es un `NombreIcono` (`lagarto`, `velero`, `luna`); `ICONO_MOMENTO` está en `scene/momento.ts`. Los textos de i18n ya no llevan emojis ni ✓; la valoración del guía son 5 estrellas SVG y el texto «4,9 de 5».
+- **Pines HTML** (`ui/Pin.tsx`, `ui/CapaPines.tsx`, `scene/Pines.tsx`, `src/pines.ts`): un botón por lugar con el número de la guía, del color de su categoría (`COLOR_CATEGORIA`, todos ≥ 4,5:1 con blanco) y con colita; al pasar el ratón o con el foco despliega nombre y barrio. En un tour, las paradas llevan su número de parada y el color del tour, y el resto queda pequeño y gris. Sustituyen a los pines 3D de `Monumento.tsx` (queda el anillo), a la etiqueta `Html` de hover y a los números `Html` de `Ruta.tsx` (quedan los arcos). La versión ligera usa el mismo `Pin`.
+  - Reparto: `scene/Pines.tsx` (dentro del Canvas) proyecta las anclas en cada fotograma y, cada 0,2 s, calcula oclusión y grupos; lo deja en `pantalla` (`src/pines.ts`, sin three) y avisa. `ui/CapaPines.tsx` (DOM normal, en `App`, después de la lista para el tabulador) solo mueve los `transform` y cambia `data-ver`/`tabIndex`/`aria-hidden`, sin re-render por fotograma. **Ojo**: `createPortal` de react-dom dentro del Canvas no funciona (el reconciliador de R3F intenta crear un `<span>` de three), y una capa dentro del div del Canvas pasaría los clics a la escena.
+  - **Grupos**: pines a menos de 44 px se juntan (voraz, en el orden de la guía); el grupo muestra sus números («2 · 6») o «N lugares» y, al pulsarlo, `volarA(x, z, dist)` acerca la cámara (8 × la separación, entre 5 y 45 u). `vuelo` admite `dist`.
+  - **Oclusión**: el worker de edificios rellena una **rejilla de tejados** (`relieve.ts`: `crearRejilla`, `elevarRejilla`, `tapado`; celdas de 0,2 u, la caja de cada edificio a la altura de su tejado, 1,3 MB transferidos) que llega como `DatosCiudad.tejados`. `tapado` avanza del ancla a la cámara y corta en cuanto el rayo pasa por encima del tejado más alto. Comprobado: a ras de calle tras el Eixample el pin de la Casa Batlló se oculta y, con la cámara más alta, vuelve.
+- **Accesibilidad**:
+  - Movimiento reducido (`src/movimiento.ts`, con escucha del cambio): los vuelos de ficha, vuelta al mapa, «dónde estoy» y grupos llegan sin animación; el anillo y los arcos de la ruta quedan quietos; en CSS, `prefers-reduced-motion` anula animaciones y transiciones.
+  - Teclado: la maqueta (`<Canvas className="maqueta" tabIndex={0} role="application">`) se mueve con flechas, Mayús + flechas o Q/E (girar), +/− e Inicio (vista general o cerrar ficha). Enlace «Ir a la lista de lugares» al principio. La ficha pone el foco en su título al abrirse (no si ya viene abierta en el enlace) y lo devuelve al cerrarse; los diálogos atrapan el Tab y devuelven el foco. Filas nuevas en la Ayuda.
+  - Lector de pantalla: descripción oculta de la maqueta (`#maqueta-ayuda`, que remite a la lista y a las fichas), `ui/Anunciador.tsx` (`aria-live`: lugar mostrado y parada, hora, metro) y etiquetas del metro con `aria-hidden`.
+  - Contraste: `--acento` pasa de #c8553a (4,4:1) a #b4472d (5,4:1); las opacidades de los textos secundarios se cambian por `--texto-2` (#5c5048); los botones «Empezar tour» oscurecen el color del tour un 20 %.
+- **Repaso visual**: la vista general de escritorio se corre 8 u al oeste (la lista tapaba los pines del Camp Nou y de Montjuïc); ahora se ven los 8. Contorno de foco del título de la ficha más fino y separado de la ✕. Revisados escritorio (1440×900) y móvil (390×844): portada, vista general, hover, ficha, tour, diálogos y versión ligera.
+- Pruebas (todas sobre el build, en verde: `prueba-a11y`, `prueba-ui`, `prueba-utilidad` y `prueba-robustez`; `prueba-pwa` no se pasó porque necesita apagar el servidor): `scripts/prueba-a11y.mjs [url] [axe,teclado,movimiento,pines]` (nueva dependencia de desarrollo `@axe-core/playwright`): axe sin violaciones serias en portada, mapa, ficha, los tres diálogos, tour y versión ligera; recorrido con teclado; «reducir movimiento»; oclusión y grupos de pines. En modo captura, `window.__pines` expone `pantalla`.
+- Capturas: `capturas/sesion12-*.png`.
+- Lecciones: `npm install` en el worktree sustituye el enlace de `node_modules` por una instalación propia (el checkout principal no se toca). axe mide los colores a mitad de los fundidos de entrada y da falsos fallos de contraste: el bloque axe abre las páginas con `reducedMotion: 'reduce'`. El puerto 5182 lo usa otro proceso.
+
 ## Plan para hacerla profesional (sesiones 9–15)
 Propuesto al final de la sesión 8. Orden: **9 → 12 → 10 → 13 → 11 → 14 → 15**.
 - **S9 · Que no falle nunca**: versión ligera sin WebGL o en móviles flojos (lista + fichas + mapa 2D) con aviso; calidad adaptativa desde el inicio (sombras, postproceso, edificios, dpr); terreno y textura del suelo en un worker (hoy ~0,9 s de hilo principal); postproceso (159 kB) cargado después de la ciudad; error boundary con «Reintentar».
@@ -130,8 +147,9 @@ Propuesto al final de la sesión 8. Orden: **9 → 12 → 10 → 13 → 11 → 1
 - **S15 · Calidad continua y Lokalu**: tests en GitHub Actions; regresión visual; presupuesto de peso y carga; registro de errores; modo embebido `?embed=1` con datos de lugares y tours desde un JSON externo y aviso a la página anfitriona (postMessage) al pulsar «Reservar».
 
 ## Siguiente sesión
-- Revisar el PR de la S9 y hacer merge a `main`. Probar en el navegador del usuario: la calidad que elige con GPU (en la consola, `__estado` solo en `?captura=1`), la versión ligera en un móvil y el aviso de contexto perdido (en Chrome: `chrome://gpucrash`).
-- **S12 · Interfaz de producto** (siguiente del plan).
+- Revisar el PR de la S12 y hacer merge a `main`. Probar en el navegador del usuario: los pines y los grupos al alejar, el teclado en la maqueta, un lector de pantalla (NVDA o VoiceOver) y «reducir movimiento» del sistema.
+- **S10 · Ciudad más real** (siguiente del plan).
+- Pendiente de la S9: en el navegador del usuario, la calidad que elige con GPU, la versión ligera en un móvil y el aviso de contexto perdido (`chrome://gpucrash`).
 - Pendiente de la fase 8: probar en un móvil real el GPS paseando, instalar la app, el modo avión con la app ya abierta una vez y el aviso «Nueva versión» tras otro despliegue; y en el navegador del usuario (GPU, con postpro) los tres momentos del día, el metro de noche y el LOD al acercarse.
 
 ## Notas

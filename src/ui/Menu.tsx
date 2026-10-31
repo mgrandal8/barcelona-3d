@@ -2,11 +2,12 @@ import { useEffect } from 'react'
 import { useT } from '../i18n'
 import { useEstado, type Dialogo } from '../store'
 import { SelectorIdioma } from './SelectorIdioma'
+import { Icono, type NombreIcono } from './Icono'
 
-const OPCIONES: { id: Dialogo; icono: string }[] = [
-  { id: 'tours', icono: '🧭' },
-  { id: 'guia', icono: '👋' },
-  { id: 'ayuda', icono: '?' },
+const OPCIONES: { id: Dialogo; icono: NombreIcono }[] = [
+  { id: 'tours', icono: 'brujula' },
+  { id: 'guia', icono: 'guia' },
+  { id: 'ayuda', icono: 'ayuda' },
 ]
 
 /** Accesos a los tours, al guía y a la ayuda de controles. */
@@ -28,9 +29,7 @@ export function Menu() {
     <nav className="menu" aria-label={t.etiqueta}>
       {OPCIONES.map((o) => (
         <button key={o.id} className={dialogo === o.id ? 'activo' : ''} onClick={() => setDialogo(o.id)} title={t[o.id]}>
-          <span aria-hidden className={o.id === 'ayuda' ? 'menu-ayuda' : ''}>
-            {o.icono}
-          </span>
+          <Icono nombre={o.icono} />
           <small>{t[o.id]}</small>
         </button>
       ))}

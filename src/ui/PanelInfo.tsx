@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MONUMENTOS } from '../data/monumentos'
 import { useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
 import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 import { useTransporte } from '../transporte'
 import { EstacionCercana } from './Lineas'
+import { Icono } from './Icono'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
@@ -23,6 +24,25 @@ export function PanelInfo() {
   const ir = (paso: number) => setSeleccionado(lista[(i + paso + lista.length) % lista.length])
   const parada = tour?.paradas[i]
 
+  // al abrirse, el foco va al título de la ficha; al cerrarse, vuelve adonde estaba (el pin o la lista)
+  const titulo = useRef<HTMLHeadingElement>(null)
+  const origen = useRef<HTMLElement | null>(null)
+  const abierta = !!m
+  const primera = useRef(true)
+  useEffect(() => {
+    // si la ficha ya viene abierta en el enlace (?lugar=), el foco se queda al principio de la página
+    const alCargar = primera.current
+    primera.current = false
+    if (abierta && !alCargar) {
+      const activo = document.activeElement as HTMLElement | null
+      origen.current = activo && activo !== document.body ? activo : null
+      titulo.current?.focus({ preventScroll: true })
+    } else if (origen.current) {
+      if (origen.current.isConnected) origen.current.focus({ preventScroll: true })
+      origen.current = null
+    }
+  }, [abierta])
+
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
       // con un diálogo abierto, Esc cierra solo el diálogo
@@ -37,12 +57,12 @@ export function PanelInfo() {
       {m && (
         <>
           <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label={t.volverMapa}>
-            ✕
+            <Icono nombre="cerrar" />
           </button>
           {tour && parada && (
             <div className="panel-tour" style={{ ['--color' as string]: tour.color }}>
               <p>
-                <span aria-hidden>{tour.icono}</span> {tour.nombre} · {t.parada(i + 1, tour.paradas.length)}
+                <Icono nombre={tour.icono} /> {tour.nombre} · {t.parada(i + 1, tour.paradas.length)}
               </p>
               <div className="panel-tour-pasos" aria-hidden>
                 {tour.paradas.map((p, k) => (
@@ -55,8 +75,14 @@ export function PanelInfo() {
           <p className="panel-etiqueta">
             {m.etiqueta} · {m.barrio}
           </p>
-          <h2>{m.nombre}</h2>
-          {dist !== null && <p className="panel-distancia">📍 {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}</p>}
+          <h2 ref={titulo} tabIndex={-1}>
+            {m.nombre}
+          </h2>
+          {dist !== null && (
+            <p className="panel-distancia">
+              <Icono nombre="pin" /> {tt.ubicacion.deTi(formatoDistancia(dist, idioma), minutosAPie(dist))}
+            </p>
+          )}
           {transporte && (
             <p className="panel-metro">
               <span>{tt.metro.ficha}</span>
@@ -93,7 +119,7 @@ export function PanelInfo() {
                 </button>
               ) : (
                 <button className="primario" onClick={() => setSeleccionado(null)}>
-                  {t.terminarTour}
+                  {t.terminarTour} <Icono nombre="check" />
                 </button>
               )}
             </div>

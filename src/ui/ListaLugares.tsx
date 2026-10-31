@@ -21,7 +21,7 @@ export function ListaLugares() {
   const [abierta, setAbierta] = useState(() => !movil())
 
   return (
-    <nav className={`lista ${abierta ? 'abierta' : ''}`} aria-label={t.etiqueta}>
+    <nav id="lista" tabIndex={-1} className={`lista ${abierta ? 'abierta' : ''}`} aria-label={t.etiqueta}>
       <header className="lista-cabecera">
         <h1>
           Barcelona <span>3D</span>

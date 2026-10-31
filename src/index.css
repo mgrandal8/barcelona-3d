@@ -2,6 +2,8 @@
   --fondo-1: #fbefdc;
   --fondo-2: #e9d3b4;
   --texto: #2b2420;
+  /* texto secundario: en lugar de bajar la opacidad, que deja el contraste por debajo de 4,5:1 */
+  --texto-2: #5c5048;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--texto);
 }
@@ -20,21 +22,49 @@ body {
 :root {
   --tarjeta: rgba(255, 250, 242, 0.92);
   --borde: rgba(90, 60, 30, 0.14);
-  --acento: #c8553a;
+  --acento: #b4472d;
   --acento-2: #f0b84a;
   --sombra: 0 10px 30px rgba(60, 35, 15, 0.18);
 }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-/* etiqueta flotante del monumento (Html de drei) */
-.etiqueta {
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
-  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra);
-  transform: translateY(-34px); font-size: 13px; pointer-events: none;
+/* pines de los lugares (ui/Pin.tsx): en la maqueta los coloca scene/Pines.tsx; en la versión ligera, el plano */
+.capa-pines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 15; transition: opacity 0.4s; }
+.con-portada .capa-pines { opacity: 0; }
+.pin {
+  position: absolute; left: 0; top: 0; padding: 0 0 8px; border: 0; background: none; pointer-events: auto;
+  transition: opacity 0.25s; will-change: transform;
 }
-.etiqueta span { font-size: 11px; opacity: 0.65; }
+.capa-pines .pin:not([data-ver="1"]) { opacity: 0; pointer-events: none; }
+.pin-num {
+  position: relative; display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 999px;
+  background: var(--color); color: #fff; font-size: 14px; font-weight: 800; white-space: nowrap;
+  border: 2px solid #fff; box-shadow: 0 3px 10px rgba(40, 25, 10, 0.35); transition: transform 0.2s;
+}
+/* colita que apunta al lugar */
+.pin-num::after {
+  content: ''; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%);
+  border: 6px solid transparent; border-top: 7px solid #fff; border-bottom: 0;
+}
+.pin-nombre {
+  position: absolute; left: calc(100% + 6px); top: 0; display: none; flex-direction: column; align-items: flex-start;
+  padding: 4px 10px; border-radius: 12px; white-space: nowrap; text-align: left; color: var(--texto);
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra); font-size: 13px;
+}
+.pin-nombre small { font-size: 11.5px; color: #5c5048; }
+.pin.hover, .pin:focus-visible, .pin.activo { z-index: 2; }
+.pin.hover .pin-nombre, .pin:focus-visible .pin-nombre { display: flex; }
+.pin.hover .pin-num, .pin.activo .pin-num { transform: scale(1.12); }
+.pin.activo .pin-num { box-shadow: 0 0 0 3px var(--acento-2), 0 3px 10px rgba(40, 25, 10, 0.35); }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .pin-num { box-shadow: 0 0 0 3px var(--texto), 0 3px 10px rgba(40, 25, 10, 0.35); }
+.pin.apagado .pin-num { min-width: 24px; height: 24px; padding: 0 6px; font-size: 12px; background: #6f655d; }
+/* grupo: una pila de pines */
+.pin-grupo .pin-num {
+  background: var(--color, var(--texto)); padding: 0 10px;
+  box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 1px rgba(40, 25, 10, 0.25), 0 3px 10px rgba(40, 25, 10, 0.35);
+}
 
 /* lista de lugares */
 .lista {
@@ -57,7 +87,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .lista li button:hover, .lista li button.hover { background: rgba(200, 85, 58, 0.08); }
 .lista li button.activo { background: rgba(200, 85, 58, 0.16); }
 .lista strong { display: block; font-size: 14px; font-weight: 600; }
-.lista small { display: block; font-size: 11.5px; opacity: 0.6; }
+.lista small { display: block; font-size: 11.5px; color: var(--texto-2); }
 .lista-num {
   flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
   background: var(--acento); color: #fff; font-size: 12px; font-weight: 700;
@@ -75,14 +105,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel h2 { margin: 2px 0 10px; font-size: 26px; line-height: 1.15; }
 .panel-cerrar {
   position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
-  border: 1px solid var(--borde); background: #fff8;
+  border: 1px solid var(--borde); background: #fff8; display: grid; place-items: center; padding: 0;
 }
 .panel-etiqueta { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--acento); font-weight: 600; }
 .panel-texto { line-height: 1.55; font-size: 15px; }
 .panel-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
 .panel-datos div:first-child { grid-column: 1 / -1; }
 .panel-datos div { background: rgba(255, 255, 255, 0.6); border: 1px solid var(--borde); border-radius: 12px; padding: 8px 10px; }
-.panel-datos dt { font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; }
+.panel-datos dt { font-size: 11px; color: var(--texto-2); text-transform: uppercase; letter-spacing: 0.05em; }
 .panel-datos dd { margin: 2px 0 0; font-size: 13.5px; font-weight: 600; }
 .panel-consejo { background: #fdf0d2; border-radius: 14px; padding: 12px 14px; }
 .panel-consejo strong { font-size: 13px; }
@@ -90,7 +120,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel-nav { display: flex; gap: 6px; margin-top: 16px; }
 .panel-nav button { flex: 1; border: 1px solid var(--borde); background: #fff8; border-radius: 999px; padding: 8px 6px; font-size: 13px; }
 .panel-nav button.primario { background: var(--acento); color: #fff; border-color: transparent; flex: 1.3; }
-.panel-aviso { margin: 12px 0 0; font-size: 11px; opacity: 0.5; text-align: center; }
+.panel-aviso { margin: 12px 0 0; font-size: 11px; color: var(--texto-2); text-align: center; }
 
 .atribucion {
   position: absolute; z-index: 25; bottom: 6px; left: 50%; transform: translateX(-50%); margin: 0;
@@ -102,14 +132,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .plano { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #6fa9c4; }
 .plano:active { cursor: grabbing; }
 .plano canvas { position: absolute; inset: 0; }
-.plano-pin {
-  position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 28px; height: 28px; padding: 0 8px;
-  display: flex; align-items: center; gap: 6px; border: 2px solid #fff; border-radius: 999px;
-  background: var(--acento); color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 3px 10px rgba(60, 35, 15, 0.35);
-}
-.plano-pin span { font-weight: 600; white-space: nowrap; }
-.plano-pin.hover, .plano-pin.activo { z-index: 3; background: var(--texto); }
-.plano-pin.activo { outline: 3px solid var(--acento-2); }
+.plano-pin { z-index: 2; transform: translate(-50%, -100%); }
+.plano-pin.hover, .plano-pin.activo, .plano-pin:focus-visible { z-index: 3; }
+.plano-pin.activo .pin-nombre { display: flex; }
 .plano-yo {
   position: absolute; z-index: 2; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%;
   background: #2a7de1; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(42, 125, 225, 0.25);
@@ -119,7 +144,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: absolute; z-index: 25; right: 16px; bottom: 40px; display: flex; flex-direction: column; overflow: hidden;
   background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra);
 }
-.plano-zoom button { width: 40px; height: 40px; border: 0; background: transparent; font-size: 20px; font-weight: 600; }
+.plano-zoom button { width: 40px; height: 40px; border: 0; background: transparent; font-size: 20px; display: grid; place-items: center; }
 .plano-zoom button + button { border-top: 1px solid var(--borde); }
 .plano-zoom button:hover { background: rgba(200, 85, 58, 0.08); }
 .ligera-aviso {
@@ -162,7 +187,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .ubicacion-tarjeta p { margin: 0; }
 .ubicacion-tarjeta button.primario { margin-top: 8px; border: 0; border-radius: 999px; padding: 7px 12px; font-size: 12.5px; }
-.ubicacion-cerrar { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 24px; height: 24px; opacity: 0.6; }
+.ubicacion-cerrar { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 24px; height: 24px; color: var(--texto-2); }
 .panel-distancia { margin: -4px 0 8px; font-size: 13.5px; font-weight: 600; color: #2563eb; }
 .lista-cerca { display: flex; align-items: center; gap: 6px; margin: 10px 6px 0; font-size: 12.5px; cursor: pointer; }
 
@@ -182,7 +207,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .estacion-nombre { font-weight: 600; }
 .panel-metro { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; }
 .panel-metro > span:first-child, .ubicacion-metro small {
-  font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;
+  font-size: 11px; color: var(--texto-2); text-transform: uppercase; letter-spacing: 0.05em;
 }
 .ubicacion-metro { margin-top: 8px !important; display: grid; gap: 3px; }
 .estacion-etiqueta {
@@ -205,7 +230,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sin-conexion h3 { margin: 0 0 4px; font-size: 14px; }
 .sin-conexion p { margin: 0; font-size: 13.5px; line-height: 1.45; }
 .sin-conexion button { margin-top: 10px; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; }
-.sin-conexion-ios { margin-top: 6px !important; opacity: 0.75; }
+.sin-conexion-ios { margin-top: 6px !important; color: var(--texto-2); }
 
 /* con la portada delante se esconde la interfaz del mapa */
 .lista, .hora, .menu, .panel, .ubicacion, .metro-boton { z-index: 25; transition: opacity 0.4s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -213,6 +238,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 button:disabled { opacity: 0.4; cursor: default; }
 button.primario { background: var(--acento); color: #fff; border-color: transparent; }
+/* iconos SVG en línea (ui/Icono.tsx): se alinean con el texto */
+.icono { flex: none; vertical-align: -0.2em; }
+.panel-tour p .icono, .panel-distancia .icono, .tour-cabecera small .icono { vertical-align: -0.25em; }
+.panel-nav .icono { vertical-align: -0.2em; margin-left: 2px; }
+.estrellas { display: inline-flex; gap: 1px; color: #e3a21a; vertical-align: -0.15em; }
+.estrellas .icono { width: 15px; height: 15px; }
+/* accesibilidad: solo para el lector de pantalla, y el enlace para saltar a la lista */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.saltar {
+  position: absolute; left: 16px; top: -60px; z-index: 40; padding: 10px 16px; border-radius: 999px;
+  background: var(--texto); color: #fff; font-weight: 600; text-decoration: none; transition: top 0.2s;
+}
+.saltar:focus { top: 16px; }
+.maqueta:focus-visible { outline: 3px solid var(--acento); outline-offset: -3px; }
+.lista:focus { outline: none; }
+.panel h2 { margin-right: 40px; }
+.panel h2:focus { outline: none; }
+.panel h2:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; border-radius: 4px; }
 button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 
 /* menú: tours, guía y ayuda */
@@ -228,16 +273,12 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .menu button small { font-size: 13px; font-weight: 600; }
 .menu button:hover { background: rgba(200, 85, 58, 0.08); }
 .menu button.activo { background: rgba(200, 85, 58, 0.16); }
-.menu-ayuda {
-  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--texto); color: #fff; font-size: 12px; font-weight: 700;
-}
 
 /* selector de idioma: en el menú y en la portada */
 .idioma { display: flex; gap: 1px; align-items: center; }
 .menu .idioma { margin-left: 4px; padding-left: 6px; border-left: 1px solid var(--borde); }
 .idioma button, .menu .idioma button {
-  border: 0; background: transparent; border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; opacity: 0.6;
+  border: 0; background: transparent; border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--texto-2);
 }
 .idioma button.activo, .menu .idioma button.activo { background: var(--texto); color: #fff; opacity: 1; }
 .portada-arriba { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -257,7 +298,7 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .portada h1 { margin: 8px 0 14px; font-size: clamp(40px, 6vw, 68px); line-height: 0.98; letter-spacing: -0.02em; font-weight: 800; }
 .portada h1 span { display: block; color: var(--acento); }
 .portada-texto { font-size: 17px; line-height: 1.55; margin: 0; max-width: 42ch; }
-.portada-cifras { list-style: none; padding: 0; margin: 20px 0 24px; display: flex; gap: 22px; font-size: 13px; opacity: 0.8; }
+.portada-cifras { list-style: none; padding: 0; margin: 20px 0 24px; display: flex; gap: 22px; font-size: 13px; color: var(--texto-2); }
 .portada-cifras strong { display: block; font-size: 24px; color: var(--texto); }
 .portada-botones { display: flex; gap: 10px; flex-wrap: wrap; animation: aparecer 0.5s both; }
 .portada-botones button {
@@ -266,7 +307,7 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 }
 .portada-botones button.primario { padding: 12px 28px; background: var(--acento); color: #fff; border-color: transparent; }
 .portada-botones button:hover { transform: translateY(-1px); }
-.portada-pie { margin: 22px 0 0; font-size: 11.5px; opacity: 0.55; }
+.portada-pie { margin: 22px 0 0; font-size: 11.5px; color: var(--texto-2); }
 @keyframes aparecer { from { opacity: 0; transform: translateY(14px); } }
 
 .carga { justify-content: center; transition: opacity 0.8s; }
@@ -290,7 +331,7 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 .carga .progreso { margin: 14px auto 0; }
 .progreso-barra { height: 6px; border-radius: 999px; background: rgba(90, 60, 30, 0.12); overflow: hidden; }
 .progreso-barra span { display: block; height: 100%; background: linear-gradient(90deg, var(--acento), var(--acento-2)); border-radius: inherit; transition: width 0.3s; }
-.progreso small { display: block; margin-top: 8px; font-size: 12.5px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+.progreso small { display: block; margin-top: 8px; font-size: 12.5px; color: var(--texto-2); font-variant-numeric: tabular-nums; }
 
 /* pista de controles */
 .pista {
@@ -300,12 +341,6 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 }
 .pista.visible { opacity: 1; transform: translate(-50%, 0); }
 
-/* número de parada del tour sobre el mapa */
-.ruta-num {
-  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 800;
-  border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); transform: translateY(-40px);
-}
-.ruta-num.activa { width: 28px; height: 28px; font-size: 14px; }
 
 /* tour en la ficha */
 .panel-tour { background: color-mix(in srgb, var(--color) 10%, #fff); border: 1px solid color-mix(in srgb, var(--color) 30%, transparent); border-radius: 14px; padding: 10px 12px; margin: 0 36px 14px 0; }
@@ -328,7 +363,7 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 .dialogo-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dialogo-cabecera h2 { margin: 0; font-size: 24px; }
 .dialogo-cabecera .panel-cerrar { position: static; flex: none; }
-.dialogo-intro { margin: 6px 0 18px; opacity: 0.75; line-height: 1.5; font-size: 14.5px; }
+.dialogo-intro { margin: 6px 0 18px; color: var(--texto-2); line-height: 1.5; font-size: 14.5px; }
 @keyframes fundido { from { opacity: 0; } }
 
 .tours { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
@@ -338,11 +373,11 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 }
 .tour-cabecera { display: flex; gap: 12px; align-items: center; }
 .tour-icono {
-  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
-  background: color-mix(in srgb, var(--color) 14%, #fff);
+  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 24px;
+  background: color-mix(in srgb, var(--color) 14%, #fff); color: color-mix(in srgb, var(--color) 85%, #000);
 }
 .tour h3 { margin: 0; font-size: 17px; }
-.tour-cabecera small { font-size: 12.5px; opacity: 0.65; }
+.tour-cabecera small { font-size: 12.5px; color: var(--texto-2); }
 .tour > p { font-size: 14px; line-height: 1.5; margin: 12px 0; }
 .tour-paradas { margin: 0 0 14px; padding: 0; list-style: none; counter-reset: parada; display: grid; gap: 6px; flex: 1; align-content: start; }
 .tour-paradas li { counter-increment: parada; display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
@@ -352,7 +387,7 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 }
 .tour footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px dashed var(--borde); padding-top: 12px; }
 .tour footer strong { font-size: 14px; }
-.tour footer button { white-space: nowrap; border: 0; border-radius: 999px; padding: 8px 16px; font-size: 13.5px; font-weight: 600; background: var(--color); }
+.tour footer button { white-space: nowrap; border: 0; border-radius: 999px; padding: 8px 16px; font-size: 13.5px; font-weight: 600; background: color-mix(in srgb, var(--color) 80%, #000); }
 
 .guia { display: flex; gap: 16px; align-items: center; margin: 14px 0 4px; }
 .guia-avatar {
@@ -361,10 +396,10 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
   border: 3px solid #fff; box-shadow: var(--sombra);
 }
 .guia h3 { margin: 0; font-size: 20px; }
-.guia-sub { margin: 2px 0 0; font-size: 13.5px; opacity: 0.7; }
+.guia-sub { margin: 2px 0 0; font-size: 13.5px; color: var(--texto-2); }
 .dialogo > p { line-height: 1.6; font-size: 15px; }
 .guia-datos { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 6px; font-size: 14px; }
-.guia-datos strong { display: inline-block; width: 92px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+.guia-datos strong { display: inline-block; width: 92px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--texto-2); }
 .dialogo blockquote { margin: 0; padding: 12px 16px; background: #fdf0d2; border-radius: 14px; font-style: italic; line-height: 1.5; }
 
 .ayuda { display: grid; gap: 8px; margin: 16px 0; }
@@ -413,4 +448,9 @@ kbd {
   .dialogo { padding: 18px 16px 20px; }
   .hora button { padding: 6px 9px; }
   .hora button small { display: none; }
+}
+
+/* «reducir movimiento»: sin animaciones ni transiciones (los vuelos de cámara se saltan en Experience.tsx) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

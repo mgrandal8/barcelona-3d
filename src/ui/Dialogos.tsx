@@ -3,19 +3,40 @@ import { traducirLugar, useT, useTours } from '../i18n'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
+import { Icono } from './Icono'
+import { ICONO_MOMENTO } from '../scene/momento'
 
-/** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. */
+const ENFOCABLES = 'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
+
+/** Ventana modal con fondo; se cierra con Esc, con la ✕ o pulsando fuera. El foco no sale de ella y, al cerrar, vuelve adonde estaba. */
 function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; children: ReactNode }) {
   const setDialogo = useEstado((s) => s.setDialogo)
   const ref = useRef<HTMLDivElement>(null)
   const t = useT()
   useEffect(() => {
+    const antes = document.activeElement as HTMLElement | null
     ref.current?.focus()
     const tecla = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setDialogo(null)
+      if (e.key !== 'Tab' || !ref.current) return
+      // Tab da la vuelta dentro del diálogo
+      const lista = [...ref.current.querySelectorAll<HTMLElement>(ENFOCABLES)]
+      if (!lista.length) return
+      const [primero, ultimo] = [lista[0], lista[lista.length - 1]]
+      const fuera = !ref.current.contains(document.activeElement)
+      if (e.shiftKey && (document.activeElement === primero || document.activeElement === ref.current || fuera)) {
+        e.preventDefault()
+        ultimo.focus()
+      } else if (!e.shiftKey && (document.activeElement === ultimo || fuera)) {
+        e.preventDefault()
+        primero.focus()
+      }
     }
     window.addEventListener('keydown', tecla)
-    return () => window.removeEventListener('keydown', tecla)
+    return () => {
+      window.removeEventListener('keydown', tecla)
+      if (antes?.isConnected) antes.focus()
+    }
   }, [setDialogo])
   return (
     <div className="dialogo-fondo" onClick={(e) => e.target === e.currentTarget && setDialogo(null)}>
@@ -23,7 +44,7 @@ function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; 
         <header className="dialogo-cabecera">
           <h2>{titulo}</h2>
           <button className="panel-cerrar" onClick={() => setDialogo(null)} aria-label={t.cerrar}>
-            ✕
+            <Icono nombre="cerrar" />
           </button>
         </header>
         {children}
@@ -44,13 +65,13 @@ function Tours() {
         {useTours().map((t) => (
           <article key={t.id} className="tour" style={{ ['--color' as string]: t.color }}>
             <div className="tour-cabecera">
-              <span className="tour-icono" aria-hidden>
-                {t.icono}
+              <span className="tour-icono">
+                <Icono nombre={t.icono} />
               </span>
               <div>
                 <h3>{t.nombre}</h3>
                 <small>
-                  {t.duracion} · {horas[t.momento]}
+                  {t.duracion} · <Icono nombre={ICONO_MOMENTO[t.momento]} /> {horas[t.momento]}
                 </small>
               </div>
             </div>
@@ -95,7 +116,13 @@ function Guia() {
           <strong>{t.gruposEt}</strong> {t.grupos}
         </li>
         <li>
-          <strong>{t.valoracionEt}</strong> {t.valoracion}
+          <strong>{t.valoracionEt}</strong>{' '}
+          <span className="estrellas">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Icono key={i} nombre="estrella" />
+            ))}
+          </span>{' '}
+          {t.valoracion}
         </li>
       </ul>
       <blockquote>{t.cita}</blockquote>

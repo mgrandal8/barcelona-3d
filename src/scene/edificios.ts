@@ -1,6 +1,7 @@
 import { Color, ShapeUtils, Vector2 } from 'three'
 import { aleatorio } from './geo'
 import { ESCALA, metrosAY } from './geo'
+import { elevarRejilla, type Rejilla } from './relieve'
 
 // Lectura y extrusión de los edificios de OSM. Sin DOM ni WebGL: se ejecuta en edificios.worker.ts.
 
@@ -72,6 +73,8 @@ export function crearEdificios(
   huecos: { x: number; z: number; r: number }[],
   tamTrozo = 15,
   progreso?: (f: number) => void,
+  /** Si se da, se rellena con la altura de los tejados (para la oclusión de los pines). */
+  rejilla?: Rejilla,
 ): Trozo[] {
   const grupos = new Map<string, number[][]>()
   const areas = new Float32Array(edificios.length)
@@ -124,6 +127,16 @@ export function crearEdificios(
       const r = aleatorio(i)
       const y0 = suelo + metrosAY(e.base) - (e.base > 0 ? 0 : 0.02)
       const y1 = suelo + metrosAY(e.alto)
+      if (rejilla) {
+        let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity
+        for (let k = 0; k < n; k++) {
+          x0 = Math.min(x0, e.pts[k * 2])
+          x1 = Math.max(x1, e.pts[k * 2])
+          z0 = Math.min(z0, e.pts[k * 2 + 1])
+          z1 = Math.max(z1, e.pts[k * 2 + 1])
+        }
+        elevarRejilla(rejilla, x0, z0, x1, z1, y1)
+      }
       const paleta = e.alto > 70 ? ['#b4c2cb', '#c9cfd1'] : (COLOR_TIPO[e.tipo] ?? (e.tipo === 5 ? CASAS : FACHADAS))
       c.set(paleta[Math.floor(r * 97) % paleta.length])
       const conTeja = e.tipo === 5 || (e.tipo === 0 && areas[i] < 0.03 && e.alto < 14 && r < 0.55)
