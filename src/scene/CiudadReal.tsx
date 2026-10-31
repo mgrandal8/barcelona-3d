@@ -34,9 +34,10 @@ function Terreno() {
 }
 
 /**
- * Ventanas encendidas de noche, sin geometría: en las paredes (normal casi horizontal) se dibuja una
- * rejilla de plantas de 3,2 m y huecos de 4,5 m, y se enciende una parte de las celdas al azar.
- * De lejos, cuando la celda ocupa menos de un píxel, se usa el brillo medio para que no parpadee.
+ * Ventanas sin geometría: en las paredes (normal casi horizontal) se dibuja una rejilla de plantas de 3,2 m y
+ * huecos de 4,5 m. De día los huecos son cristal oscuro o persianas (verdes o de madera, como en Barcelona);
+ * de noche se enciende una parte al azar. De lejos, cuando la celda ocupa menos de un píxel, se usa el valor
+ * medio para que no parpadee.
  */
 function conVentanas(m: THREE.MeshStandardMaterial) {
   m.onBeforeCompile = (s) => {
@@ -53,24 +54,39 @@ function conVentanas(m: THREE.MeshStandardMaterial) {
         float azar2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }`,
       )
       .replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        float vHueco = 0.0;
+        float vLejos = 1.0;
+        vec2 vId = vec2(0.0);
+        vec3 nW = normalize(cross(dFdx(vPosW), dFdy(vPosW)));
+        bool pared = abs(nW.y) < 0.35;
+        if (pared) {
+          vec2 tg = normalize(vec2(-nW.z, nW.x));
+          vec2 celda = vec2(dot(vPosW.xz, tg) / 0.045, vPosW.y / ${(3.2 * 1.6) / 100});
+          vId = floor(celda);
+          vec2 f = fract(celda);
+          vHueco = step(0.22, f.x) * step(f.x, 0.78) * step(0.28, f.y) * step(f.y, 0.82);
+          vLejos = smoothstep(0.35, 1.0, max(fwidth(celda.x), fwidth(celda.y)));
+          // de día: cristal que refleja el cielo, o persianas verdes o de madera
+          float tipo = azar2(vId + 3.1);
+          vec3 hueco = tipo < 0.16 ? diffuseColor.rgb * vec3(0.45, 0.62, 0.48) : tipo < 0.28 ? diffuseColor.rgb * vec3(0.72, 0.6, 0.48) : vec3(0.27, 0.32, 0.38);
+          float dia = 1.0 - uNoche * 0.6;
+          diffuseColor.rgb = mix(diffuseColor.rgb, hueco, vHueco * (1.0 - vLejos) * 0.62 * dia);
+          // de lejos, la fachada se oscurece un poco en lugar de dibujar las ventanas
+          diffuseColor.rgb *= 1.0 - vLejos * 0.08 * dia;
+        }`,
+      )
+      .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
-        if (uNoche > 0.001) {
-          vec3 nW = normalize(cross(dFdx(vPosW), dFdy(vPosW)));
-          if (abs(nW.y) < 0.35) {
-            vec2 tg = normalize(vec2(-nW.z, nW.x));
-            vec2 celda = vec2(dot(vPosW.xz, tg) / 0.045, vPosW.y / ${(3.2 * 1.6) / 100});
-            vec2 id = floor(celda);
-            vec2 f = fract(celda);
-            float h = azar2(id);
-            float prob = 0.42 * uNoche;
-            float encendida = step(1.0 - prob, h);
-            float hueco = step(0.22, f.x) * step(f.x, 0.78) * step(0.28, f.y) * step(f.y, 0.82);
-            float lejos = smoothstep(0.35, 1.0, max(fwidth(celda.x), fwidth(celda.y)));
-            float v = mix(hueco * encendida, 0.12 * prob, lejos);
-            vec3 tono = mix(vec3(1.0, 0.72, 0.38), vec3(0.75, 0.85, 1.0), step(0.86, azar2(id + 7.3)));
-            totalEmissiveRadiance += tono * v * 2.2;
-          }
+        if (uNoche > 0.001 && pared) {
+          float h = azar2(vId);
+          float prob = 0.42 * uNoche;
+          float encendida = step(1.0 - prob, h);
+          float v = mix(vHueco * encendida, 0.12 * prob, vLejos);
+          vec3 tono = mix(vec3(1.0, 0.72, 0.38), vec3(0.75, 0.85, 1.0), step(0.86, azar2(vId + 7.3)));
+          totalEmissiveRadiance += tono * v * 2.2;
         }`,
       )
   }

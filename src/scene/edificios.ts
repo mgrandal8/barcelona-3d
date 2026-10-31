@@ -50,6 +50,30 @@ const COLOR_TIPO: Record<number, string[]> = {
   3: ['#b9b3a8'],
   4: ['#e8d7ba', '#ddd0bd'],
 }
+/**
+ * Fachadas por zona (índices de ZONAS en scripts/datos/nombres.mjs) y proporción de tejados de teja.
+ * La zona 0 (fuera de Barcelona y l'Hospitalet) usa FACHADAS.
+ */
+const OCRES = ['#e8c48f', '#dcae78', '#e6b98a', '#d9a06e', '#efd3a6', '#c98f62', '#e3c7a0', '#f0dcb8']
+const PIEDRA = ['#efe1c6', '#e8d5b0', '#f2e6cf', '#dccaa8', '#e9d9bd', '#d8c3a0', '#f4ead6']
+const PASTEL = ['#f2c9a6', '#ecd59b', '#f0b9a0', '#e9d2b8', '#f3dcb2', '#e6bfa0', '#f1e2c8']
+const LADRILLO_NUEVO = ['#c98a6a', '#d9a184', '#e3ddd3', '#cfcac0', '#b97a5c', '#e9e4da', '#d7cfc2']
+const BLANCOS = ['#f4f0e8', '#ece6da', '#f6efe2', '#e6dfd2', '#f2ead8', '#e9e2d4']
+const BARRIO = ['#e8c9a8', '#d8a888', '#efdcc0', '#cf9f80', '#e6d4ba', '#dcb898', '#f0e2cc']
+const ZONA: { fachadas: string[]; tejas: number }[] = [
+  { fachadas: FACHADAS, tejas: 0.55 },
+  { fachadas: OCRES, tejas: 0.5 }, // Ciutat Vella
+  { fachadas: PIEDRA, tejas: 0.3 }, // l'Eixample
+  { fachadas: BARRIO, tejas: 0.55 }, // Sants-Montjuïc
+  { fachadas: BLANCOS, tejas: 0.6 }, // les Corts
+  { fachadas: BLANCOS, tejas: 0.7 }, // Sarrià - Sant Gervasi
+  { fachadas: PASTEL, tejas: 0.6 }, // Gràcia
+  { fachadas: BARRIO, tejas: 0.65 }, // Horta-Guinardó
+  { fachadas: BARRIO, tejas: 0.55 }, // Nou Barris
+  { fachadas: BARRIO, tejas: 0.6 }, // Sant Andreu
+  { fachadas: LADRILLO_NUEVO, tejas: 0.4 }, // Sant Martí
+  { fachadas: BARRIO, tejas: 0.5 }, // l'Hospitalet
+]
 const AZOTEAS = ['#e6e1d8', '#dcd6cb', '#ece7de', '#d6cfc2', '#e9dccb']
 const TEJAS = ['#c4643f', '#b85a3b', '#cc744c']
 
@@ -140,9 +164,10 @@ export function crearEdificios(
         }
         elevarRejilla(rejilla, x0, z0, x1, z1, y1)
       }
-      const paleta = e.alto > 70 ? ['#b4c2cb', '#c9cfd1'] : (COLOR_TIPO[e.tipo] ?? (e.tipo === 5 ? CASAS : FACHADAS))
+      const zona = ZONA[e.zona] ?? ZONA[0]
+      const paleta = e.alto > 70 ? ['#b4c2cb', '#c9cfd1'] : (COLOR_TIPO[e.tipo] ?? (e.tipo === 5 ? CASAS : zona.fachadas))
       c.set(paleta[Math.floor(r * 97) % paleta.length])
-      const conTeja = e.tipo === 5 || (e.tipo === 0 && areas[i] < 0.03 && e.alto < 14 && r < 0.55)
+      const conTeja = e.tipo === 5 || (e.tipo === 0 && areas[i] < 0.03 && e.alto < 14 && r < zona.tejas)
       cTecho.set(conTeja ? TEJAS[Math.floor(r * 31) % TEJAS.length] : e.tipo === 1 ? '#bda57e' : AZOTEAS[Math.floor(r * 53) % AZOTEAS.length])
       // anillos: base (n), alto de pared (n), techo (n)
       for (let k = 0; k < n; k++) {
