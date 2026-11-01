@@ -192,7 +192,7 @@ if (bloques.includes('compartir')) {
   await page.waitForFunction(() => window.__enVuelo(), null, { timeout: 60000 })
   await page.locator('.panel-compartir').evaluate((b) => b.click())
   const enlace2 = await page.locator('.compartir-enlace input').inputValue()
-  ok(enlace2.includes('lugar=casa-batllo') && !enlace2.includes('vista='), 'desde la ficha, el enlace lleva el lugar: ' + enlace2)
+  ok(enlace2.includes('/lugar/casa-batllo/') && !enlace2.includes('vista='), 'desde la ficha, el enlace lleva el lugar: ' + enlace2)
   await page.waitForSelector('.compartir-imagen img', { timeout: 180000 })
   ok((await page.locator('.compartir-botones a[download]').getAttribute('download')) === 'barcelona-3d-casa-batllo.png', 'y la imagen se llama como el lugar')
   // guarda la imagen para revisarla a ojo, ya con la cámara en el lugar
