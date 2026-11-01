@@ -1,6 +1,7 @@
 import { MONUMENTOS, porId, type Monumento } from '../data/monumentos'
 import { TOURS, tourPorId, type Tour } from '../data/tours'
 import { useEstado } from '../store'
+import { ca } from './ca'
 import { en } from './en'
 import { es } from './es'
 import type { Idioma, Traduccion } from './idioma'
@@ -8,7 +9,7 @@ import type { Idioma, Traduccion } from './idioma'
 export type { Idioma }
 
 // el español es el idioma de los datos: no lleva traducción
-const TRADUCCIONES: Record<Idioma, Traduccion | null> = { es: null, en }
+const TRADUCCIONES: Record<Idioma, Traduccion | null> = { es: null, ca, en }
 
 export const textosDe = (i: Idioma) => TRADUCCIONES[i]?.textos ?? es
 

@@ -1,8 +1,8 @@
 import type { Monumento } from '../data/monumentos'
 import type { Textos } from './es'
 
-export type Idioma = 'es' | 'en'
-export const IDIOMAS: Idioma[] = ['es', 'en']
+export type Idioma = 'es' | 'ca' | 'en'
+export const IDIOMAS: Idioma[] = ['es', 'ca', 'en']
 
 type TextoLugar = Pick<Monumento, 'nombre' | 'etiqueta' | 'descripcion' | 'horario' | 'precio' | 'duracion' | 'consejo'>
 
@@ -27,7 +27,8 @@ export function idiomaInicial(): Idioma {
     // sin almacenamiento se decide por el navegador
   }
   const nav = navigator.language?.slice(0, 2)
-  return esIdioma(nav) ? nav : nav === 'ca' ? 'es' : 'en'
+  // con gallego o euskera, mejor el español que el inglés
+  return esIdioma(nav) ? nav : nav === 'gl' || nav === 'eu' ? 'es' : 'en'
 }
 
 export function guardarIdioma(i: Idioma) {

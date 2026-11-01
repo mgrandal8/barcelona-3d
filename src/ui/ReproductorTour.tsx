@@ -25,7 +25,7 @@ function vozGuardada() {
 function leer(texto: string, idioma: string, fin: () => void) {
   speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(texto)
-  u.lang = idioma === 'en' ? 'en-GB' : 'es-ES'
+  u.lang = ({ es: 'es-ES', ca: 'ca-ES', en: 'en-GB' } as Record<string, string>)[idioma] ?? 'es-ES'
   const voz = speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith(idioma))
   if (voz) u.voice = voz
   u.rate = 1.02
