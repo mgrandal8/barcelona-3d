@@ -49,7 +49,7 @@ if (bloques.includes('idioma')) {
   await page.evaluate(() => window.__estado.getState().empezarTour('gaudi'))
   await page.locator('.menu .idioma button', { hasText: 'EN' }).click({ force: true })
   await page.waitForTimeout(300)
-  ok((await texto(page, '.panel-tour')).includes('stop 1 of 3'), 'tour en inglés')
+  ok((await texto(page, '.panel-tour')).includes('stop 1 of 4'), 'tour en inglés')
   if (errores.length) console.log('ERRORES:\n' + errores.join('\n'))
   await ctx.close()
 }

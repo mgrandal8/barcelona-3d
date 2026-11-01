@@ -177,6 +177,8 @@ export function CapaPines() {
         const miembros = g.map((id) => lugares[indice(id)])
         const nums = g.map(num)
         const nombres = miembros.map((m) => m.nombre)
+        // el nombre accesible empieza por lo que se ve en el pin (WCAG 2.5.3)
+        const visible = nums.length <= 3 ? nums.join(' · ') : t.pines.lugares(nums.length)
         const clave = g.join('+')
         return (
           <button
@@ -187,7 +189,7 @@ export function CapaPines() {
             }}
             className="pin pin-grupo"
             style={tour && g.some((id) => paradas.includes(id)) ? { ['--color' as string]: tour.color } : undefined}
-            aria-label={t.pines.grupo(nombres.join(', '))}
+            aria-label={t.pines.grupo(visible, nombres.join(', '))}
             title={nombres.join(' · ')}
             onClick={() => {
               // se acerca lo justo para que los pines del grupo se separen
@@ -199,7 +201,7 @@ export function CapaPines() {
             }}
           >
             <span className="pin-num" aria-hidden="true">
-              {nums.length <= 3 ? nums.join(' · ') : t.pines.lugares(nums.length)}
+              {visible}
             </span>
           </button>
         )

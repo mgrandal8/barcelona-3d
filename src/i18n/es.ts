@@ -59,7 +59,7 @@ export const es = {
     metroNo: 'Capa de metro oculta',
   },
   pines: {
-    grupo: (nombres: string) => `${nombres}: acercar para verlos por separado`,
+    grupo: (visible: string, nombres: string) => `${visible}: ${nombres}. Acercar para verlos por separado`,
     lugares: (n: number) => `${n} lugares`,
     fuera: (nombre: string) => `${nombre}, fuera de la vista: ir al lugar`,
   },

@@ -62,7 +62,7 @@ const textos: Textos = {
     metroNo: 'Metro layer hidden',
   },
   pines: {
-    grupo: (nombres: string) => `${nombres}: zoom in to see them separately`,
+    grupo: (visible: string, nombres: string) => `${visible}: ${nombres}. Zoom in to see them separately`,
     lugares: (n: number) => `${n} places`,
     fuera: (nombre: string) => `${nombre}, out of view: go to the place`,
   },

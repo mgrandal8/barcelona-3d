@@ -176,7 +176,10 @@ if (bloques.includes('pines')) {
     const { grupos } = await pines(page)
     ok(grupos.length > 0, 'desde lejos hay grupos: ' + JSON.stringify(grupos))
     await page.locator('.pin-grupo').first().click({ force: true })
-    await page.waitForTimeout(8000)
+    // espera a que termine el vuelo (con SwiftShader, bastante más que en una GPU) y a otro cálculo de grupos
+    await page.waitForTimeout(2000)
+    await page.waitForFunction(() => !window.__enVuelo(), null, { timeout: 120000, polling: 1000 })
+    await page.waitForTimeout(3000)
     const despues = (await pines(page)).grupos.flat()
     ok(grupos[0].every((id) => !despues.includes(id)), 'al pulsar el grupo se separan: ' + JSON.stringify(despues))
     await ctx.close()
