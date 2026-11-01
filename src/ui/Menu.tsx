@@ -8,6 +8,7 @@ const OPCIONES: { id: Dialogo; icono: NombreIcono }[] = [
   { id: 'tours', icono: 'brujula' },
   { id: 'guia', icono: 'guia' },
   { id: 'ayuda', icono: 'ayuda' },
+  { id: 'compartir', icono: 'compartir' },
 ]
 
 /** Accesos a los tours, al guía y a la ayuda de controles. */

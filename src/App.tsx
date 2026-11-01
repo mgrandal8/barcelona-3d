@@ -13,6 +13,7 @@ import { AvisoRed } from './ui/AvisoRed'
 import { CapaPines } from './ui/CapaPines'
 import { CapaNombres } from './ui/CapaNombres'
 import { Anunciador } from './ui/Anunciador'
+import { ReproductorTour } from './ui/ReproductorTour'
 import { ErrorMaqueta } from './ui/ErrorMaqueta'
 import { AvisoLigera, VersionLigera } from './ui/VersionLigera'
 
@@ -26,13 +27,14 @@ export default function App() {
   const fallo = useEstado((s) => s.fallo)
   const reintentos = useEstado((s) => s.reintentos)
   const ligera = useEstado((s) => s.modo) === 'ligero'
+  const reproduciendo = useEstado((s) => s.reproduciendo)
   const t = useT()
   useEffect(() => {
     document.documentElement.lang = idioma
     document.title = t.tituloPagina
   }, [idioma, t])
   return (
-    <main className={['app', portada && 'con-portada', ligera && 'en-ligera'].filter(Boolean).join(' ')}>
+    <main className={['app', portada && 'con-portada', ligera && 'en-ligera', reproduciendo && 'reproduciendo'].filter(Boolean).join(' ')}>
       <a className="saltar" href="#lista">
         {t.maqueta.saltar}
       </a>
@@ -60,6 +62,7 @@ export default function App() {
       {!ligera && <BotonMetro />}
       <Menu />
       <PanelInfo />
+      <ReproductorTour />
       <p className="atribucion">
         {t.atribucion.mapa}: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · {t.atribucion.relieve}: Mapzen/AWS
         Terrain Tiles · {t.atribucion.ejemplo}

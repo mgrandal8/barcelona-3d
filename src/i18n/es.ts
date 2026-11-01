@@ -30,6 +30,7 @@ export const es = {
     tours: 'Tours',
     guia: 'El guía',
     ayuda: 'Ayuda',
+    compartir: 'Compartir',
     idioma: 'Idioma',
   },
   hora: {
@@ -60,6 +61,7 @@ export const es = {
   pines: {
     grupo: (nombres: string) => `${nombres}: acercar para verlos por separado`,
     lugares: (n: number) => `${n} lugares`,
+    fuera: (nombre: string) => `${nombre}, fuera de la vista: ir al lugar`,
   },
   panel: {
     parada: (i: number, n: number) => `parada ${i} de ${n}`,
@@ -78,6 +80,32 @@ export const es = {
     titulo: 'Tours de ejemplo',
     intro: 'Tres rutas a pie con guía. Al empezar una, la maqueta te lleva de parada en parada.',
     empezar: 'Empezar tour',
+    reproducir: 'Reproducir',
+    reproducirEtiqueta: (n: string) => `Reproducir el tour «${n}»: la maqueta pasa sola de parada en parada`,
+  },
+  reproductor: {
+    etiqueta: 'Tour automático',
+    reproducir: 'Reproducir tour',
+    pausar: 'Pausar y ver la ficha',
+    siguiente: 'Siguiente parada',
+    vozSi: 'Leer las notas en voz alta',
+    vozNo: 'Silenciar la voz',
+    fin: 'Fin del tour. ¡Gracias por venir!',
+  },
+  compartir: {
+    titulo: 'Compartir',
+    intro: 'El enlace abre la maqueta en esta misma vista, con la hora del día y el lugar o el tour que tengas abiertos.',
+    enlace: 'Enlace',
+    copiar: 'Copiar enlace',
+    copiado: 'Copiado',
+    descargar: 'Descargar imagen',
+    compartir: 'Compartir…',
+    preparando: 'Preparando la imagen…',
+    sinImagen: 'En la versión ligera solo se comparte el enlace.',
+    imagen: 'Imagen para redes de la vista actual',
+    general: 'Descubre Barcelona',
+    lema: 'Maqueta 3D de la ciudad',
+    texto: (n: string) => `${n} en la maqueta 3D de Barcelona`,
   },
   guia: {
     titulo: 'Sobre el guía',

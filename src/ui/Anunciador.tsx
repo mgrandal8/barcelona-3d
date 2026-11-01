@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { traducirLugar, useT } from '../i18n'
+import { traducirLugar, traducirTour, useT } from '../i18n'
 import { porId } from '../data/monumentos'
 import { tourPorId } from '../data/tours'
 import { useEstado } from '../store'
@@ -16,9 +16,12 @@ export function Anunciador() {
           const m = porId(s.seleccionado)
           if (!m) return setTexto(t.maqueta.vistaGeneral)
           const nombre = traducirLugar(m, s.idioma).nombre
-          const paradas = tourPorId(s.tour)?.paradas.map((p) => p.id) ?? []
+          const tour = tourPorId(s.tour)
+          const paradas = tour?.paradas.map((p) => p.id) ?? []
           const i = paradas.indexOf(m.id)
-          setTexto(t.maqueta.mostrando(i >= 0 ? `${nombre}, ${t.panel.parada(i + 1, paradas.length)}` : nombre))
+          const texto = t.maqueta.mostrando(i >= 0 ? `${nombre}, ${t.panel.parada(i + 1, paradas.length)}` : nombre)
+          // en el tour automático la ficha está escondida: se lee también la nota del guía
+          setTexto(tour && i >= 0 && s.reproduciendo ? `${texto}. ${traducirTour(tour, s.idioma).paradas[i].nota}` : texto)
         } else if (s.momento !== antes.momento) setTexto(t.maqueta.hora(t.hora[s.momento]))
         else if (s.metro !== antes.metro) setTexto(s.metro ? t.maqueta.metroSi : t.maqueta.metroNo)
       }),

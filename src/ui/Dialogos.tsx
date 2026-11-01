@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
 import { traducirLugar, useT, useTours } from '../i18n'
 import { porId } from '../data/monumentos'
 import { useEstado } from '../store'
@@ -55,6 +55,7 @@ function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; 
 
 function Tours() {
   const empezarTour = useEstado((s) => s.empezarTour)
+  const reproducirTour = useEstado((s) => s.reproducirTour)
   const idioma = useEstado((s) => s.idioma)
   const tx = useT()
   const horas = { dia: tx.hora.tourDia, atardecer: tx.hora.tourAtardecer, noche: tx.hora.tourNoche }
@@ -83,6 +84,9 @@ function Tours() {
             </ol>
             <footer>
               <strong>{t.precio}</strong>
+              <button className="tour-play" onClick={() => reproducirTour(t.id)} aria-label={tx.tours.reproducirEtiqueta(t.nombre)}>
+                <Icono nombre="play" /> {tx.tours.reproducir}
+              </button>
               <button className="primario" onClick={() => empezarTour(t.id)}>
                 {tx.tours.empezar}
               </button>
@@ -153,10 +157,25 @@ function Ayuda() {
   )
 }
 
+// la imagen para redes y el enlace solo se cargan al abrir el diálogo
+const Compartir = lazy(() => import('./Compartir').then((m) => ({ default: m.Compartir })))
+
+function DialogoCompartir() {
+  const t = useT().compartir
+  return (
+    <Dialogo titulo={t.titulo} ancho={620}>
+      <Suspense fallback={null}>
+        <Compartir />
+      </Suspense>
+    </Dialogo>
+  )
+}
+
 export function Dialogos() {
   const d = useEstado((s) => s.dialogo)
   if (d === 'tours') return <Tours />
   if (d === 'guia') return <Guia />
   if (d === 'ayuda') return <Ayuda />
+  if (d === 'compartir') return <DialogoCompartir />
   return null
 }

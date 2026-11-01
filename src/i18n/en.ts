@@ -33,6 +33,7 @@ const textos: Textos = {
     tours: 'Tours',
     guia: 'Your guide',
     ayuda: 'Help',
+    compartir: 'Share',
     idioma: 'Language',
   },
   hora: {
@@ -63,6 +64,7 @@ const textos: Textos = {
   pines: {
     grupo: (nombres: string) => `${nombres}: zoom in to see them separately`,
     lugares: (n: number) => `${n} places`,
+    fuera: (nombre: string) => `${nombre}, out of view: go to the place`,
   },
   panel: {
     parada: (i: number, n: number) => `stop ${i} of ${n}`,
@@ -81,6 +83,32 @@ const textos: Textos = {
     titulo: 'Sample tours',
     intro: 'Three guided walking routes. Start one and the model takes you from stop to stop.',
     empezar: 'Start tour',
+    reproducir: 'Play',
+    reproducirEtiqueta: (n: string) => `Play the “${n}” tour: the model moves from stop to stop by itself`,
+  },
+  reproductor: {
+    etiqueta: 'Self-playing tour',
+    reproducir: 'Play tour',
+    pausar: 'Pause and show details',
+    siguiente: 'Next stop',
+    vozSi: 'Read the notes aloud',
+    vozNo: 'Mute the voice',
+    fin: 'End of the tour. Thanks for coming!',
+  },
+  compartir: {
+    titulo: 'Share',
+    intro: 'The link opens the model at this same view, with the time of day and the place or tour you have open.',
+    enlace: 'Link',
+    copiar: 'Copy link',
+    copiado: 'Copied',
+    descargar: 'Download image',
+    compartir: 'Share…',
+    preparando: 'Preparing the image…',
+    sinImagen: 'In the light version only the link is shared.',
+    imagen: 'Social media image of the current view',
+    general: 'Discover Barcelona',
+    lema: '3D model of the city',
+    texto: (n: string) => `${n} on the 3D model of Barcelona`,
   },
   guia: {
     titulo: 'About your guide',

@@ -23,6 +23,7 @@ export function PanelInfo() {
   const i = lista.indexOf(id ?? '')
   const ir = (paso: number) => setSeleccionado(lista[(i + paso + lista.length) % lista.length])
   const parada = tour?.paradas[i]
+  const reproduciendo = useEstado((s) => s.reproduciendo)
 
   // al abrirse, el foco va al título de la ficha; al cerrarse, vuelve adonde estaba (el pin o la lista)
   const titulo = useRef<HTMLHeadingElement>(null)
@@ -43,21 +44,35 @@ export function PanelInfo() {
     }
   }, [abierta])
 
+  // al pausar el tour automático vuelve la ficha: el foco va a su título
+  const reproducia = useRef(reproduciendo)
+  useEffect(() => {
+    if (reproducia.current && !reproduciendo && abierta) titulo.current?.focus({ preventScroll: true })
+    reproducia.current = reproduciendo
+  }, [reproduciendo, abierta])
+
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
       // con un diálogo abierto, Esc cierra solo el diálogo
-      if (e.key === 'Escape' && !useEstado.getState().dialogo) setSeleccionado(null)
+      // y en el tour automático, Esc lo pausa (vuelve la ficha)
+      const s = useEstado.getState()
+      if (e.key !== 'Escape' || s.dialogo) return
+      if (s.reproduciendo) s.setReproduciendo(false)
+      else setSeleccionado(null)
     }
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
   }, [setSeleccionado])
 
   return (
-    <aside className={`panel ${m ? 'abierto' : ''}`} aria-hidden={!m}>
+    <aside className={`panel ${m && !reproduciendo ? 'abierto' : ''}`} aria-hidden={!m || reproduciendo}>
       {m && (
         <>
           <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label={t.volverMapa}>
             <Icono nombre="cerrar" />
+          </button>
+          <button className="panel-cerrar panel-compartir" onClick={() => useEstado.getState().setDialogo('compartir')} aria-label={tt.compartir.titulo} title={tt.compartir.titulo}>
+            <Icono nombre="compartir" />
           </button>
           {tour && parada && (
             <div className="panel-tour" style={{ ['--color' as string]: tour.color }}>
@@ -70,6 +85,9 @@ export function PanelInfo() {
                 ))}
               </div>
               <p className="panel-tour-nota">{parada.nota}</p>
+              <button className="panel-tour-play" onClick={() => useEstado.getState().reproducirTour()}>
+                <Icono nombre="play" /> {tt.reproductor.reproducir}
+              </button>
             </div>
           )}
           <p className="panel-etiqueta">
