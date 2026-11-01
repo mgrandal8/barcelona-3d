@@ -58,7 +58,10 @@ export function estacionCercana(t: Transporte, x: number, z: number) {
 
 /** Texto oscuro sobre los colores claros (L4 amarilla, L11 verde lima, L12 lila). */
 export function textoSobre(color: string) {
+  // luminancia relativa de WCAG: el texto, oscuro o blanco, que dé más contraste (con la L3 verde, el blanco no llega a 3:1)
   const n = parseInt(color.slice(1), 16)
-  const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)
-  return lum > 150 ? '#1d1a17' : '#ffffff'
+  const canal = (c: number) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+  const l = 0.2126 * canal(n >> 16) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255)
+  // #1d1a17 tiene una luminancia de ~0,011
+  return (l + 0.05) / 0.061 > 1.05 / (l + 0.05) ? '#1d1a17' : '#ffffff'
 }

@@ -2,12 +2,15 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "es2023",
-    "lib": ["ES2023"],
-    "types": ["node"],
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vite/client"],
+    "jsx": "react-jsx",
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "module": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
@@ -19,5 +22,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
+  // vite.config.ts importa src/seo.ts (y con él, datos y textos): por eso resolución de bundler, DOM y JSX
   "include": ["vite.config.ts"]
 }

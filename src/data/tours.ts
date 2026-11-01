@@ -1,7 +1,7 @@
 import type { Momento } from '../scene/momento'
 import type { NombreIcono } from '../ui/Icono'
 
-// Tours de ejemplo para la demo: ni el guía ni los precios son reales.
+// Tours de ejemplo para la demo: ni la guía ni los precios de los tours son reales (los de los lugares sí: monumentos.ts).
 
 export type Tour = {
   id: string
@@ -61,7 +61,7 @@ export const TOURS: Tour[] = [
     momento: 'noche',
     paradas: [
       { id: 'torre-glories', nota: 'A las 21:00 la torre se ilumina; la vemos desde la plaza de las Glòries.' },
-      { id: 'montjuic', nota: 'Espectáculo de agua, luz y música en la Font Màgica (de jueves a domingo).' },
+      { id: 'montjuic', nota: 'Espectáculo de agua, luz y música en la Font Màgica, los días que hay función.' },
       { id: 'barceloneta', nota: 'Cerramos con un paseo junto al mar hasta el Hotel W.' },
     ],
   },

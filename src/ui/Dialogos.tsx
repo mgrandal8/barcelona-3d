@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
-import { traducirLugar, useT, useTours } from '../i18n'
-import { porId } from '../data/monumentos'
+import { fechaLarga, traducirLugar, useLugares, useT, useTours } from '../i18n'
+import { CONSULTADO, porId } from '../data/monumentos'
+import { ANALITICA } from '../analitica'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
 import { Icono } from './Icono'
@@ -153,6 +154,11 @@ function Ayuda() {
       </dl>
       <p className="dialogo-intro">{t.intro}</p>
       <SinConexion />
+      <p className="dialogo-pie">
+        <button className="enlace" onClick={() => useEstado.getState().setDialogo('legal')}>
+          {useT().legal.titulo}
+        </button>
+      </p>
     </Dialogo>
   )
 }
@@ -171,11 +177,78 @@ function DialogoCompartir() {
   )
 }
 
+/** Privacidad (sin cookies, ubicación local, analítica) y créditos: mapa, relieve, horarios, fotos y código. */
+function Legal() {
+  const tt = useT()
+  const t = tt.legal
+  const idioma = useEstado((s) => s.idioma)
+  const lugares = useLugares()
+  const fuera = { target: '_blank', rel: 'noopener' }
+  return (
+    <Dialogo titulo={t.titulo} ancho={620}>
+      <div className="legal">
+        <h3>{t.privacidad}</h3>
+        <ul>
+          {t.puntos.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+          <li>{ANALITICA ? t.analiticaSi(ANALITICA) : t.analiticaNo}</li>
+          <li>
+            {t.alojamiento}{' '}
+            <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" {...fuera}>
+              {t.politicaGithub}
+            </a>
+            .
+          </li>
+        </ul>
+        <h3>{t.creditos}</h3>
+        <dl>
+          <dt>{t.mapa}</dt>
+          <dd>
+            © <a href="https://www.openstreetmap.org/copyright" {...fuera}>OpenStreetMap contributors</a>, ODbL
+          </dd>
+          <dt>{t.relieve}</dt>
+          <dd>
+            <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" {...fuera}>
+              Mapzen/AWS Terrain Tiles
+            </a>{' '}
+            (SRTM, GMTED, ETOPO1…)
+          </dd>
+          <dt>{t.horarios}</dt>
+          <dd>{t.horariosTexto(fechaLarga(CONSULTADO, idioma))}</dd>
+          <dt>{t.fotos}</dt>
+          <dd>
+            <ul className="legal-fotos">
+              {lugares
+                .filter((m) => m.foto)
+                .map((m) => (
+                  <li key={m.id}>
+                    {m.nombre}:{' '}
+                    <a href={m.foto!.pagina} {...fuera}>
+                      {m.foto!.autor}
+                    </a>
+                    , {m.foto!.urlLicencia ? <a href={m.foto!.urlLicencia} target="_blank" rel="noopener license">{m.foto!.licencia}</a> : m.foto!.licencia}
+                    {m.foto!.recortada && `, ${t.recortada}`} · Wikimedia Commons
+                  </li>
+                ))}
+            </ul>
+          </dd>
+          <dt>{t.codigo}</dt>
+          <dd>{t.codigoTexto}</dd>
+          <dt>{t.ejemplo}</dt>
+          <dd>{t.ejemploTexto}</dd>
+        </dl>
+      </div>
+    </Dialogo>
+  )
+}
+
 export function Dialogos() {
   const d = useEstado((s) => s.dialogo)
   if (d === 'tours') return <Tours />
   if (d === 'guia') return <Guia />
   if (d === 'ayuda') return <Ayuda />
   if (d === 'compartir') return <DialogoCompartir />
+  if (d === 'legal') return <Legal />
   return null
 }

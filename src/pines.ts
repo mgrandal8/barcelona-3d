@@ -11,6 +11,9 @@ export const pantalla = {
   ver: [] as boolean[],
   /** Fuera de la pantalla, en una vista alta y sin lugar elegido: se indica en el borde con una flecha. */
   fuera: [] as boolean[],
+  /** Base del lugar en pantalla (el suelo, no el pin, que de cerca queda fuera): la usa la imagen de compartir. */
+  baseX: [] as number[],
+  baseY: [] as number[],
   /** Detrás de la cámara: la proyección sale invertida. */
   detras: [] as boolean[],
   /** Lugares que se solapan en pantalla, por id; solo cambia cuando cambia la composición. */

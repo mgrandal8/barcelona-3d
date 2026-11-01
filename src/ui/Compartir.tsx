@@ -16,7 +16,7 @@ import type { Textos } from '../i18n/es'
 const ANCHO = 1200
 const ALTO = 630
 /** Parámetros que no se comparten: son de pruebas o de este dispositivo. */
-const PRIVADOS = ['captura', 'entrada', 'cam', 'vista', 'modo', 'calidad', 'postpro', 'nombres']
+const PRIVADOS = ['captura', 'entrada', 'cam', 'vista', 'modo', 'calidad', 'postpro', 'nombres', 'dominio']
 
 function enlaceCompartir() {
   const url = new URL(location.href)
@@ -24,7 +24,7 @@ function enlaceCompartir() {
   url.hash = ''
   // con un lugar abierto basta con el lugar (se llega volando); si no, la vista de la cámara
   const vista = escena.vista?.()
-  if (!url.searchParams.has('lugar') && vista) url.searchParams.set('vista', vista.join(','))
+  if (!useEstado.getState().seleccionado && vista) url.searchParams.set('vista', vista.join(','))
   // las comas de la vista se leen mejor sin escapar (también son válidas en la consulta)
   return url.toString().replace(/%2C/g, ',')
 }
@@ -67,13 +67,14 @@ async function componerImagen(t: Textos): Promise<Blob | null> {
   const css = document.querySelector<HTMLElement>('.maqueta')?.clientWidth || innerWidth
   const k = foto.width / css
   const i = MONUMENTOS.findIndex((m) => m.id === s.seleccionado)
-  const cx = i >= 0 ? pantalla.x[i] * k : foto.width / 2
-  const cy = i >= 0 ? pantalla.y[i] * k : foto.height / 2
+  const cx = i >= 0 ? pantalla.baseX[i] * k : foto.width / 2
+  const cy = i >= 0 ? pantalla.baseY[i] * k : foto.height / 2
   let [sw, sh] = [foto.width, foto.height]
   if (sw / sh > ANCHO / ALTO) sw = sh * (ANCHO / ALTO)
   else sh = sw / (ANCHO / ALTO)
   const sx = Math.min(foto.width - sw, Math.max(0, cx - sw / 2))
-  const sy = Math.min(foto.height - sh, Math.max(0, cy - sh / 2))
+  // la base del lugar, un poco por debajo del centro: el edificio cabe por encima y el rótulo no lo tapa
+  const sy = Math.min(foto.height - sh, Math.max(0, cy - sh * (i >= 0 ? 0.62 : 0.5)))
   ctx.drawImage(foto, sx, sy, sw, sh, 0, 0, ANCHO, ALTO)
   const escala = ANCHO / sw
 
@@ -135,7 +136,8 @@ async function componerImagen(t: Textos): Promise<Blob | null> {
   ctx.textAlign = 'right'
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
   ctx.font = "600 19px system-ui, -apple-system, 'Segoe UI', sans-serif"
-  ctx.fillText(location.host, ANCHO - margen, ALTO - 34)
+  // ?dominio= lo usa scripts/imagenes-og.mjs, que captura en local las imágenes de la web publicada
+  ctx.fillText(new URLSearchParams(location.search).get('dominio') ?? location.host, ANCHO - margen, ALTO - 34)
 
   return new Promise((r) => c.toBlob(r, 'image/png'))
 }

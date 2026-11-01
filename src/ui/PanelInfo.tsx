@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { MONUMENTOS } from '../data/monumentos'
-import { useLugar, useT, useTour } from '../i18n'
+import { CONSULTADO, MONUMENTOS, type Foto } from '../data/monumentos'
+import { fechaLarga, useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
 import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 import { useTransporte } from '../transporte'
@@ -90,6 +90,7 @@ export function PanelInfo() {
               </button>
             </div>
           )}
+          {m.foto && <FotoLugar foto={m.foto} alt={m.nombre} />}
           <p className="panel-etiqueta">
             {m.etiqueta} · {m.barrio}
           </p>
@@ -150,9 +151,43 @@ export function PanelInfo() {
               <button onClick={() => ir(1)}>{t.siguiente}</button>
             </div>
           )}
-          <p className="panel-aviso">{t.aviso}</p>
+          <p className="panel-aviso panel-fuente">
+            {m.web ? (
+              <>
+                <a href={m.web} target="_blank" rel="noopener">
+                  {t.fuente}
+                </a>
+                , {t.consultado(fechaLarga(CONSULTADO, idioma))}
+              </>
+            ) : (
+              t.calle
+            )}
+          </p>
         </>
       )}
     </aside>
+  )
+}
+
+/** Foto de Wikimedia Commons con su crédito (autor, licencia y enlace a la página del fichero). */
+function FotoLugar({ foto, alt }: { foto: Foto; alt: string }) {
+  const t = useT()
+  return (
+    <figure className="panel-foto">
+      <img src={import.meta.env.BASE_URL + foto.archivo} width={foto.ancho} height={foto.alto} alt={alt} loading="lazy" decoding="async" />
+      <figcaption>
+        <a href={foto.pagina} target="_blank" rel="noopener">
+          {t.panel.foto}: {foto.autor}
+        </a>{' '}
+        · {foto.urlLicencia ? (
+          <a href={foto.urlLicencia} target="_blank" rel="noopener license">
+            {foto.licencia}
+          </a>
+        ) : (
+          foto.licencia
+        )}
+        {foto.recortada && ` · ${t.legal.recortada}`}
+      </figcaption>
+    </figure>
   )
 }

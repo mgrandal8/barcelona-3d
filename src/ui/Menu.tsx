@@ -4,7 +4,7 @@ import { useEstado, type Dialogo } from '../store'
 import { SelectorIdioma } from './SelectorIdioma'
 import { Icono, type NombreIcono } from './Icono'
 
-const OPCIONES: { id: Dialogo; icono: NombreIcono }[] = [
+const OPCIONES: { id: Exclude<Dialogo, 'legal'>; icono: NombreIcono }[] = [
   { id: 'tours', icono: 'brujula' },
   { id: 'guia', icono: 'guia' },
   { id: 'ayuda', icono: 'ayuda' },

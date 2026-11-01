@@ -165,6 +165,23 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel-nav button { flex: 1; border: 1px solid var(--borde); background: #fff8; border-radius: 999px; padding: 8px 6px; font-size: 13px; }
 .panel-nav button.primario { background: var(--acento); color: #fff; border-color: transparent; flex: 1.3; }
 .panel-aviso { margin: 12px 0 0; font-size: 11px; color: var(--texto-2); text-align: center; }
+.panel-aviso a, .panel-foto a { color: inherit; }
+/* foto de Wikimedia Commons: 16:9 en la ficha (el fichero es 4:3), con el crédito debajo */
+.panel-foto { margin: 0 40px 10px 0; }
+.panel-foto img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: var(--borde); }
+.panel-foto figcaption { margin-top: 3px; font-size: 10.5px; color: var(--texto-2); line-height: 1.3; }
+.atribucion-legal { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+button.enlace { font: inherit; color: var(--acento); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+.dialogo-pie { margin: 12px 0 0; font-size: 13px; text-align: center; }
+.legal h3 { margin: 14px 0 6px; font-size: 15px; }
+.legal h3:first-child { margin-top: 0; }
+.legal ul { margin: 0; padding-left: 18px; line-height: 1.5; font-size: 14px; }
+.legal li { margin-bottom: 4px; }
+.legal dl { margin: 0; font-size: 14px; line-height: 1.45; }
+.legal dt { font-weight: 600; margin-top: 8px; }
+.legal dd { margin: 2px 0 0; }
+.legal a { color: var(--acento); }
+.legal-fotos { font-size: 12.5px; }
 
 .atribucion {
   position: absolute; z-index: 25; bottom: 6px; left: 50%; transform: translateX(-50%); margin: 0;
@@ -559,3 +576,11 @@ kbd {
   border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
 }
 .compartir-botones button.primario { background: var(--acento); color: #fff; border-color: transparent; }
+
+/* texto de la página que genera el build para buscadores y sin JavaScript (src/seo.ts); React lo sustituye al arrancar */
+.seo { max-width: 640px; margin: 0 auto; padding: 32px 16px; line-height: 1.55; color: var(--texto); }
+.seo h1 { margin: 0 0 8px; font-size: 28px; }
+.seo h2 { font-size: 17px; margin: 24px 0 6px; }
+.seo dt { font-weight: 600; }
+.seo dd { margin: 0 0 8px; }
+.seo a { color: var(--acento); }

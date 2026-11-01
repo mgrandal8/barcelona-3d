@@ -4,11 +4,12 @@ import { tourPorId } from './data/tours'
 import { momentoDeUrl, type Momento } from './scene/momento'
 import { guardarIdioma, idiomaInicial, type Idioma } from './i18n/idioma'
 import type { Textos } from './i18n/es'
+import { ponerRuta, rutaActual } from './rutas'
 import { guardarModo, modoInicial, nivelInicial, NIVELES, PERFILES, type Modo, type Nivel } from './calidad'
 
 export type ClaveCarga = keyof Textos['carga']
 
-export type Dialogo = 'tours' | 'guia' | 'ayuda' | 'compartir'
+export type Dialogo = 'tours' | 'guia' | 'ayuda' | 'compartir' | 'legal'
 
 /** Posición del usuario (GPS o simulada) en grados y en la escena. */
 export type Ubicacion = { lat: number; lon: number; precision: number; x: number; z: number; dentro: boolean; simulada: boolean }
@@ -72,7 +73,9 @@ type Estado = {
 }
 
 const params = new URLSearchParams(location.search)
-const inicial = porId(params.get('lugar'))?.id ?? null
+const ruta = rutaActual()
+// ?lugar= es de los enlaces anteriores a las rutas por ficha
+const inicial = porId(params.get('lugar') ?? ruta.lugar)?.id ?? null
 const tourInicial = tourPorId(params.get('tour'))
 const enTour = (tour: string | null, id: string | null) => !!id && !!tourPorId(tour)?.paradas.some((p) => p.id === id)
 
@@ -94,7 +97,7 @@ export const useEstado = create<Estado>((set, get) => ({
   // con un enlace a un lugar o a una vista, o en modo captura, se entra directo al mapa
   portada: !inicial && (!params.has('captura') || params.has('entrada')) && !params.has('vista'),
   carga: { progreso: 0, texto: 'preparando', listo: false },
-  idioma: idiomaInicial(),
+  idioma: idiomaInicial(ruta.idioma),
   ubicacion: null,
   estadoUbicacion: 'apagada',
   vuelo: null,
@@ -109,7 +112,7 @@ export const useEstado = create<Estado>((set, get) => ({
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
     set({ seleccionado: id, tour, reproduciendo: get().reproduciendo && !!tour })
-    ponerParam('lugar', id)
+    ponerRuta(id, get().idioma)
     ponerParam('tour', tour)
   },
   setHover: (id) => set({ hover: id }),
@@ -140,7 +143,7 @@ export const useEstado = create<Estado>((set, get) => ({
   setIdioma: (i) => {
     set({ idioma: i })
     guardarIdioma(i)
-    ponerParam('lang', i === 'es' ? null : i)
+    ponerRuta(get().seleccionado, i)
   },
   setMetro: (v) => {
     set({ metro: v })
@@ -167,6 +170,9 @@ export const useEstado = create<Estado>((set, get) => ({
     set({ vuelo: { x, z, dist, n: (get().vuelo?.n ?? 0) + 1 } })
   },
 }))
+
+// la barra enseña desde el principio la ruta de la ficha y del idioma (también si venían de ?lugar=, ?lang= o del navegador)
+ponerRuta(useEstado.getState().seleccionado, useEstado.getState().idioma)
 
 /** Perfil de la calidad actual (sombras, postproceso, LOD…). */
 export const usePerfil = () => PERFILES[useEstado((s) => s.calidad)]

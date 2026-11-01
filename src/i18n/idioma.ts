@@ -16,10 +16,11 @@ export type Traduccion = {
 const CLAVE = 'bcn3d-idioma'
 const esIdioma = (x: string | null | undefined): x is Idioma => IDIOMAS.includes(x as Idioma)
 
-/** ?lang= manda; si no, la última elección y, si no, el idioma del navegador. */
-export function idiomaInicial(): Idioma {
+/** ?lang= manda; después, el idioma de la ruta (/en/, /ca/); si no, la última elección y, si no, el idioma del navegador. */
+export function idiomaInicial(deRuta?: Idioma | null): Idioma {
   const url = new URLSearchParams(location.search).get('lang')
   if (esIdioma(url)) return url
+  if (deRuta) return deRuta
   try {
     const guardado = localStorage.getItem(CLAVE)
     if (esIdioma(guardado)) return guardado

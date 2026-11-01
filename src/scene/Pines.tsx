@@ -38,6 +38,7 @@ export function Pines() {
     }
   }, [d])
 
+  const bases = useMemo(() => MONUMENTOS.map(({ pos: [x, z] }) => new THREE.Vector3(x, d.alturaY(x, z) + 0.1, z)), [d])
   const anclas = useMemo(
     () =>
       MONUMENTOS.map((m) => {
@@ -55,6 +56,9 @@ export function Pines() {
       pantalla.y[i] = ((1 - v.y) / 2) * size.height
       delante[i] = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1
       pantalla.detras[i] = v.z > 1
+      v.copy(bases[i]).project(camera)
+      pantalla.baseX[i] = ((v.x + 1) / 2) * size.width
+      pantalla.baseY[i] = ((1 - v.y) / 2) * size.height
     })
 
     if (clock.elapsedTime - ultimo.current > CADA || ultimo.current < 0) {

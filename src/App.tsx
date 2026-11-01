@@ -65,7 +65,10 @@ export default function App() {
       <ReproductorTour />
       <p className="atribucion">
         {t.atribucion.mapa}: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · {t.atribucion.relieve}: Mapzen/AWS
-        Terrain Tiles · {t.atribucion.ejemplo}
+        Terrain Tiles ·{' '}
+        <button className="atribucion-legal" onClick={() => useEstado.getState().setDialogo('legal')}>
+          {t.legal.titulo}
+        </button>
       </p>
       <AvisoRed />
       <Anunciador />
