@@ -315,6 +315,8 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
   border-radius: 999px; padding: 6px 14px; font-size: 14px;
 }
 .menu button small { font-size: 13px; font-weight: 600; }
+/* con la ficha abierta, en pantallas medianas el menú se queda en iconos para no meterse debajo de ella (el nombre queda en el title) */
+@media (max-width: 1400px) { .app:has(.panel.abierto) .menu button small { display: none; } }
 .menu button:hover { background: rgba(200, 85, 58, 0.08); }
 .menu button.activo { background: rgba(200, 85, 58, 0.16); }
 

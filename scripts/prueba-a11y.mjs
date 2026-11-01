@@ -163,7 +163,8 @@ if (bloques.includes('pines')) {
     await page.waitForTimeout(3000)
     ok((await pines(page)).ver[1] === false, 'pin tapado por un edificio: oculto')
     await page.evaluate(() => window.__controles.setLookAt(2.6, 4, 3.2, -0.42, 1.3, 0.21, false))
-    await page.waitForTimeout(3000)
+    // con la máquina cargada pueden pasar varios segundos hasta el siguiente cálculo de oclusión
+    await page.waitForFunction(() => window.__pines.ver[1] === true, null, { timeout: 60000 }).catch(() => {})
     ok((await pines(page)).ver[1] === true, 'con la cámara más alta: visible')
     await ctx.close()
   }
