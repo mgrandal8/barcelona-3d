@@ -2,6 +2,7 @@
 // vistas.json: [{ "nombre": "x", "cam": [px, py, pz, tx, ty, tz] } | { "nombre": "x", "lugar": "id" }, ...]
 // Cualquier vista admite "hora": "dia" | "atardecer" | "noche" (espera a que termine la transición)
 // y "ui": true para que la captura incluya la interfaz HTML (pines, nombres).
+// Con "suelo": true, las alturas de "cam" (py y ty) se cuentan desde el suelo en el punto al que se mira.
 // Con "lugar" se selecciona como si se hiciera clic (vuelo + ficha) y la captura incluye la interfaz.
 // Carga la escena una vez y saca una captura por vista moviendo la cámara (modo ?captura=1).
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -39,6 +40,11 @@ for (const v of vistas) {
     await page.screenshot({ path: `${salida}/${v.nombre}.png`, timeout: 120000 })
     console.log('captura:', v.nombre)
     continue
+  }
+  if (v.suelo) {
+    await page.waitForFunction(() => window.__alturaY, null, { timeout: 60000 })
+    const y = await page.evaluate(([x, z]) => window.__alturaY(x, z), [v.cam[3], v.cam[5]])
+    v.cam = [v.cam[0], v.cam[1] + y, v.cam[2], v.cam[3], v.cam[4] + y, v.cam[5]]
   }
   // dos veces: la primera puede llegar antes de que los controles terminen de montarse
   for (let k = 0; k < 2; k++) {

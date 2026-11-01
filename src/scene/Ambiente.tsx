@@ -233,6 +233,8 @@ function Luces() {
     vivo.noche = a.noche
     vivo.uNoche.value = a.noche
     vivo.mar.copy(a.mar)
+    vivo.uCieloArriba.value.copy(a.cielo[0])
+    vivo.uCieloHorizonte.value.copy(a.cielo[2])
     vivo.marRugosidad = a.marRugosidad
     vivo.nubes.copy(a.nubes)
   }, -1)

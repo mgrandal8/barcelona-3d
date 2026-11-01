@@ -8,6 +8,7 @@ import { CasaBatllo } from './monumentos/CasaBatllo'
 import { CasaMila } from './monumentos/CasaMila'
 import { CatedralGotico } from './monumentos/CatedralGotico'
 import { Colom } from './monumentos/Colom'
+import { useFocos } from './monumentos/comun'
 import { Montjuic } from './monumentos/Montjuic'
 import { ParkGuell } from './monumentos/ParkGuell'
 import { SagradaFamilia } from './monumentos/SagradaFamilia'
@@ -28,6 +29,7 @@ const MODELOS: Record<string, ComponentType> = {
 }
 
 export function Monumentos() {
+  useFocos()
   return (
     <group>
       {MONUMENTOS.map((m) => {

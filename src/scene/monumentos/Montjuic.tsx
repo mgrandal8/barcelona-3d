@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Y, mat, useLocal, useSuelo } from './comun'
+import { Y, mat, matFoco, useLocal, useSuelo } from './comun'
 import { vivo } from '../hora'
 
 // Origen en el Palau Nacional (MNAC). La fachada mira a Plaça d'Espanya: en local, −z apunta
@@ -9,45 +9,91 @@ import { vivo } from '../hora'
 
 const FONT: [number, number] = [41.3713, 2.1517]
 const CASTELL: [number, number] = [41.3633, 2.1661]
-const PIEDRA = '#e7d8bb'
+const PIEDRA = '#ecdfc3'
 const CUPULA = '#b9b2a2'
 
 function TorrePalau({ x, z }: { x: number; z: number }) {
   return (
     <group position={[x, 0, z]}>
-      <mesh position={[0, Y(46) / 2, 0]} material={mat(PIEDRA)} castShadow receiveShadow>
+      <mesh position={[0, Y(46) / 2, 0]} material={matFoco(PIEDRA, 0.3)} castShadow receiveShadow>
         <boxGeometry args={[0.06, Y(46), 0.06]} />
       </mesh>
-      <mesh position={[0, Y(46) + 0.03, 0]} material={mat(CUPULA)} castShadow>
+      <mesh position={[0, Y(46) + 0.03, 0]} material={matFoco(CUPULA, 0.18)} castShadow>
         <sphereGeometry args={[0.035, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2]} />
       </mesh>
-      <mesh position={[0, Y(46) + 0.08, 0]} material={mat(CUPULA)}>
+      <mesh position={[0, Y(46) + 0.08, 0]} material={matFoco(CUPULA, 0.18)}>
         <coneGeometry args={[0.012, 0.06, 6]} />
       </mesh>
     </group>
   )
 }
 
+
 function Palau({ base }: { base: number }) {
   const cuerpo = Y(24)
-  const alto = cuerpo - base
+  // piedra algo más clara que antes (la fachada queda a contraluz de día), iluminada de noche
+  const piedra = matFoco('#efe2c6', 0.32)
+  // podio: del punto más bajo del terreno a la cota del palacio, con terraza delantera
+  const podio = -base
+  const ventanas = useMemo(() => {
+    const out: { x: number; y: number; z: number; ry: number }[] = []
+    // fachada principal (−z) y laterales (±x), dos filas
+    for (const y of [cuerpo * 0.3, cuerpo * 0.68]) {
+      for (let x = -0.6; x <= 0.6; x += 0.075) if (Math.abs(x) > 0.24) out.push({ x, y, z: -0.376, ry: 0 })
+      for (const s of [-1, 1]) for (let z = -0.3; z <= 0.3; z += 0.075) out.push({ x: s * 0.651, y, z, ry: Math.PI / 2 })
+    }
+    return out
+  }, [cuerpo])
   return (
     <group>
-      {/* zócalo hasta el punto más bajo del terreno bajo el edificio */}
-      <mesh position={[0, base + alto / 2, 0]} material={mat(PIEDRA)} castShadow receiveShadow>
-        <boxGeometry args={[1.3, alto, 0.75]} />
+      <mesh position={[0, base + podio / 2, 0.05]} material={matFoco('#d3c09c', 0.22)} castShadow receiveShadow>
+        <boxGeometry args={[1.42, podio, 0.95]} />
       </mesh>
+      {/* terraza delantera con balaustrada y escalera central hacia las cascadas */}
+      <mesh position={[0, base + podio / 2, -0.46]} material={matFoco('#dccba8', 0.22)} castShadow receiveShadow>
+        <boxGeometry args={[1.1, podio, 0.12]} />
+      </mesh>
+      {[-1, 1].map((s) => (
+        <mesh key={s} position={[s * 0.33, 0.012, -0.515]} material={mat('#f1e6cf')} castShadow>
+          <boxGeometry args={[0.44, 0.024, 0.012]} />
+        </mesh>
+      ))}
+      {Array.from({ length: 5 }, (_, k) => (
+        <mesh key={k} position={[0, -k * 0.022 - 0.011, -0.51 - k * 0.022]} material={mat('#e7d8bb')} receiveShadow>
+          <boxGeometry args={[0.2, 0.022, 0.03]} />
+        </mesh>
+      ))}
+      {/* cuerpo del palacio */}
+      <mesh position={[0, cuerpo / 2, 0]} material={piedra} castShadow receiveShadow>
+        <boxGeometry args={[1.3, cuerpo, 0.75]} />
+      </mesh>
+      <mesh position={[0, cuerpo + 0.008, 0]} material={matFoco('#e2d2b2', 0.3)} castShadow>
+        <boxGeometry args={[1.33, 0.016, 0.78]} />
+      </mesh>
+      {ventanas.map((v, i) => (
+        <mesh key={i} position={[v.x, v.y, v.z]} rotation-y={v.ry} material={mat('#5d5246')}>
+          <boxGeometry args={[0.03, 0.06, 0.004]} />
+        </mesh>
+      ))}
       {/* cuerpo central más alto, con la cúpula inspirada en San Pedro */}
-      <mesh position={[0, cuerpo + 0.05, 0]} material={mat(PIEDRA)} castShadow receiveShadow>
+      <mesh position={[0, cuerpo + 0.05, 0]} material={piedra} castShadow receiveShadow>
         <boxGeometry args={[0.6, 0.1, 0.5]} />
       </mesh>
-      <mesh position={[0, cuerpo + 0.15, 0.03]} material={mat(PIEDRA)} castShadow>
+      <mesh position={[0, cuerpo + 0.15, 0.03]} material={piedra} castShadow>
         <cylinderGeometry args={[0.16, 0.17, 0.12, 16]} />
       </mesh>
-      <mesh position={[0, cuerpo + 0.21, 0.03]} material={mat(CUPULA)} castShadow>
+      {Array.from({ length: 16 }, (_, k) => {
+        const a = (k / 16) * Math.PI * 2
+        return (
+          <mesh key={k} position={[Math.cos(a) * 0.166, cuerpo + 0.15, 0.03 + Math.sin(a) * 0.166]} rotation-y={-a + Math.PI / 2} material={mat('#5d5246')}>
+            <boxGeometry args={[0.02, 0.05, 0.004]} />
+          </mesh>
+        )
+      })}
+      <mesh position={[0, cuerpo + 0.21, 0.03]} material={matFoco(CUPULA, 0.18)} castShadow>
         <sphereGeometry args={[0.16, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
       </mesh>
-      <mesh position={[0, cuerpo + 0.4, 0.03]} material={mat(PIEDRA)} castShadow>
+      <mesh position={[0, cuerpo + 0.4, 0.03]} material={piedra} castShadow>
         <cylinderGeometry args={[0.025, 0.03, 0.06, 8]} />
       </mesh>
       {[-1, 1].map((sx) =>
@@ -55,18 +101,21 @@ function Palau({ base }: { base: number }) {
       )}
       {/* cúpulas menores de las alas */}
       {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.48, cuerpo, 0]} material={mat(CUPULA)} castShadow>
+        <mesh key={s} position={[s * 0.48, cuerpo, 0]} material={matFoco(CUPULA, 0.18)} castShadow>
           <sphereGeometry args={[0.09, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
         </mesh>
       ))}
-      {/* pórtico de columnas */}
+      {/* pórtico de columnas, adelantado sobre la fachada */}
+      <mesh position={[0, cuerpo * 0.04, -0.4]} material={matFoco('#e2d2b2', 0.3)} receiveShadow>
+        <boxGeometry args={[0.46, cuerpo * 0.08, 0.06]} />
+      </mesh>
       {Array.from({ length: 10 }, (_, i) => (
-        <mesh key={i} position={[-0.18 + i * 0.04, cuerpo / 2 + 0.02, -0.39]} material={mat('#f1e7d2')} castShadow>
-          <cylinderGeometry args={[0.009, 0.009, cuerpo * 0.7, 6]} />
+        <mesh key={i} position={[-0.18 + i * 0.04, cuerpo * 0.45, -0.41]} material={matFoco('#f6eedd', 0.35)} castShadow>
+          <cylinderGeometry args={[0.009, 0.01, cuerpo * 0.75, 6]} />
         </mesh>
       ))}
-      <mesh position={[0, cuerpo * 0.9, -0.39]} material={mat(PIEDRA)} castShadow>
-        <boxGeometry args={[0.44, 0.04, 0.04]} />
+      <mesh position={[0, cuerpo * 0.86, -0.405]} material={piedra} castShadow>
+        <boxGeometry args={[0.46, 0.05, 0.05]} />
       </mesh>
     </group>
   )
@@ -130,8 +179,8 @@ function Castell() {
       const a = (k / 4) * Math.PI * 2 + Math.PI / 4
       const c = Math.cos(a)
       const s = Math.sin(a)
-      // esquina con baluarte en punta de flecha
-      pts.push([c * L - s * B * 0.5, s * L + c * B * 0.5], [c * (L + B), s * (L + B)], [c * L + s * B * 0.5, s * L - c * B * 0.5])
+      // esquina con baluarte en punta de flecha, en el sentido del recorrido (si no, el polígono se cruza)
+      pts.push([c * L + s * B * 0.5, s * L - c * B * 0.5], [c * (L + B), s * (L + B)], [c * L - s * B * 0.5, s * L + c * B * 0.5])
     }
     pts.forEach(([x, z], i) => (i ? f.lineTo(x, z) : f.moveTo(x, z)))
     return new THREE.ExtrudeGeometry(f, { depth: 0.28, bevelEnabled: false }).rotateX(Math.PI / 2).translate(0, 0.14, 0)

@@ -49,7 +49,9 @@ const LUGARES: Omit<Monumento, 'pos'>[] = [
     barrio: 'Passeig de Gràcia',
     etiqueta: 'Modernismo',
     coord: [41.39159, 2.16482],
-    radio: 0.1,
+    // 0,125 para quitar también la parte de OSM de la fachada; la Casa Amatller va en el modelo
+    radio: 0.125,
+    huecos: [{ coord: [41.39152, 2.16499], radio: 0.1 }],
     alturaMarcador: 1,
     camara: [1.3, 0.9, 1.1],
     descripcion:
@@ -66,7 +68,11 @@ const LUGARES: Omit<Monumento, 'pos'>[] = [
     etiqueta: 'Gaudí',
     coord: [41.41393, 2.15252],
     radio: 0.5,
-    huecos: [{ coord: [41.4131, 2.153], radio: 0.3 }],
+    // la puerta de Carrer d'Olot con sus dos pabellones, y la Casa-Museu Gaudí
+    huecos: [
+      { coord: [41.41349, 2.15308], radio: 0.2 },
+      { coord: [41.41444, 2.15358], radio: 0.08 },
+    ],
     alturaMarcador: 0.9,
     camara: [0.4, 1.4, 2.4],
     descripcion:

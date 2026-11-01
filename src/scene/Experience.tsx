@@ -143,7 +143,11 @@ function Camara() {
       history.replaceState(null, '', url)
     }
     // modo captura: scripts/capturas-lote.mjs mueve la cámara sin recargar (y __gl.info da los triángulos)
-    if (CAPTURA) Object.assign(window, { __controles: c, __estado: useEstado, __gl: gl, __enVuelo: () => !!plan.current })
+    if (CAPTURA) {
+      Object.assign(window, { __controles: c, __estado: useEstado, __gl: gl, __enVuelo: () => !!plan.current })
+      // altura del suelo, para poner cámaras relativas al terreno (capturas-lote con "suelo": true)
+      cargarDatos().then((d) => Object.assign(window, { __alturaY: d.alturaY }))
+    }
     c.setBoundary(new THREE.Box3(new THREE.Vector3(-55, -1, -60), new THREE.Vector3(65, 12, 45)))
     // el enlace de compartir lleva la vista actual (redondeada: 0,1 u son 10 m)
     escena.enVuelo = () => !!plan.current

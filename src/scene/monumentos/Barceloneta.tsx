@@ -2,6 +2,7 @@ import { use, useMemo } from 'react'
 import * as THREE from 'three'
 import { cargarDatos } from '../datos'
 import { M, Y, azar, mat, OrigenCtx, teñirCaras, useLocal, useSuelo } from './comun'
+import { vivo } from '../hora'
 
 // Origen en la playa de la Barceloneta. El Hotel W (la "vela") y la torre de Sant Sebastià
 // van en sus coordenadas, al final del paseo de Joan de Borbó.
@@ -37,11 +38,35 @@ function geoVela() {
     p.setZ(i, z > 0 ? z * (1 - 0.7 * t * t) : z)
     p.setY(i, y * (0.8 + 0.2 * Math.cos((x / L) * Math.PI * 0.5)))
   }
-  // franjas de cristal: reflejos claros y oscuros por plantas
+  // paneles de cristal: el color por vértice solo modula cuánto refleja cada uno
   return teñirCaras(g, (i, c) => {
-    const banda = Math.floor((c.y / H) * 14)
-    return azar(i * 5 + banda) < 0.15 ? '#dceef7' : banda % 2 ? '#7fb0d0' : '#97c2dc'
+    const banda = Math.floor((c.y / H) * 26)
+    return azar(i * 5 + banda) < 0.12 ? '#ffffff' : banda % 2 ? '#c4ccd2' : '#e2e8ec'
   })
+}
+
+/**
+ * Cristal de espejo: sin mapa de entorno en la escena, refleja los colores del cielo del momento
+ * (vivo.uCieloArriba y vivo.uCieloHorizonte) según hacia dónde rebota la mirada, con más reflejo de canto.
+ */
+const cristalW = new THREE.MeshStandardMaterial({ color: '#9fb3c2', vertexColors: true, roughness: 0.25, metalness: 0.2, flatShading: true })
+cristalW.onBeforeCompile = (sh) => {
+  sh.uniforms.uCieloArriba = vivo.uCieloArriba
+  sh.uniforms.uCieloHorizonte = vivo.uCieloHorizonte
+  sh.uniforms.uNoche = vivo.uNoche
+  sh.fragmentShader = sh.fragmentShader
+    .replace('void main() {', 'uniform vec3 uCieloArriba;\nuniform vec3 uCieloHorizonte;\nuniform float uNoche;\nvoid main() {')
+    .replace(
+      '#include <opaque_fragment>',
+      `vec3 vistaW = normalize(vViewPosition);
+      vec3 rebote = inverseTransformDirection(reflect(-vistaW, normal), viewMatrix);
+      vec3 cieloW = mix(uCieloHorizonte, uCieloArriba, clamp(rebote.y * 1.2 + 0.55, 0.0, 1.0));
+      float canto = 0.35 + 0.65 * pow(1.0 - clamp(dot(normal, vistaW), 0.0, 1.0), 3.0);
+      outgoingLight = mix(outgoingLight, cieloW * (0.5 + 0.5 * vColor.r), 0.45 + 0.5 * canto);
+      // de noche, los paneles más claros son habitaciones con luz
+      outgoingLight += vec3(1.0, 0.82, 0.55) * step(0.99, vColor.r) * uNoche * 0.9;
+      #include <opaque_fragment>`,
+    )
 }
 
 /** Busca el punto de arena (terreno casi a nivel del mar) más cercano. */
@@ -95,7 +120,7 @@ export function Barceloneta() {
     <group>
       {/* Hotel W */}
       <group position={[wx, suelo(wx, wz), wz]} rotation-y={-0.63}>
-        <mesh geometry={vela} material={mat('#fff', { vertexColors: true, roughness: 0.2, metalness: 0.25 })} castShadow receiveShadow />
+        <mesh geometry={vela} material={cristalW} castShadow receiveShadow />
         <mesh position={[0, 0.05, 0.13]} material={mat('#e4e0d6')} castShadow receiveShadow>
           <boxGeometry args={[0.7, 0.1, 0.2]} />
         </mesh>

@@ -57,7 +57,7 @@ function geoFachada() {
   const c = new THREE.Color()
   const piedra = new THREE.Color(PIEDRA)
   const sombra = new THREE.Color(PIEDRA_SOMBRA)
-  const ventana = new THREE.Color('#6a5f52')
+  const ventana = new THREE.Color('#7d7062')
   const vert = (i: number, f: number) => {
     const p = pts[i]
     const top = coronacion(p.s)

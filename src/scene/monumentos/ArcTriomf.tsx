@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Y, mat, useSuelo } from './comun'
+import { Y, mat, matFoco, useSuelo } from './comun'
 
 // Origen en el centro del arco (planta de OSM: 28 × 12,6 m, 29 m de alto). El paso va a lo largo de z:
 // en −z queda Passeig de Sant Joan y en +z el paseo de Lluís Companys baja hasta la Ciutadella.
@@ -78,14 +78,14 @@ export function ArcTriomf() {
     <group>
       <group position-y={y0}>
         {/* zócalo de piedra y arco de ladrillo */}
-        <mesh position={[0, Y(1.5) / 2, 0]} material={mat(PIEDRA)} receiveShadow castShadow>
+        <mesh position={[0, Y(1.5) / 2, 0]} material={matFoco(PIEDRA, 0.3)} receiveShadow castShadow>
           <boxGeometry args={[ANCHO + 0.02, Y(1.5), FONDO + 0.02]} />
         </mesh>
-        <mesh geometry={arco} material={mat(LADRILLO)} castShadow receiveShadow />
+        <mesh geometry={arco} material={matFoco(LADRILLO, 0.3)} castShadow receiveShadow />
         {/* friso de piedra con relieves, por las dos caras */}
         {[-1, 1].map((s) => (
           <group key={s}>
-            <mesh position={[0, Y(17.5), s * (FONDO / 2 + 0.004)]} material={mat(PIEDRA)} castShadow>
+            <mesh position={[0, Y(17.5), s * (FONDO / 2 + 0.004)]} material={matFoco(PIEDRA, 0.3)} castShadow>
               <boxGeometry args={[ANCHO - 0.02, Y(3), 0.008]} />
             </mesh>
             {Array.from({ length: 9 }, (_, k) => (
@@ -95,31 +95,31 @@ export function ArcTriomf() {
             ))}
             {/* pilastras de ladrillo más oscuro a los lados del paso */}
             {[-1, 1].map((k) => (
-              <mesh key={k} position={[k * (LUZ / 2 + 0.018), ALTO / 2, s * (FONDO / 2 + 0.003)]} material={mat(LADRILLO_OSCURO)} castShadow>
+              <mesh key={k} position={[k * (LUZ / 2 + 0.018), ALTO / 2, s * (FONDO / 2 + 0.003)]} material={matFoco(LADRILLO_OSCURO, 0.3)} castShadow>
                 <boxGeometry args={[0.022, ALTO, 0.006]} />
               </mesh>
             ))}
           </group>
         ))}
         {/* cornisa, ático y remates */}
-        <mesh position={[0, ALTO + 0.008, 0]} material={mat(PIEDRA)} castShadow>
+        <mesh position={[0, ALTO + 0.008, 0]} material={matFoco(PIEDRA, 0.3)} castShadow>
           <boxGeometry args={[ANCHO + 0.016, 0.016, FONDO + 0.016]} />
         </mesh>
-        <mesh position={[0, ALTO + 0.016 + Y(2) / 2, 0]} material={mat(LADRILLO)} castShadow>
+        <mesh position={[0, ALTO + 0.016 + Y(2) / 2, 0]} material={matFoco(LADRILLO, 0.3)} castShadow>
           <boxGeometry args={[ANCHO * 0.7, Y(2), FONDO * 0.8]} />
         </mesh>
         {/* escudo central */}
-        <mesh position={[0, ALTO + 0.03, 0]} material={mat(PIEDRA)} castShadow>
+        <mesh position={[0, ALTO + 0.03, 0]} material={matFoco(PIEDRA, 0.3)} castShadow>
           <sphereGeometry args={[0.03, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
         </mesh>
         {/* cuatro pináculos en las esquinas, con su cupulita */}
         {[-1, 1].map((sx) =>
           [-1, 1].map((sz) => (
             <group key={`${sx}${sz}`} position={[sx * (ANCHO / 2 - 0.016), ALTO + 0.016, sz * (FONDO / 2 - 0.016)]}>
-              <mesh position-y={Y(2.5) / 2} material={mat(LADRILLO_OSCURO)} castShadow>
+              <mesh position-y={Y(2.5) / 2} material={matFoco(LADRILLO_OSCURO, 0.3)} castShadow>
                 <boxGeometry args={[0.03, Y(2.5), 0.03]} />
               </mesh>
-              <mesh position-y={Y(2.5) + 0.012} material={mat(PIEDRA)} castShadow>
+              <mesh position-y={Y(2.5) + 0.012} material={matFoco(PIEDRA, 0.3)} castShadow>
                 <sphereGeometry args={[0.018, 8, 5]} />
               </mesh>
             </group>

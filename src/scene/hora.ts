@@ -68,4 +68,7 @@ export const vivo = {
   nubes: new THREE.Color(),
   /** uniform compartido por los shaders de luces nocturnas (ventanas). */
   uNoche: { value: 0 },
+  /** Colores del cielo (cenit y horizonte): el cristal del Hotel W los refleja. */
+  uCieloArriba: { value: new THREE.Color(PRESETS.dia.cielo[0]) },
+  uCieloHorizonte: { value: new THREE.Color(PRESETS.dia.cielo[2]) },
 }
