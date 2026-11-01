@@ -32,6 +32,7 @@ export function Pines() {
       vigente = false
       // sin escena, no hay pines
       pantalla.ver = []
+      pantalla.fuera = []
       ponerGrupos([])
       avisarFotograma()
     }
@@ -53,6 +54,7 @@ export function Pines() {
       pantalla.x[i] = ((v.x + 1) / 2) * size.width
       pantalla.y[i] = ((1 - v.y) / 2) * size.height
       delante[i] = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1
+      pantalla.detras[i] = v.z > 1
     })
 
     if (clock.elapsedTime - ultimo.current > CADA || ultimo.current < 0) {
@@ -61,11 +63,14 @@ export function Pines() {
       const paradas = tourPorId(tour)?.paradas.map((p) => p.id) ?? []
       const r = rejilla.current
       const c = camera.position
+      // las flechas del borde solo en vistas altas (de cerca serían ruido) y sin ficha abierta
+      const alta = c.y - d.alturaY(c.x, c.z) > 18 && !seleccionado
       MONUMENTOS.forEach((m, i) => {
         const a = anclas[i]
         // fuera de un tour, el lugar elegido no lleva pin: ya tiene el anillo y la ficha
         const oculto = m.id === seleccionado && !paradas.includes(m.id)
         pantalla.ver[i] = delante[i] && !oculto && !(r && tapado(r, a.x, a.y, a.z, c.x, c.y, c.z))
+        pantalla.fuera[i] = alta && !delante[i] && (!paradas.length || paradas.includes(m.id))
       })
       // agrupación voraz en el orden de la guía
       const libres = MONUMENTOS.map((_, i) => i).filter((i) => pantalla.ver[i])
