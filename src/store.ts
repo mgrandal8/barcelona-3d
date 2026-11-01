@@ -8,7 +8,7 @@ import { guardarModo, modoInicial, nivelInicial, NIVELES, PERFILES, type Modo, t
 
 export type ClaveCarga = keyof Textos['carga']
 
-export type Dialogo = 'tours' | 'guia' | 'ayuda'
+export type Dialogo = 'tours' | 'guia' | 'ayuda' | 'compartir'
 
 /** Posición del usuario (GPS o simulada) en grados y en la escena. */
 export type Ubicacion = { lat: number; lon: number; precision: number; x: number; z: number; dentro: boolean; simulada: boolean }
@@ -24,6 +24,8 @@ type Estado = {
   momento: Momento
   /** Tour en curso: sus paradas se recorren con la ficha. */
   tour: string | null
+  /** «Reproducir tour»: la maqueta pasa sola de parada en parada con la nota del guía. */
+  reproduciendo: boolean
   dialogo: Dialogo | null
   /** Portada "Descubre Barcelona" encima del mapa. */
   portada: boolean
@@ -48,6 +50,9 @@ type Estado = {
   setHover: (id: string | null) => void
   setMomento: (m: Momento) => void
   empezarTour: (id: string) => void
+  /** Empieza el tour (si no estaba en curso) y lo reproduce solo; sin id, el tour en curso. */
+  reproducirTour: (id?: string) => void
+  setReproduciendo: (v: boolean) => void
   setDialogo: (d: Dialogo | null) => void
   cerrarPortada: () => void
   setCarga: (c: Partial<Estado['carga']>) => void
@@ -84,9 +89,10 @@ export const useEstado = create<Estado>((set, get) => ({
   hover: null,
   momento: momentoDeUrl(),
   tour: enTour(tourInicial?.id ?? null, inicial) ? tourInicial!.id : null,
+  reproduciendo: false,
   dialogo: null,
-  // con un enlace a un lugar o en modo captura se entra directo al mapa
-  portada: !inicial && !params.has('captura'),
+  // con un enlace a un lugar o a una vista, o en modo captura, se entra directo al mapa
+  portada: !inicial && (!params.has('captura') || params.has('entrada')) && !params.has('vista'),
   carga: { progreso: 0, texto: 'preparando', listo: false },
   idioma: idiomaInicial(),
   ubicacion: null,
@@ -102,7 +108,7 @@ export const useEstado = create<Estado>((set, get) => ({
   setSeleccionado: (id) => {
     // elegir un lugar que no es del tour (o volver al mapa) termina el tour
     const tour = enTour(get().tour, id) ? get().tour : null
-    set({ seleccionado: id, tour })
+    set({ seleccionado: id, tour, reproduciendo: get().reproduciendo && !!tour })
     ponerParam('lugar', id)
     ponerParam('tour', tour)
   },
@@ -120,6 +126,14 @@ export const useEstado = create<Estado>((set, get) => ({
     get().setMomento(t.momento)
     get().setSeleccionado(t.paradas[0].id)
   },
+  reproducirTour: (id) => {
+    const t = tourPorId(id ?? get().tour)
+    if (!t) return
+    // antes de cambiar de lugar, para que el anunciador ya lea la nota de la primera parada
+    set({ reproduciendo: true, dialogo: null })
+    if (get().tour !== t.id) get().empezarTour(t.id)
+  },
+  setReproduciendo: (v) => set({ reproduciendo: v && !!get().tour }),
   setDialogo: (d) => set({ dialogo: d }),
   cerrarPortada: () => set({ portada: false }),
   setCarga: (c) => set({ carga: { ...get().carga, ...c } }),

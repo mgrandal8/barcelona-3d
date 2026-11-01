@@ -125,7 +125,10 @@ if (bloques.includes('teclado')) {
   const p1 = await posicion(page)
   ok(distancia(p0, p1) > 1, `flechas y + mueven la cámara (${distancia(p0, p1).toFixed(1)} u)`)
   await page.keyboard.press('Home')
-  await page.waitForTimeout(4000)
+  // desde la S13 es un vuelo: se espera a que llegue (con SwiftShader dura bastante más que en una GPU)
+  await page.waitForTimeout(500)
+  await page.waitForFunction(() => !window.__enVuelo(), null, { timeout: 120000 })
+  await page.waitForTimeout(1500)
   ok(distancia(await posicion(page), [-2, 62, 78.4]) < 1, 'Inicio vuelve a la vista general')
   await ctx.close()
 }
