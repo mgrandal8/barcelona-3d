@@ -282,16 +282,45 @@ export const en: Traduccion = {
       duracion: 'As long as you like',
       consejo: 'For an authentic paella, leave the seafront promenade and head into the neighbourhood.',
     },
+    'casa-mila': {
+      etiqueta: 'Gaudí',
+      descripcion:
+        'The last house Gaudí built in the city (1906–1912): a stone façade that ripples like a quarry, wrought-iron balconies like seaweed and a rooftop guarded by chimneys that look like warriors.',
+      horario: '9:00 – 20:30',
+      precio: 'from €28',
+      duracion: '1 – 1.5 h',
+      consejo: 'The night tour takes you round the rooftop with lights and music; from there you can see the Sagrada Família between the chimneys.',
+    },
+    'arc-de-triomf': {
+      etiqueta: 'Modernisme',
+      descripcion:
+        'The gateway to the 1888 Universal Exhibition, in red brick and Neo-Mudéjar style. Its promenade of palm trees and street lamps leads down to Ciutadella Park.',
+      horario: 'Always open',
+      precio: 'Free',
+      duracion: '30 min',
+      consejo: 'Follow the promenade into Ciutadella Park: the monumental waterfall, crowned by a golden chariot, is at the far end.',
+    },
+    colom: {
+      nombre: 'Columbus Monument',
+      etiqueta: 'Museums & views',
+      descripcion:
+        'A 60 m iron column, raised for the 1888 Exhibition at the bottom of La Rambla. A lift inside takes you up to the viewpoint, at the feet of the statue of Columbus.',
+      horario: '8:30 – 20:30',
+      precio: '€8 (viewpoint)',
+      duracion: '30 min',
+      consejo: 'Go first thing: the lift is small and the queue grows by mid-morning. From the top you can see the whole of La Rambla and the port.',
+    },
   },
   tours: {
     gaudi: {
       nombre: 'Essential Gaudí',
-      resumen: 'The three must-see works of the modernist genius, from the basilica to the park by way of Passeig de Gràcia.',
-      duracion: '5 h',
+      resumen: 'The four must-see works of the modernist genius, from the basilica to the park by way of Passeig de Gràcia.',
+      duracion: '6 h',
       precio: '€65 per person',
       notas: [
         'We start at 9:00 in front of the Nativity façade, the only one Gaudí saw finished.',
         'We walk through the Eixample to the Block of Discord. Coffee break.',
+        'We walk up Passeig de Gràcia to La Pedrera and out onto the rooftop of the warriors.',
         'We take the metro up to Lesseps and finish in the square, with the whole city at our feet.',
       ],
     },
@@ -302,7 +331,8 @@ export const en: Traduccion = {
       precio: '€45 per person',
       notas: [
         'We meet in Plaça Nova, next to the Roman towers of Barcino.',
-        'We cross El Born to the fishermen’s quarter. A “bomba” tapa in an old-school bodega.',
+        'We walk down La Rambla to Columbus and ride up to the viewpoint to see the port from above.',
+        'We follow the Port Vell round to the fishermen’s quarter. A “bomba” tapa in an old-school bodega.',
         'Cable car up the hill and sunset on the steps of the Palau Nacional.',
       ],
     },

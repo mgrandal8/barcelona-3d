@@ -38,7 +38,7 @@ if (bloques.includes('ligera')) {
   const { ctx, page, errores, pedidos } = await abrir('modo=ligero')
   await page.waitForSelector('.plano canvas', { timeout: 60000 })
   await page.waitForFunction(() => document.querySelector('.plano')?.dataset.listo === '1', null, { timeout: 120000 })
-  ok((await page.locator('.plano-pin').count()) === 8, 'versión ligera: mapa 2D con 8 pines')
+  ok((await page.locator('.plano-pin').count()) === 11, 'versión ligera: mapa 2D con 11 pines')
   ok(await page.locator('.ligera-aviso').isVisible(), 'aviso de versión ligera')
   await page.locator('.plano-pin').nth(1).click({ force: true })
   await page.waitForTimeout(500)

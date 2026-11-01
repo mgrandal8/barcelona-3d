@@ -140,19 +140,19 @@ if (bloques.includes('tour')) {
   // «Siguiente» salta de parada
   await page.locator('.subtitulo').getByRole('button', { name: 'Siguiente parada' }).evaluate((b) => b.click())
   s = await st()
-  ok(s.sel === 'park-guell' && s.rep, 'el botón «Siguiente parada» salta a la tercera')
+  ok(s.sel === 'casa-mila' && s.rep, 'el botón «Siguiente parada» salta a la tercera')
   // Esc pausa: vuelve la ficha con el foco en el título
   await page.keyboard.press('Escape')
   await page.waitForTimeout(600)
   s = await st()
-  ok(!s.rep && s.sel === 'park-guell' && s.tour === 'gaudi', 'Esc pausa sin terminar el tour')
+  ok(!s.rep && s.sel === 'casa-mila' && s.tour === 'gaudi', 'Esc pausa sin terminar el tour')
   ok(await page.locator('.panel').evaluate((p) => p.classList.contains('abierto')), 'la ficha vuelve')
   ok(await page.evaluate(() => document.activeElement?.tagName === 'H2' && !!document.activeElement.closest('.panel')), 'con el foco en su título')
   // desde la ficha se reanuda; en la última parada, al terminar, se para con la ficha abierta
   await page.locator('.panel-tour-play').evaluate((b) => b.click())
   s = await st()
   ok(s.rep, '«Reproducir tour» en la ficha lo reanuda')
-  await page.waitForFunction(() => !window.__estado.getState().reproduciendo, null, { timeout: 40000 })
+  await page.waitForFunction(() => !window.__estado.getState().reproduciendo, null, { timeout: 90000 })
   s = await st()
   ok(s.sel === 'park-guell' && s.tour === 'gaudi', 'al acabar la última parada se para y deja la ficha')
   ok((await page.locator('.subtitulo.fin').textContent()).includes('Fin del tour'), 'con el mensaje de fin')

@@ -14,7 +14,7 @@ const salida = process.argv[4] ?? 'capturas'
 const browser = await chromium.launch({
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 })
-const page = await browser.newPage({ viewport: { width: Number(process.env.ANCHO ?? 1200), height: Number(process.env.ALTO ?? 750) } })
+const page = await browser.newPage({ locale: 'es-ES', viewport: { width: Number(process.env.ANCHO ?? 1200), height: Number(process.env.ALTO ?? 750) } })
 const errores = []
 page.on('console', (m) => m.type() === 'error' && errores.push(m.text()))
 page.on('pageerror', (e) => errores.push(String(e)))
@@ -32,7 +32,10 @@ for (const v of vistas) {
   }
   if (v.lugar !== undefined) {
     await page.evaluate((id) => window.__estado.getState().setSeleccionado(id), v.lugar)
-    await page.waitForTimeout(Number(process.env.ESPERA_LUGAR ?? 15000))
+    // espera a que empiece y termine el vuelo (con SwiftShader tarda bastante más que en una GPU)
+    await page.waitForTimeout(3000)
+    await page.waitForFunction(() => !window.__enVuelo(), null, { timeout: 180000, polling: 1000 })
+    await page.waitForTimeout(Number(process.env.ESPERA_LUGAR ?? 4000))
     await page.screenshot({ path: `${salida}/${v.nombre}.png`, timeout: 120000 })
     console.log('captura:', v.nombre)
     continue

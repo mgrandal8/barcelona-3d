@@ -159,6 +159,60 @@ const LUGARES: Omit<Monumento, 'pos'>[] = [
     duracion: 'Lo que quieras',
     consejo: 'Para comer una paella auténtica, aléjate del paseo marítimo y entra en el barrio.',
   },
+  {
+    id: 'casa-mila',
+    nombre: 'Casa Milà (La Pedrera)',
+    barrio: 'Passeig de Gràcia',
+    etiqueta: 'Gaudí',
+    coord: [41.39542, 2.1619],
+    radio: 0,
+    // tres círculos y no uno: el vecino del norte (OSM) queda a 0,2 u del centro
+    huecos: [
+      { coord: [41.39529, 2.16178], radio: 0.1 },
+      { coord: [41.39537, 2.16193], radio: 0.1 },
+      { coord: [41.39546, 2.16211], radio: 0.1 },
+    ],
+    alturaMarcador: 1.1,
+    camara: [-1.7, 1.3, 1.5],
+    descripcion:
+      'La última casa que Gaudí construyó en la ciudad (1906–1912): una fachada de piedra que ondula como una cantera, balcones de hierro como algas y una azotea custodiada por chimeneas que parecen guerreros.',
+    horario: '9:00 – 20:30',
+    precio: 'desde 28 €',
+    duracion: '1 – 1,5 h',
+    consejo: 'La visita nocturna recorre la azotea con luces y música; desde ahí se ve la Sagrada Família entre las chimeneas.',
+  },
+  {
+    id: 'arc-de-triomf',
+    nombre: 'Arc de Triomf',
+    barrio: 'Passeig de Lluís Companys',
+    etiqueta: 'Modernismo',
+    coord: [41.39104, 2.18065],
+    radio: 0.18,
+    alturaMarcador: 0.9,
+    camara: [-0.9, 0.9, -1.9],
+    descripcion:
+      'La puerta de entrada a la Exposición Universal de 1888, de ladrillo rojo y estilo neomudéjar. Su paseo de palmeras y farolas baja hasta el parque de la Ciutadella.',
+    horario: 'Siempre abierto',
+    precio: 'Gratis',
+    duracion: '30 min',
+    consejo: 'Sigue el paseo hasta la Ciutadella: la cascada monumental, con la cuadriga dorada en lo alto, está al fondo del parque.',
+  },
+  {
+    id: 'colom',
+    nombre: 'Mirador de Colom',
+    barrio: 'Port Vell',
+    etiqueta: 'Museos y vistas',
+    coord: [41.3758, 2.17777],
+    radio: 0.16,
+    alturaMarcador: 1.5,
+    camara: [1.6, 1.3, 2.1],
+    descripcion:
+      'Una columna de hierro de 60 m, levantada para la Exposición de 1888, al final de la Rambla. Un ascensor sube por dentro hasta el mirador, a los pies de la estatua de Colón.',
+    horario: '8:30 – 20:30',
+    precio: '8 € (mirador)',
+    duracion: '30 min',
+    consejo: 'Sube a primera hora: el ascensor es pequeño y la cola crece a media mañana. Arriba se ve la Rambla entera y el puerto.',
+  },
 ]
 
 export const MONUMENTOS: Monumento[] = LUGARES.map((m) => ({ ...m, pos: geoAEscena(...m.coord) }))

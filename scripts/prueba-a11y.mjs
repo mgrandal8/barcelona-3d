@@ -159,7 +159,7 @@ if (bloques.includes('pines')) {
     // a ras de calle, detrás de los edificios del Eixample, el pin de la Casa Batlló queda tapado
     const { ctx, page } = await abrir('?captura=1&postpro=0&cam=2.6,0.75,3.2,-0.42,1.3,0.21')
     await listo(page)
-    await page.waitForFunction(() => window.__pines.ver.length === 8, null, { timeout: 60000 })
+    await page.waitForFunction(() => window.__pines.ver.length === 11, null, { timeout: 60000 })
     await page.waitForTimeout(3000)
     ok((await pines(page)).ver[1] === false, 'pin tapado por un edificio: oculto')
     await page.evaluate(() => window.__controles.setLookAt(2.6, 4, 3.2, -0.42, 1.3, 0.21, false))
