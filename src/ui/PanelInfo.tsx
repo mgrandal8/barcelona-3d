@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { MONUMENTOS } from '../data/monumentos'
-import { useLugar, useT, useTour } from '../i18n'
+import { CONSULTADO, MONUMENTOS, type Foto } from '../data/monumentos'
+import { fechaLarga, useLugar, useT, useTour } from '../i18n'
 import { useEstado } from '../store'
 import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 import { useTransporte } from '../transporte'
 import { EstacionCercana } from './Lineas'
 import { Icono } from './Icono'
+import { EMBEBIDO, reservar } from '../embebido'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
@@ -23,6 +24,7 @@ export function PanelInfo() {
   const i = lista.indexOf(id ?? '')
   const ir = (paso: number) => setSeleccionado(lista[(i + paso + lista.length) % lista.length])
   const parada = tour?.paradas[i]
+  const reproduciendo = useEstado((s) => s.reproduciendo)
 
   // al abrirse, el foco va al título de la ficha; al cerrarse, vuelve adonde estaba (el pin o la lista)
   const titulo = useRef<HTMLHeadingElement>(null)
@@ -43,21 +45,35 @@ export function PanelInfo() {
     }
   }, [abierta])
 
+  // al pausar el tour automático vuelve la ficha: el foco va a su título
+  const reproducia = useRef(reproduciendo)
+  useEffect(() => {
+    if (reproducia.current && !reproduciendo && abierta) titulo.current?.focus({ preventScroll: true })
+    reproducia.current = reproduciendo
+  }, [reproduciendo, abierta])
+
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
       // con un diálogo abierto, Esc cierra solo el diálogo
-      if (e.key === 'Escape' && !useEstado.getState().dialogo) setSeleccionado(null)
+      // y en el tour automático, Esc lo pausa (vuelve la ficha)
+      const s = useEstado.getState()
+      if (e.key !== 'Escape' || s.dialogo) return
+      if (s.reproduciendo) s.setReproduciendo(false)
+      else setSeleccionado(null)
     }
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
   }, [setSeleccionado])
 
   return (
-    <aside className={`panel ${m ? 'abierto' : ''}`} aria-hidden={!m}>
+    <aside className={`panel ${m && !reproduciendo ? 'abierto' : ''}`} aria-hidden={!m || reproduciendo}>
       {m && (
         <>
           <button className="panel-cerrar" onClick={() => setSeleccionado(null)} aria-label={t.volverMapa}>
             <Icono nombre="cerrar" />
+          </button>
+          <button className="panel-cerrar panel-compartir" onClick={() => useEstado.getState().setDialogo('compartir')} aria-label={tt.compartir.titulo} title={tt.compartir.titulo}>
+            <Icono nombre="compartir" />
           </button>
           {tour && parada && (
             <div className="panel-tour" style={{ ['--color' as string]: tour.color }}>
@@ -70,8 +86,12 @@ export function PanelInfo() {
                 ))}
               </div>
               <p className="panel-tour-nota">{parada.nota}</p>
+              <button className="panel-tour-play" onClick={() => useEstado.getState().reproducirTour()}>
+                <Icono nombre="play" /> {tt.reproductor.reproducir}
+              </button>
             </div>
           )}
+          {m.foto && <FotoLugar foto={m.foto} alt={m.nombre} />}
           <p className="panel-etiqueta">
             {m.etiqueta} · {m.barrio}
           </p>
@@ -104,6 +124,11 @@ export function PanelInfo() {
               <dd>{m.duracion}</dd>
             </div>
           </dl>
+          {EMBEBIDO && (tour?.reserva || m.reserva) && (
+            <button className="panel-reservar" onClick={() => reservar((tour?.reserva ?? m.reserva)!, m.id, tour?.reserva ? tour.id : null)}>
+              <Icono nombre="check" /> {tour?.reserva ? t.reservarTour : t.reservar}
+            </button>
+          )}
           <div className="panel-consejo">
             <strong>{t.consejo}</strong>
             <p>{m.consejo}</p>
@@ -132,9 +157,45 @@ export function PanelInfo() {
               <button onClick={() => ir(1)}>{t.siguiente}</button>
             </div>
           )}
-          <p className="panel-aviso">{t.aviso}</p>
+          <p className="panel-aviso panel-fuente">
+            {m.web ? (
+              <>
+                <a href={m.web} target="_blank" rel="noopener">
+                  {t.fuente}
+                </a>
+                , {t.consultado(fechaLarga(CONSULTADO, idioma))}
+              </>
+            ) : m.fuenteDatos ? (
+              t.datosDe(m.fuenteDatos)
+            ) : (
+              t.calle
+            )}
+          </p>
         </>
       )}
     </aside>
+  )
+}
+
+/** Foto de Wikimedia Commons con su crédito (autor, licencia y enlace a la página del fichero). */
+function FotoLugar({ foto, alt }: { foto: Foto; alt: string }) {
+  const t = useT()
+  return (
+    <figure className="panel-foto">
+      <img src={import.meta.env.BASE_URL + foto.archivo} width={foto.ancho} height={foto.alto} alt={alt} loading="lazy" decoding="async" />
+      <figcaption>
+        <a href={foto.pagina} target="_blank" rel="noopener">
+          {t.panel.foto}: {foto.autor}
+        </a>{' '}
+        · {foto.urlLicencia ? (
+          <a href={foto.urlLicencia} target="_blank" rel="noopener license">
+            {foto.licencia}
+          </a>
+        ) : (
+          foto.licencia
+        )}
+        {foto.recortada && ` · ${t.legal.recortada}`}
+      </figcaption>
+    </figure>
   )
 }

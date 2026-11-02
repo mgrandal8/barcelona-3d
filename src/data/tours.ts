@@ -1,7 +1,8 @@
 import type { Momento } from '../scene/momento'
 import type { NombreIcono } from '../ui/Icono'
+import type { Reserva } from './monumentos'
 
-// Tours de ejemplo para la demo: ni el guía ni los precios son reales.
+// Tours de ejemplo para la demo: ni la guía ni los precios de los tours son reales (los de los lugares sí: monumentos.ts).
 
 export type Tour = {
   id: string
@@ -15,6 +16,8 @@ export type Tour = {
   /** Hora a la que se pone la maqueta al empezar. */
   momento: Momento
   paradas: { id: string; nota: string }[]
+  /** Modo embebido: se puede reservar (botón «Reservar»). */
+  reserva?: Reserva
 }
 
 export const TOURS: Tour[] = [
@@ -23,13 +26,14 @@ export const TOURS: Tour[] = [
     nombre: 'Gaudí esencial',
     icono: 'lagarto',
     color: '#d8603f',
-    resumen: 'Las tres obras imprescindibles del genio modernista, de la basílica al parque, pasando por el Passeig de Gràcia.',
-    duracion: '5 h',
+    resumen: 'Las cuatro obras imprescindibles del genio modernista, de la basílica al parque, pasando por el Passeig de Gràcia.',
+    duracion: '6 h',
     precio: '65 € por persona',
     momento: 'dia',
     paradas: [
       { id: 'sagrada-familia', nota: 'Empezamos a las 9:00 frente a la fachada del Nacimiento, la única que Gaudí vio terminada.' },
       { id: 'casa-batllo', nota: 'Bajamos andando por el Eixample hasta la manzana de la discordia. Parada para el café.' },
+      { id: 'casa-mila', nota: 'Subimos por el Passeig de Gràcia hasta La Pedrera y salimos a la azotea de los guerreros.' },
       { id: 'park-guell', nota: 'Subimos en metro hasta Lesseps y terminamos en la plaza, con toda la ciudad a los pies.' },
     ],
   },
@@ -44,7 +48,8 @@ export const TOURS: Tour[] = [
     momento: 'atardecer',
     paradas: [
       { id: 'catedral', nota: 'Quedamos en la plaza Nova, junto a las torres romanas de Barcino.' },
-      { id: 'barceloneta', nota: 'Cruzamos el Born hasta el barrio de pescadores. Tapa de bomba en una bodega de siempre.' },
+      { id: 'colom', nota: 'Bajamos por la Rambla hasta Colón y subimos al mirador para ver el puerto desde arriba.' },
+      { id: 'barceloneta', nota: 'Bordeamos el Port Vell hasta el barrio de pescadores. Tapa de bomba en una bodega de siempre.' },
       { id: 'montjuic', nota: 'Teleférico hasta la montaña y atardecer en las escalinatas del Palau Nacional.' },
     ],
   },
@@ -59,7 +64,7 @@ export const TOURS: Tour[] = [
     momento: 'noche',
     paradas: [
       { id: 'torre-glories', nota: 'A las 21:00 la torre se ilumina; la vemos desde la plaza de las Glòries.' },
-      { id: 'montjuic', nota: 'Espectáculo de agua, luz y música en la Font Màgica (de jueves a domingo).' },
+      { id: 'montjuic', nota: 'Espectáculo de agua, luz y música en la Font Màgica, los días que hay función.' },
       { id: 'barceloneta', nota: 'Cerramos con un paseo junto al mar hasta el Hotel W.' },
     ],
   },

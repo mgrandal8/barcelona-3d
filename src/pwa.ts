@@ -21,7 +21,7 @@ export function iniciarPwa() {
   })
   addEventListener('appinstalled', () => setRed({ instalable: false }))
 
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator) || new URLSearchParams(location.search).has('captura')) return
+  if (!import.meta.env.PROD || !('serviceWorker' in navigator) || new URLSearchParams(location.search).has('captura') || new URLSearchParams(location.search).has('embed')) return
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (recargarAlCambiar) location.reload()
   })

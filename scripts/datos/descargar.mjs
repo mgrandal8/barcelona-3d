@@ -77,6 +77,21 @@ await overpass(
   `${CRUDOS}transporte.json`,
 )
 
+// Línea de costa real (la tierra queda a la izquierda de cada vía), en un marco algo mayor
+// para que las cadenas salgan del rectángulo de la maqueta
+const margen = 1500
+const polyAmplio = polyOverpass({ uMin: RECT.uMin - margen, uMax: RECT.uMax + margen, vMin: RECT.vMin - margen, vMax: RECT.vMax + margen })
+await overpass(`[out:json][timeout:300];way["natural"="coastline"](poly:"${polyAmplio}");out geom qt;`, `${CRUDOS}costa.json`)
+
+// Municipios, distritos y barris (con su geometría) y, por si faltan, los nodos de lugar
+await overpass(
+  `[out:json][timeout:400];(
+    relation["boundary"="administrative"]["admin_level"~"^(8|9|10)$"](poly:"${poly}");
+    node["place"~"^(suburb|quarter|neighbourhood)$"](poly:"${poly}");
+  );out geom qt;`,
+  `${CRUDOS}limites.json`,
+)
+
 // Teselas de elevación (zoom 13 ≈ 14 m/px a esta latitud)
 const Z = 13
 const tx = (lon) => Math.floor(((lon + 180) / 360) * 2 ** Z)

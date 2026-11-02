@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
+import { paginas, robots, sitemap } from './src/seo'
 
 /** Ficheros de public/ (rutas relativas, con / aunque se construya en Windows). */
 const publicos = (dir = 'public'): string[] =>
@@ -19,7 +20,8 @@ function pwa(): Plugin {
     apply: 'build',
     enforce: 'post',
     generateBundle(_, bundle) {
-      const archivos = [...Object.keys(bundle), ...publicos()].filter((f) => !f.endsWith('.map')).sort()
+      // og/ son las imágenes para redes: solo las piden los buscadores y las redes, no hacen falta sin conexión
+      const archivos = [...Object.keys(bundle), ...publicos()].filter((f) => !f.endsWith('.map') && !f.startsWith('og/')).sort()
       const hash = createHash('sha256')
       for (const f of archivos) {
         const b = bundle[f]
@@ -33,11 +35,35 @@ function pwa(): Plugin {
   }
 }
 
+/**
+ * SEO: una página por ruta (vista general y cada ficha, en español, catalán e inglés) con sus metas y el texto de la
+ * ficha, más sitemap.xml y robots.txt. Las URL absolutas usan SITIO (por defecto, la web publicada en GitHub Pages).
+ * Va después de pwa(): las páginas de las fichas no entran en la copia sin conexión (sin red, cualquier ruta da index.html).
+ */
+function seo(): Plugin {
+  const sitio = process.env.SITIO ?? 'https://mgrandal8.github.io/barcelona-3d/'
+  return {
+    name: 'bcn3d-seo',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_, bundle) {
+      const indice = bundle['index.html']
+      if (!indice || indice.type !== 'asset') return this.error('seo: no está index.html en el bundle')
+      for (const p of paginas({ plantilla: String(indice.source), sitio, base: process.env.BASE ?? '/', publicos: publicos() })) {
+        if (p.ruta === '') indice.source = p.html
+        else this.emitFile({ type: 'asset', fileName: p.ruta + 'index.html', source: p.html })
+      }
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemap(sitio) })
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots(sitio) })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // en GitHub Pages la web cuelga de /barcelona-3d/ (lo pone el workflow); en local, en la raíz, como esperan los scripts
   base: process.env.BASE ?? '/',
-  plugins: [react(), pwa()],
+  plugins: [react(), pwa(), seo()],
   build: {
     // three solo ya ocupa ~700 kB minificado
     chunkSizeWarningLimit: 800,

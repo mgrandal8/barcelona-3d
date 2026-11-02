@@ -1,20 +1,8 @@
 import type { CSSProperties, Ref } from 'react'
-import { MONUMENTOS } from '../data/monumentos'
+import { colorDe } from './colores'
 
 // Pin de un lugar: un botón con su número (el de la lista) del color de su categoría; con el ratón
 // o el foco despliega el nombre. Lo usan la maqueta (scene/Pines.tsx) y la versión ligera.
-
-/** Color de cada categoría (la `etiqueta` de data/monumentos.ts), con contraste ≥ 4,5:1 frente al blanco. */
-const COLOR_CATEGORIA: Record<string, string> = {
-  Gaudí: '#b4472d',
-  Modernismo: '#a2366a',
-  'Arquitectura contemporánea': '#2f6596',
-  Deporte: '#3b4f96',
-  Gótico: '#6d4c35',
-  'Museos y vistas': '#85570c',
-  Mar: '#1c6a86',
-}
-const colorDe = (id: string) => COLOR_CATEGORIA[MONUMENTOS.find((m) => m.id === id)?.etiqueta ?? ''] ?? '#b4472d'
 
 export type PropsPin = {
   id: string

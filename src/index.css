@@ -29,6 +29,28 @@ body {
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
+/* nombres de distritos, barrios y calles (ui/CapaNombres.tsx), por debajo de los pines */
+.capa-nombres {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 14; transition: opacity 0.4s;
+  --tinta: #3d3029; --halo: rgba(255, 248, 236, 0.9);
+}
+.capa-nombres.de-noche { --tinta: #f3ead8; --halo: rgba(20, 24, 48, 0.85); }
+.con-portada .capa-nombres { opacity: 0; }
+.capa-nombres span {
+  position: absolute; left: 0; top: 0; white-space: nowrap; color: var(--tinta); will-change: transform;
+  text-shadow: 0 0 3px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo);
+  transition: opacity 0.35s; opacity: 1;
+}
+.capa-nombres span[data-ver="0"] { opacity: 0; }
+.plano-nombres { position: absolute; inset: 0; pointer-events: none; z-index: 1; --tinta: #3d3029; --halo: rgba(255, 248, 236, 0.9); }
+.plano-nombres span {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap; color: var(--tinta);
+  text-shadow: 0 0 3px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo);
+}
+.nombre-distrito { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; font-variant: small-caps; text-transform: lowercase; }
+.nombre-barrio { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+.nombre-calle { font-size: 11px; font-style: italic; font-weight: 500; }
+
 /* pines de los lugares (ui/Pin.tsx): en la maqueta los coloca scene/Pines.tsx; en la versión ligera, el plano */
 .capa-pines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 15; transition: opacity 0.4s; }
 .con-portada .capa-pines { opacity: 0; }
@@ -37,6 +59,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: opacity 0.25s; will-change: transform;
 }
 .capa-pines .pin:not([data-ver="1"]) { opacity: 0; pointer-events: none; }
+/* lugar fuera de la pantalla: número pequeño en el borde y una flecha hacia donde está */
+.pin-borde {
+  position: absolute; left: 0; top: 0; width: 26px; height: 26px; padding: 0; border: 0; background: none; pointer-events: auto;
+  transition: opacity 0.25s; will-change: transform;
+}
+.pin-borde:not([data-ver="1"]) { opacity: 0; pointer-events: none; }
+.pin-borde-num {
+  position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%; background: var(--color); color: #fff;
+  font-size: 12.5px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(40, 25, 10, 0.35); opacity: 0.92;
+}
+.pin-borde-flecha {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: rotate(var(--ang, 0rad)) translateX(17px) translate(-2px, -6px);
+  transform-origin: 0 0; border-left: 8px solid var(--color); border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+  filter: drop-shadow(0 0 1.5px #fff);
+}
+.pin-borde:hover .pin-borde-num, .pin-borde:focus-visible .pin-borde-num { opacity: 1; transform: scale(1.1); }
+.pin-borde:focus-visible { outline: none; }
+.pin-borde:focus-visible .pin-borde-num { box-shadow: 0 0 0 3px var(--texto); }
 .pin-num {
   position: relative; display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 999px;
   background: var(--color); color: #fff; font-size: 14px; font-weight: 800; white-space: nowrap;
@@ -107,6 +147,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
   border: 1px solid var(--borde); background: #fff8; display: grid; place-items: center; padding: 0;
 }
+/* compartir, debajo de la ✕: el título y la etiqueta dejan sitio a los dos botones */
+.panel-compartir { top: 52px; }
+.panel-compartir .icono { width: 1.05em; height: 1.05em; }
+.panel h2, .panel-etiqueta { margin-right: 40px !important; }
 .panel-etiqueta { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--acento); font-weight: 600; }
 .panel-texto { line-height: 1.55; font-size: 15px; }
 .panel-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
@@ -117,10 +161,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel-consejo { background: #fdf0d2; border-radius: 14px; padding: 12px 14px; }
 .panel-consejo strong { font-size: 13px; }
 .panel-consejo p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+/* modo embebido: reserva en la web anfitriona (verde, para no confundirlo con la navegación) */
+.panel-reservar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin: 0 0 12px; border: 0; border-radius: 999px; padding: 11px 16px; font-size: 15px; font-weight: 700; background: #1d6b48; color: #fff; }
+.panel-reservar:hover { background: #17573a; }
+.tour footer button.tour-reservar { flex: 1 0 100%; background: #1d6b48; color: #fff; }
 .panel-nav { display: flex; gap: 6px; margin-top: 16px; }
 .panel-nav button { flex: 1; border: 1px solid var(--borde); background: #fff8; border-radius: 999px; padding: 8px 6px; font-size: 13px; }
 .panel-nav button.primario { background: var(--acento); color: #fff; border-color: transparent; flex: 1.3; }
 .panel-aviso { margin: 12px 0 0; font-size: 11px; color: var(--texto-2); text-align: center; }
+.panel-aviso a, .panel-foto a { color: inherit; }
+/* foto de Wikimedia Commons: 16:9 en la ficha (el fichero es 4:3), con el crédito debajo */
+.panel-foto { margin: 0 40px 10px 0; }
+.panel-foto img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: var(--borde); }
+.panel-foto figcaption { margin-top: 3px; font-size: 10.5px; color: var(--texto-2); line-height: 1.3; }
+.atribucion-legal { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+button.enlace { font: inherit; color: var(--acento); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+.dialogo-pie { margin: 12px 0 0; font-size: 13px; text-align: center; }
+.legal h3 { margin: 14px 0 6px; font-size: 15px; }
+.legal h3:first-child { margin-top: 0; }
+.legal ul { margin: 0; padding-left: 18px; line-height: 1.5; font-size: 14px; }
+.legal li { margin-bottom: 4px; }
+.legal dl { margin: 0; font-size: 14px; line-height: 1.45; }
+.legal dt { font-weight: 600; margin-top: 8px; }
+.legal dd { margin: 2px 0 0; }
+.legal a { color: var(--acento); }
+.legal-fotos { font-size: 12.5px; }
 
 .atribucion {
   position: absolute; z-index: 25; bottom: 6px; left: 50%; transform: translateX(-50%); margin: 0;
@@ -271,6 +336,8 @@ button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
   border-radius: 999px; padding: 6px 14px; font-size: 14px;
 }
 .menu button small { font-size: 13px; font-weight: 600; }
+/* con la ficha abierta, en pantallas medianas el menú se queda en iconos para no meterse debajo de ella (el nombre queda en el title) */
+@media (max-width: 1400px) { .app:has(.panel.abierto) .menu button small { display: none; } }
 .menu button:hover { background: rgba(200, 85, 58, 0.08); }
 .menu button.activo { background: rgba(200, 85, 58, 0.16); }
 
@@ -388,6 +455,42 @@ button.enlace { border: 0; background: none; padding: 0; color: var(--acento); f
 .tour footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px dashed var(--borde); padding-top: 12px; }
 .tour footer strong { font-size: 14px; }
 .tour footer button { white-space: nowrap; border: 0; border-radius: 999px; padding: 8px 16px; font-size: 13.5px; font-weight: 600; background: color-mix(in srgb, var(--color) 80%, #000); }
+/* el precio arriba y los dos botones debajo, a partes iguales */
+.tour footer { flex-wrap: wrap; }
+.tour footer strong { flex: 1 0 100%; }
+.tour footer button { flex: 1; justify-content: center; }
+.tour footer button.tour-play, .panel-tour-play {
+  display: inline-flex; align-items: center; gap: 6px; background: #fff; color: color-mix(in srgb, var(--color) 80%, #000);
+  border: 1.5px solid color-mix(in srgb, var(--color) 60%, transparent); padding: 6.5px 13px 6.5px 11px;
+}
+.tour-play .icono, .panel-tour-play .icono { width: 0.95em; height: 0.95em; }
+.panel-tour-play { margin-top: 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+
+/* tour automático: subtítulo con la nota del guía, abajo en el centro */
+.subtitulo {
+  position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); z-index: 22; width: min(620px, calc(100% - 32px));
+  background: rgba(32, 26, 23, 0.84); color: #fff; border-radius: 18px; padding: 14px 18px 12px; box-shadow: var(--sombra);
+  backdrop-filter: blur(8px); animation: aparecer 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.subtitulo-cabecera { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: color-mix(in srgb, var(--color) 45%, #fff); }
+.subtitulo-cabecera .icono { vertical-align: -0.25em; }
+.subtitulo-lugar { margin: 4px 0 4px; font-size: 21px; line-height: 1.2; }
+.subtitulo-nota { margin: 0; font-size: 15.5px; line-height: 1.5; }
+.subtitulo.fin { text-align: center; padding: 14px 18px; }
+.subtitulo-barra { display: flex; gap: 4px; margin: 12px 0 10px; }
+.subtitulo-barra span { flex: 1; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.22); overflow: hidden; }
+.subtitulo-barra span.hecho { background: color-mix(in srgb, var(--color) 50%, #fff); }
+.subtitulo-barra i { display: block; height: 100%; width: 100%; background: color-mix(in srgb, var(--color) 50%, #fff); transform-origin: left; animation: llenar linear both; }
+@keyframes llenar { from { transform: scaleX(0); } }
+.subtitulo-botones { display: flex; gap: 8px; }
+.subtitulo-botones button {
+  width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: #fff;
+}
+.subtitulo-botones button:hover { background: rgba(255, 255, 255, 0.22); }
+.subtitulo-botones button[aria-pressed='true'] { background: #fff; color: var(--texto); }
+/* mientras se reproduce no sale la pista de controles */
+.reproduciendo .pista { opacity: 0; }
 
 .guia { display: flex; gap: 16px; align-items: center; margin: 14px 0 4px; }
 .guia-avatar {
@@ -444,6 +547,10 @@ kbd {
   .portada-cifras { margin: 14px 0 18px; }
   .portada-botones button, .portada-botones button.primario { flex: 1; padding: 12px 14px; white-space: nowrap; }
   .pista { bottom: 64px; font-size: 12px; }
+  .subtitulo { bottom: 62px; padding: 12px 14px 10px; }
+  .subtitulo-lugar { font-size: 18px; }
+  .subtitulo-nota { font-size: 14.5px; }
+  .reproduciendo .hora, .reproduciendo .ubicacion, .reproduciendo .metro-boton { opacity: 0; pointer-events: none; }
   .ayuda dt { width: 120px; }
   .dialogo { padding: 18px 16px 20px; }
   .hora button { padding: 6px 9px; }
@@ -454,3 +561,30 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* compartir */
+.compartir-imagen {
+  margin: 0 0 14px; border-radius: 14px; overflow: hidden; aspect-ratio: 1200 / 630; background: var(--fondo-2);
+  display: grid; place-items: center; border: 1px solid var(--borde);
+}
+.compartir-imagen img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.compartir-imagen span { font-size: 13.5px; color: var(--texto-2); }
+.compartir-enlace { display: grid; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--texto-2); }
+.compartir-enlace input {
+  width: 100%; box-sizing: border-box; border: 1px solid var(--borde); border-radius: 10px; padding: 9px 11px;
+  font: inherit; font-size: 13px; font-weight: 400; color: var(--texto); background: #fff;
+}
+.compartir-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.compartir-botones button, .compartir-botones a.boton {
+  display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--borde); background: #fff; color: var(--texto);
+  border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.compartir-botones button.primario { background: var(--acento); color: #fff; border-color: transparent; }
+
+/* texto de la página que genera el build para buscadores y sin JavaScript (src/seo.ts); React lo sustituye al arrancar */
+.seo { max-width: 640px; margin: 0 auto; padding: 32px 16px; line-height: 1.55; color: var(--texto); }
+.seo h1 { margin: 0 0 8px; font-size: 28px; }
+.seo h2 { font-size: 17px; margin: 24px 0 6px; }
+.seo dt { font-weight: 600; }
+.seo dd { margin: 0 0 8px; }
+.seo a { color: var(--acento); }

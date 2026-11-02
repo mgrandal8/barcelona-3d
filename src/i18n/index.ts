@@ -1,28 +1,10 @@
-import { MONUMENTOS, porId, type Monumento } from '../data/monumentos'
-import { TOURS, tourPorId, type Tour } from '../data/tours'
+import { MONUMENTOS, porId } from '../data/monumentos'
+import { TOURS, tourPorId } from '../data/tours'
 import { useEstado } from '../store'
-import { en } from './en'
-import { es } from './es'
-import type { Idioma, Traduccion } from './idioma'
+import { textosDe, traducirLugar, traducirTour } from './textos'
 
-export type { Idioma }
-
-// el español es el idioma de los datos: no lleva traducción
-const TRADUCCIONES: Record<Idioma, Traduccion | null> = { es: null, en }
-
-export const textosDe = (i: Idioma) => TRADUCCIONES[i]?.textos ?? es
-
-export function traducirLugar(m: Monumento, i: Idioma): Monumento {
-  const t = TRADUCCIONES[i]?.lugares[m.id]
-  return t ? { ...m, ...t } : m
-}
-
-export function traducirTour(t: Tour, i: Idioma): Tour {
-  const x = TRADUCCIONES[i]?.tours[t.id]
-  if (!x) return t
-  const { notas, ...resto } = x
-  return { ...t, ...resto, paradas: t.paradas.map((p, k) => ({ ...p, nota: notas[k] ?? p.nota })) }
-}
+export type { Idioma } from './idioma'
+export { fechaLarga, textosDe, traducirLugar, traducirTour } from './textos'
 
 /** Textos de la interfaz en el idioma elegido. */
 export const useT = () => textosDe(useEstado((s) => s.idioma))

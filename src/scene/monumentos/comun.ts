@@ -1,7 +1,9 @@
+import { useFrame } from '@react-three/fiber'
 import { createContext, use } from 'react'
 import * as THREE from 'three'
 import { cargarDatos } from '../datos'
 import { geoAEscena, metrosAY } from '../geo'
+import { vivo } from '../hora'
 
 /** Origen del monumento en la escena: x, z y la altura del suelo ahí. */
 export type Origen = { x: number; z: number; y: number }
@@ -77,4 +79,30 @@ export function torno(perfil: [number, number][], lados = 12) {
     perfil.map(([r, y]) => new THREE.Vector2(r, y)),
     lados,
   )
+}
+
+const focos: { m: THREE.MeshStandardMaterial; k: number }[] = []
+const cacheFocos = new Map<string, THREE.MeshStandardMaterial>()
+
+/**
+ * Material de un monumento que de noche iluminan los focos: brilla con un tono cálido según vivo.noche.
+ * `k` es cuánto se enciende. Lo actualiza useFocos() (en Monumentos), una vez por fotograma para todos.
+ */
+export function matFoco(color: string, k = 0.3) {
+  const clave = color + k
+  let m = cacheFocos.get(clave)
+  if (!m) {
+    // el brillo parte del color de la pieza (con algo de luz cálida), para que el ladrillo siga siendo rojo
+    const emissive = new THREE.Color(color).lerp(new THREE.Color('#ffc98a'), 0.35)
+    m = new THREE.MeshStandardMaterial({ color, roughness: 0.8, flatShading: true, emissive, emissiveIntensity: 0 })
+    cacheFocos.set(clave, m)
+    focos.push({ m, k })
+  }
+  return m
+}
+
+export function useFocos() {
+  useFrame(() => {
+    for (const f of focos) f.m.emissiveIntensity = vivo.noche * f.k * 1.6
+  })
 }

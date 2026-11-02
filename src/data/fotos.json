@@ -1,0 +1,123 @@
+{
+  "sagrada-familia": {
+    "archivo": "fotos/sagrada-familia.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Canaan",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=201948056",
+    "titulo": "SF_octubre_26.jpg",
+    "recortada": true
+  },
+  "casa-batllo": {
+    "archivo": "fotos/casa-batllo.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Canaan",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=148745853",
+    "titulo": "Casa_Batlló,_Antoni_Gaudí.jpg",
+    "recortada": true
+  },
+  "park-guell": {
+    "archivo": "fotos/park-guell.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Canaan",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=153189480",
+    "titulo": "Güell_BCN_edited.jpg",
+    "recortada": true
+  },
+  "torre-glories": {
+    "archivo": "fotos/torre-glories.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Ank Kumar",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=120952574",
+    "titulo": "Torre Glòries (Torre Agbar) , Barcelona, Spain (Ank Kumar, Infosys Limited) 04.jpg",
+    "recortada": true
+  },
+  "camp-nou": {
+    "archivo": "fotos/camp-nou.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "SimpleObjects-9ei",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=196824318",
+    "titulo": "Camp Nou under renovation - Sept. 21, 2025.jpg",
+    "recortada": true
+  },
+  "catedral": {
+    "archivo": "fotos/catedral.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Fernando",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=106185809",
+    "titulo": "Barcelona_Cathedral_Saint_Eulalia.jpg",
+    "recortada": true
+  },
+  "montjuic": {
+    "archivo": "fotos/montjuic.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Felix König",
+    "licencia": "CC BY 3.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by/3.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=27869855",
+    "titulo": "Palau Nacional Quatre Columnes Barcelona 2013.jpg",
+    "recortada": true
+  },
+  "barceloneta": {
+    "archivo": "fotos/barceloneta.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Sergi Larripa (User:SergiL)",
+    "licencia": "CC BY-SA 3.0",
+    "urlLicencia": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=170380",
+    "titulo": "050529_Barcelona_059.jpg",
+    "recortada": true
+  },
+  "casa-mila": {
+    "archivo": "fotos/casa-mila.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Thomas Ledl",
+    "licencia": "CC BY-SA 4.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/4.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=70563074",
+    "titulo": "Casa_Milà,_general_view.jpg",
+    "recortada": true
+  },
+  "arc-de-triomf": {
+    "archivo": "fotos/arc-de-triomf.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Canaan",
+    "licencia": "CC BY-SA 3.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by-sa/3.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=31622464",
+    "titulo": "Arc_Triomf_31-10-13.JPG",
+    "recortada": true
+  },
+  "colom": {
+    "archivo": "fotos/colom.webp",
+    "ancho": 600,
+    "alto": 450,
+    "autor": "Fred Romero",
+    "licencia": "CC BY 2.0",
+    "urlLicencia": "https://creativecommons.org/licenses/by/2.0",
+    "pagina": "https://commons.wikimedia.org/w/index.php?curid=76759119",
+    "titulo": "Barcelona - Monument a Colom (3).jpg",
+    "recortada": true
+  }
+}

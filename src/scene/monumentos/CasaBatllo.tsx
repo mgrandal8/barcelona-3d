@@ -10,7 +10,78 @@ const FONDO = 0.35 // (x)
 const ALTO = Y(26)
 const FRENTE = FONDO / 2
 const TRENCADIS = ['#8fc0d4', '#a9d2cf', '#c3dfe8', '#dfe9d0', '#eec3bb', '#f0e0b0', '#6fa3c4', '#d5e6ee', '#f4efe6', '#f4efe6']
+const AMATLLER = ['#d9897a', '#e6a596', '#c98f3f', '#f0dccd', '#b8604f']
 const ESCAMAS = ['#3f8f6a', '#4a9a7a', '#3a6fae', '#5c82b8', '#c96b7a', '#d98a8a', '#e0b45a']
+
+/**
+ * Casa Amatller (Puig i Cadafalch, 1900), la vecina en +z: fachada clara esgrafiada y el hastial
+ * escalonado de cerámica rosa y dorada. Partes de OSM: z de 0,075 a 0,255 y la fachada 1,3 m más atrás.
+ */
+function Amatller() {
+  const Z0 = ANCHO / 2 + 0.002
+  const A = 0.176
+  const F = FRENTE - 0.013
+  const H = Y(20)
+  const hastial = useMemo(() => {
+    const f = new THREE.Shape()
+    const pasos = 5
+    const alto = Y(9)
+    f.moveTo(-A / 2, 0)
+    for (let i = 0; i < pasos; i++) {
+      const x = -A / 2 + (i / pasos) * (A / 2) * 0.9
+      f.lineTo(x, ((i + 1) / pasos) * alto)
+      f.lineTo(x + ((A / 2) * 0.9) / pasos, ((i + 1) / pasos) * alto)
+    }
+    for (let i = pasos - 1; i >= 0; i--) {
+      const x = A / 2 - (i / pasos) * (A / 2) * 0.9
+      f.lineTo(x - ((A / 2) * 0.9) / pasos, ((i + 1) / pasos) * alto)
+      f.lineTo(x, ((i + 1) / pasos) * alto)
+    }
+    f.lineTo(A / 2, 0)
+    f.closePath()
+    const g = new THREE.ExtrudeGeometry(f, { depth: 0.025, bevelEnabled: false }).rotateY(Math.PI / 2)
+    // la cara del hastial se llena de cerámica en franjas
+    return teñirCaras(g, (i, c) => AMATLLER[(Math.floor(c.y / 0.02) + Math.floor(azar(i) * 2)) % AMATLLER.length])
+  }, [])
+  const ventanas = useMemo(() => {
+    const out: [number, number][] = []
+    for (let p = 1; p < 5; p++) for (const z of [-0.055, 0, 0.055]) out.push([0.06 + p * Y(3.6), z])
+    return out
+  }, [])
+  return (
+    <group position={[0, 0, Z0 + A / 2]}>
+      <mesh position={[F - 0.15, H / 2, 0]} material={mat('#ead9bf')} castShadow receiveShadow>
+        <boxGeometry args={[0.3, H, A]} />
+      </mesh>
+      {/* planta baja de piedra con los arcos de la entrada */}
+      <mesh position={[F + 0.003, 0.045, 0]} material={mat('#cdb48e')} castShadow>
+        <boxGeometry args={[0.008, 0.09, A]} />
+      </mesh>
+      {[-0.035, 0.035].map((z) => (
+        <mesh key={z} position={[F + 0.008, 0.04, z]} material={mat('#4a3f37')}>
+          <boxGeometry args={[0.004, 0.06, 0.04]} />
+        </mesh>
+      ))}
+      {/* esgrafiado: franja rosada bajo el hastial */}
+      <mesh position={[F + 0.002, H - 0.03, 0]} material={mat('#e3b8a6')}>
+        <boxGeometry args={[0.006, 0.05, A]} />
+      </mesh>
+      {ventanas.map(([y, z]) => (
+        <mesh key={`${y}${z}`} position={[F + 0.004, y, z]} material={mat('#4a3f37')}>
+          <boxGeometry args={[0.004, 0.04, 0.026]} />
+        </mesh>
+      ))}
+      {/* tribuna de piedra del primer piso */}
+      <mesh position={[F + 0.012, 0.13, -0.03]} material={mat('#d8c5a2')} castShadow>
+        <boxGeometry args={[0.022, 0.05, 0.06]} />
+      </mesh>
+      <mesh geometry={hastial} position={[F - 0.025, H, 0]} material={matVertices} castShadow />
+      <mesh position={[F - 0.16, H + 0.01, 0]} material={mat('#c56a4f')} castShadow>
+        <boxGeometry args={[0.27, 0.02, A * 0.95]} />
+      </mesh>
+    </group>
+  )
+}
 
 export function CasaBatllo() {
   const fachada = useMemo(() => {
@@ -35,6 +106,7 @@ export function CasaBatllo() {
 
   return (
     <group>
+      <Amatller />
       <mesh position={[0, ALTO / 2, 0]} material={mat('#ddd3c0')} castShadow receiveShadow>
         <boxGeometry args={[FONDO, ALTO, ANCHO]} />
       </mesh>

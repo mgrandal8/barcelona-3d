@@ -1,6 +1,8 @@
 // Uso: node scripts/capturas-lote.mjs vistas.json [url-base] [carpeta-salida]
 // vistas.json: [{ "nombre": "x", "cam": [px, py, pz, tx, ty, tz] } | { "nombre": "x", "lugar": "id" }, ...]
-// Cualquier vista admite "hora": "dia" | "atardecer" | "noche" (espera a que termine la transición).
+// Cualquier vista admite "hora": "dia" | "atardecer" | "noche" (espera a que termine la transición)
+// y "ui": true para que la captura incluya la interfaz HTML (pines, nombres).
+// Con "suelo": true, las alturas de "cam" (py y ty) se cuentan desde el suelo en el punto al que se mira.
 // Con "lugar" se selecciona como si se hiciera clic (vuelo + ficha) y la captura incluye la interfaz.
 // Carga la escena una vez y saca una captura por vista moviendo la cámara (modo ?captura=1).
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -13,7 +15,7 @@ const salida = process.argv[4] ?? 'capturas'
 const browser = await chromium.launch({
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 })
-const page = await browser.newPage({ viewport: { width: Number(process.env.ANCHO ?? 1200), height: Number(process.env.ALTO ?? 750) } })
+const page = await browser.newPage({ locale: 'es-ES', viewport: { width: Number(process.env.ANCHO ?? 1200), height: Number(process.env.ALTO ?? 750) } })
 const errores = []
 page.on('console', (m) => m.type() === 'error' && errores.push(m.text()))
 page.on('pageerror', (e) => errores.push(String(e)))
@@ -31,18 +33,32 @@ for (const v of vistas) {
   }
   if (v.lugar !== undefined) {
     await page.evaluate((id) => window.__estado.getState().setSeleccionado(id), v.lugar)
-    await page.waitForTimeout(Number(process.env.ESPERA_LUGAR ?? 15000))
+    // espera a que empiece y termine el vuelo (con SwiftShader tarda bastante más que en una GPU)
+    await page.waitForTimeout(3000)
+    await page.waitForFunction(() => !window.__enVuelo(), null, { timeout: 180000, polling: 1000 })
+    await page.waitForTimeout(Number(process.env.ESPERA_LUGAR ?? 4000))
     await page.screenshot({ path: `${salida}/${v.nombre}.png`, timeout: 120000 })
     console.log('captura:', v.nombre)
     continue
+  }
+  if (v.suelo) {
+    await page.waitForFunction(() => window.__alturaY, null, { timeout: 60000 })
+    const y = await page.evaluate(([x, z]) => window.__alturaY(x, z), [v.cam[3], v.cam[5]])
+    v.cam = [v.cam[0], v.cam[1] + y, v.cam[2], v.cam[3], v.cam[4] + y, v.cam[5]]
   }
   // dos veces: la primera puede llegar antes de que los controles terminen de montarse
   for (let k = 0; k < 2; k++) {
     await page.evaluate((c) => window.__controles.setLookAt(...c, false), v.cam)
     await page.waitForTimeout(Number(process.env.ESPERA_VISTA ?? 4000) / 2)
   }
-  const dataUrl = await page.evaluate(() => document.querySelector('canvas').toDataURL('image/png'))
-  writeFileSync(`${salida}/${v.nombre}.png`, Buffer.from(dataUrl.split(',')[1], 'base64'))
+  if (v.ui) {
+    // con la interfaz HTML (pines, nombres): captura de página, más lenta
+    await page.waitForTimeout(1500)
+    await page.screenshot({ path: `${salida}/${v.nombre}.png`, timeout: 120000 })
+  } else {
+    const dataUrl = await page.evaluate(() => document.querySelector('canvas').toDataURL('image/png'))
+    writeFileSync(`${salida}/${v.nombre}.png`, Buffer.from(dataUrl.split(',')[1], 'base64'))
+  }
   console.log('captura:', v.nombre)
 }
 if (errores.length) console.log('ERRORES DE CONSOLA:\n' + errores.join('\n'))

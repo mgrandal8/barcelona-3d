@@ -6,7 +6,9 @@ import { Y, azar, mat, matVertices, teñirCaras, useLocal, useSuelo } from './co
 // en local, +z apunta a la entrada. Los elementos pequeños van a escala ×1,6 para que se lean.
 
 const TRENCADIS = ['#f4f0e6', '#3f7fc4', '#f0c33c', '#5fa35a', '#d24a3c', '#e9884a', '#7fc4d8']
-const ENTRADA: [number, number] = [41.4131, 2.153]
+/** Puerta de Carrer d'Olot: punto medio de los dos pabellones de OSM. */
+const ENTRADA: [number, number] = [41.41349, 2.15308]
+const CASA_MUSEU: [number, number] = [41.41444, 2.15358]
 
 function trencadis(g: THREE.BufferGeometry, semilla: number) {
   return teñirCaras(g, (i) => TRENCADIS[Math.floor(azar(i * 13 + semilla) * TRENCADIS.length)])
@@ -22,7 +24,7 @@ function Caseta({ x, z, torre }: { x: number; z: number; torre?: boolean }) {
   return (
     <group position={[x, 0, z]}>
       <mesh position={[0, 0.05, 0]} material={mat('#c9a477')} castShadow receiveShadow>
-        <boxGeometry args={[0.1, 0.1, 0.1]} />
+        <boxGeometry args={[0.12, 0.1, 0.09]} />
       </mesh>
       <mesh geometry={tejado} position={[0, 0.1, 0]} material={matVertices} castShadow />
       <mesh position={[0, 0.19, 0]} material={mat('#f4f0e6')} castShadow>
@@ -43,6 +45,34 @@ function Caseta({ x, z, torre }: { x: number; z: number; torre?: boolean }) {
   )
 }
 
+/** Casa-Museu Gaudí (Francesc Berenguer, 1904): casita rosa con una aguja verde rematada por una cruz. */
+function CasaMuseu() {
+  return (
+    <group>
+      <mesh position={[0, Y(9) / 2, 0]} material={mat('#e7a7a0')} castShadow receiveShadow>
+        <boxGeometry args={[0.13, Y(9), 0.13]} />
+      </mesh>
+      <mesh position={[0, Y(9) + 0.03, 0]} rotation-y={Math.PI / 4} material={mat('#b96b5c')} castShadow>
+        <coneGeometry args={[0.1, 0.06, 4]} />
+      </mesh>
+      <group position={[0.045, 0, 0.045]}>
+        <mesh position={[0, Y(12) / 2, 0]} material={mat('#e7a7a0')} castShadow>
+          <cylinderGeometry args={[0.022, 0.024, Y(12), 8]} />
+        </mesh>
+        <mesh position={[0, Y(12) + 0.06, 0]} material={mat('#6f9a68')} castShadow>
+          <coneGeometry args={[0.026, 0.12, 8]} />
+        </mesh>
+        <mesh position={[0, Y(12) + 0.135, 0]} material={mat('#f4f0e6')}>
+          <boxGeometry args={[0.004, 0.03, 0.004]} />
+        </mesh>
+        <mesh position={[0, Y(12) + 0.14, 0]} material={mat('#f4f0e6')}>
+          <boxGeometry args={[0.016, 0.004, 0.004]} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
 /** Superelipse de la plaza (planta de OSM: ~86 × 44 m, con el frente hacia +z). */
 const PLAZA = { x: 0.02, z: -0.14, a: 0.21, b: 0.43, n: 3 }
 function bordePlaza(ang: number, k = 1): [number, number] {
@@ -56,13 +86,14 @@ export function ParkGuell() {
   const suelo = useSuelo()
   const local = useLocal()
   const [ex, ez] = local(...ENTRADA)
+  const [cmx, cmz] = local(...CASA_MUSEU)
   const frente: [number, number] = [PLAZA.x, PLAZA.z + PLAZA.b]
   const yFrente = suelo(...frente)
   // la plaza está a nivel con la parte de atrás y en voladizo sobre la sala hipóstila
   const yPlaza = Math.max(suelo(PLAZA.x, PLAZA.z), suelo(PLAZA.x, PLAZA.z - 0.3), yFrente + Y(11))
   const dx = ex - frente[0]
   const dz = ez - frente[1]
-  const largo = Math.min(Math.hypot(dx, dz), 0.42)
+  const largo = Math.min(Math.hypot(dx, dz), 0.5)
   const rumbo = Math.atan2(dx, dz)
   const yEntrada = suelo(frente[0] + Math.sin(rumbo) * largo, frente[1] + Math.cos(rumbo) * largo)
   const caida = yFrente - yEntrada
@@ -135,12 +166,18 @@ export function ParkGuell() {
         </group>
         {/* las dos casetas de la entrada */}
         <group position={[0, yEntrada - yFrente, largo]}>
-          <Caseta x={-0.15} z={0} torre />
-          <Caseta x={0.15} z={0} />
-          <mesh position={[0, 0.03, 0.06]} material={mat('#c9a477')} castShadow>
-            <boxGeometry args={[0.55, 0.06, 0.015]} />
-          </mesh>
+          <Caseta x={-0.12} z={0} torre />
+          <Caseta x={0.12} z={0} />
+          {/* muro de la calle, con la puerta abierta entre los dos pabellones */}
+          {[-1, 1].map((s) => (
+            <mesh key={s} position={[s * 0.26, 0.03, 0.04]} material={mat('#c9a477')} castShadow>
+              <boxGeometry args={[0.16, 0.06, 0.015]} />
+            </mesh>
+          ))}
         </group>
+      </group>
+      <group position={[cmx, suelo(cmx, cmz), cmz]}>
+        <CasaMuseu />
       </group>
     </group>
   )

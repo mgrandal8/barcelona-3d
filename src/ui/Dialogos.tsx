@@ -1,9 +1,12 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { traducirLugar, useT, useTours } from '../i18n'
-import { porId } from '../data/monumentos'
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
+import { fechaLarga, traducirLugar, useLugares, useT, useTours } from '../i18n'
+import { CONSULTADO, porId } from '../data/monumentos'
+import { ANALITICA } from '../analitica'
+import { REGISTRO_REMOTO } from '../registro'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
 import { Icono } from './Icono'
+import { EMBEBIDO, reservar, toursPropios } from '../embebido'
 import { ICONO_MOMENTO } from '../scene/momento'
 
 const ENFOCABLES = 'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
@@ -55,12 +58,13 @@ function Dialogo({ titulo, ancho, children }: { titulo: string; ancho?: number; 
 
 function Tours() {
   const empezarTour = useEstado((s) => s.empezarTour)
+  const reproducirTour = useEstado((s) => s.reproducirTour)
   const idioma = useEstado((s) => s.idioma)
   const tx = useT()
   const horas = { dia: tx.hora.tourDia, atardecer: tx.hora.tourAtardecer, noche: tx.hora.tourNoche }
   return (
-    <Dialogo titulo={tx.tours.titulo} ancho={960}>
-      <p className="dialogo-intro">{tx.tours.intro}</p>
+    <Dialogo titulo={toursPropios ? tx.tours.tituloPropios : tx.tours.titulo} ancho={960}>
+      <p className="dialogo-intro">{toursPropios ? tx.tours.introPropios : tx.tours.intro}</p>
       <div className="tours">
         {useTours().map((t) => (
           <article key={t.id} className="tour" style={{ ['--color' as string]: t.color }}>
@@ -83,9 +87,17 @@ function Tours() {
             </ol>
             <footer>
               <strong>{t.precio}</strong>
+              <button className="tour-play" onClick={() => reproducirTour(t.id)} aria-label={tx.tours.reproducirEtiqueta(t.nombre)}>
+                <Icono nombre="play" /> {tx.tours.reproducir}
+              </button>
               <button className="primario" onClick={() => empezarTour(t.id)}>
                 {tx.tours.empezar}
               </button>
+              {EMBEBIDO && t.reserva && (
+                <button className="tour-reservar" onClick={() => reservar(t.reserva!, null, t.id)} aria-label={tx.tours.reservarEtiqueta(t.nombre)}>
+                  {tx.panel.reservar}
+                </button>
+              )}
             </footer>
           </article>
         ))}
@@ -149,6 +161,92 @@ function Ayuda() {
       </dl>
       <p className="dialogo-intro">{t.intro}</p>
       <SinConexion />
+      <p className="dialogo-pie">
+        <button className="enlace" onClick={() => useEstado.getState().setDialogo('legal')}>
+          {useT().legal.titulo}
+        </button>
+      </p>
+    </Dialogo>
+  )
+}
+
+// la imagen para redes y el enlace solo se cargan al abrir el diálogo
+const Compartir = lazy(() => import('./Compartir').then((m) => ({ default: m.Compartir })))
+
+function DialogoCompartir() {
+  const t = useT().compartir
+  return (
+    <Dialogo titulo={t.titulo} ancho={620}>
+      <Suspense fallback={null}>
+        <Compartir />
+      </Suspense>
+    </Dialogo>
+  )
+}
+
+/** Privacidad (sin cookies, ubicación local, analítica) y créditos: mapa, relieve, horarios, fotos y código. */
+function Legal() {
+  const tt = useT()
+  const t = tt.legal
+  const idioma = useEstado((s) => s.idioma)
+  const lugares = useLugares()
+  const fuera = { target: '_blank', rel: 'noopener' }
+  return (
+    <Dialogo titulo={t.titulo} ancho={620}>
+      <div className="legal">
+        <h3>{t.privacidad}</h3>
+        <ul>
+          {t.puntos.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+          <li>{ANALITICA ? t.analiticaSi(ANALITICA) : t.analiticaNo}</li>
+          {REGISTRO_REMOTO && <li>{t.errores}</li>}
+          <li>
+            {t.alojamiento}{' '}
+            <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" {...fuera}>
+              {t.politicaGithub}
+            </a>
+            .
+          </li>
+        </ul>
+        <h3>{t.creditos}</h3>
+        <dl>
+          <dt>{t.mapa}</dt>
+          <dd>
+            © <a href="https://www.openstreetmap.org/copyright" {...fuera}>OpenStreetMap contributors</a>, ODbL
+          </dd>
+          <dt>{t.relieve}</dt>
+          <dd>
+            <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" {...fuera}>
+              Mapzen/AWS Terrain Tiles
+            </a>{' '}
+            (SRTM, GMTED, ETOPO1…)
+          </dd>
+          <dt>{t.horarios}</dt>
+          <dd>{t.horariosTexto(fechaLarga(CONSULTADO, idioma))}</dd>
+          <dt>{t.fotos}</dt>
+          <dd>
+            <ul className="legal-fotos">
+              {lugares
+                .filter((m) => m.foto)
+                .map((m) => (
+                  <li key={m.id}>
+                    {m.nombre}:{' '}
+                    <a href={m.foto!.pagina} {...fuera}>
+                      {m.foto!.autor}
+                    </a>
+                    , {m.foto!.urlLicencia ? <a href={m.foto!.urlLicencia} target="_blank" rel="noopener license">{m.foto!.licencia}</a> : m.foto!.licencia}
+                    {m.foto!.recortada && `, ${t.recortada}`} · Wikimedia Commons
+                  </li>
+                ))}
+            </ul>
+          </dd>
+          <dt>{t.codigo}</dt>
+          <dd>{t.codigoTexto}</dd>
+          <dt>{t.ejemplo}</dt>
+          <dd>{t.ejemploTexto}</dd>
+        </dl>
+      </div>
     </Dialogo>
   )
 }
@@ -158,5 +256,7 @@ export function Dialogos() {
   if (d === 'tours') return <Tours />
   if (d === 'guia') return <Guia />
   if (d === 'ayuda') return <Ayuda />
+  if (d === 'compartir') return <DialogoCompartir />
+  if (d === 'legal') return <Legal />
   return null
 }

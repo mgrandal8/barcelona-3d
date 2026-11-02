@@ -1,13 +1,16 @@
 // Convierte los datos crudos en los ficheros que carga la web:
 //   public/datos/terreno.bin   alturas en decímetros (Int16) en una rejilla regular
 //   public/datos/edificios.bin.gz plantas y alturas de los edificios (gzip)
-//   public/datos/mapa.json.gz  usos del suelo y líneas (calles, tren, muelles)
+//   public/datos/mapa.json.gz  usos del suelo, líneas (calles, tren, muelles) y el mar con la costa de OSM
+//   public/datos/nombres.json.gz distritos, barrios y calles principales
 //   public/datos/meta.json     dimensiones
 // Uso: node scripts/datos/procesar.mjs
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs'
 import { PNG } from 'pngjs'
 import { CRUDOS, RECT, SALIDA, desproyectar, proyectar, simplificar } from './comun.mjs'
 import { escribirEdificios, escribirGz } from './formato.mjs'
+import { poligonoMar } from './costa.mjs'
+import { leerLimites, zonaDe, nombres } from './nombres.mjs'
 
 mkdirSync(SALIDA, { recursive: true })
 
@@ -107,7 +110,7 @@ for (const f of readdirSync(CRUDOS).filter((f) => f.startsWith('edificios_'))) {
     const a = areaFirmada(p)
     if (Math.abs(a) < 10) continue
     if (a < 0) p.reverse()
-    ;(t['building:part'] ? partes : edificios).push({ p, t })
+    ;(t['building:part'] ? partes : edificios).push({ p, t, id: e.id })
   }
 }
 
@@ -167,6 +170,20 @@ function altura(t, esParte) {
   return [Math.max(1, h), Math.max(0, min)]
 }
 
+// Alturas que en OSM faltan o están mal (comprobadas a mano en la sesión 10)
+const CORRECCIONES = {
+  51260215: 33, // Santa Maria del Mar («13 m»: es el ábside; la nave tiene 33)
+  625295824: 27, // Santa Maria del Pi (nave)
+  35793637: 45, // Palau Sant Jordi
+  45330589: 25, // Palau Blaugrana
+  68766768: 25, // Teatre Nacional de Catalunya
+  36306316: 18, // Estació de Sants
+  249401797: 20, // Mercat de Sant Antoni
+  242590265: 25, // Edifici Històric de la Universitat de Barcelona
+  33570474: 18, // Castell dels Tres Dragons
+  1533889825: 25, // Palau Reial Major
+}
+
 const salida = []
 let omitidos = 0
 for (const b of edificios) {
@@ -174,7 +191,9 @@ for (const b of edificios) {
     omitidos++
     continue
   }
-  salida.push({ ...b, alt: altura(b.t, false) })
+  const alt = altura(b.t, false)
+  if (CORRECCIONES[b.id]) alt[0] = CORRECCIONES[b.id]
+  salida.push({ ...b, alt })
 }
 for (const parte of partes) {
   const [h] = altura(parte.t, true)
@@ -183,6 +202,21 @@ for (const parte of partes) {
   salida.push({ ...parte, alt: [h, altura(parte.t, true)[1]] })
 }
 
+// zona (distrito o municipio) en los 4 bits altos del tipo: cambia la paleta de fachadas
+const limites = leerLimites(`${CRUDOS}limites.json`, proyectar)
+const zonas = new Array(16).fill(0)
+for (const s of salida) {
+  let cu = 0
+  let cv = 0
+  for (const [u, v] of s.p) {
+    cu += u
+    cv += v
+  }
+  s.zona = zonaDe(limites, cu / s.p.length, cv / s.p.length)
+  zonas[s.zona]++
+}
+console.log('zonas', zonas.join(' '))
+
 // formato en scripts/datos/formato.mjs
 const bytes = escribirEdificios(
   `${SALIDA}edificios.bin.gz`,
@@ -190,7 +224,7 @@ const bytes = escribirEdificios(
     p: s.p.map(([u, v]) => [Math.round(u * 2), Math.round(v * 2)]),
     alto: Math.round(s.alt[0] * 10),
     base: Math.round(s.alt[1] * 10),
-    tipo: tipo(s.t),
+    tipo: tipo(s.t) | (s.zona << 4),
   })),
 )
 console.log('edificios', salida.length, `(omitidos con partes: ${omitidos})`, (bytes / 1e6).toFixed(1), 'MB')
@@ -267,7 +301,9 @@ for (const e of JSON.parse(readFileSync(`${CRUDOS}mapa.json`, 'utf8')).elements)
     } else if (c && cerrada) {
       areas.push({ t: c, r: [plano(simplificar(pts, 1.5))] })
     } else if (t.man_made) {
-      lineas.push({ t: 'muelle', a: 10, p: plano(simplificar(pts, 1.5)) })
+      // diques y espigones son tierra en la maqueta; los pantalanes solo se pintan
+      const pantalan = t.man_made === 'pier'
+      lineas.push({ t: pantalan ? 'pantalan' : 'muelle', a: pantalan ? 4 : 10, p: plano(simplificar(pts, 1.5)) })
     } else if (t.highway === 'pedestrian') {
       areas.push({ t: 'peatonal', r: [plano(simplificar(pts, 1.5))] })
     }
@@ -279,8 +315,22 @@ for (const e of JSON.parse(readFileSync(`${CRUDOS}mapa.json`, 'utf8')).elements)
     if (ext.length) areas.push({ t: c, r: [...ext, ...int].map((r) => plano(simplificar(r, 2))) })
   }
 }
-escribirGz(`${SALIDA}mapa.json.gz`, JSON.stringify({ areas, lineas }))
+// el mar, con la línea de costa real; el punto más hondo del relieve dice qué lado es mar
+let hondo = 0
+for (let k = 1; k < alturas.length; k++) if (alturas[k] < alturas[hondo]) hondo = k
+const puntoMar = [RECT.uMin + (hondo % NU) * PASO, RECT.vMin + Math.floor(hondo / NU) * PASO]
+const vias = JSON.parse(readFileSync(`${CRUDOS}costa.json`, 'utf8')).elements.filter((e) => e.geometry).map((e) => e.geometry.map(({ lat, lon }) => proyectar(lat, lon)))
+const mar = poligonoMar(vias, RECT, puntoMar)
+areas.unshift({ t: 'mar', r: mar.anillos.map((r) => plano(simplificar([...r, r[0]], 1).slice(0, -1))) })
+const costa = mar.costa.map((c) => plano(simplificar(c, 1)))
+console.log('costa', mar.anillos.length, 'anillos de mar,', costa.reduce((s, c) => s + c.length / 2, 0), 'puntos')
+
+escribirGz(`${SALIDA}mapa.json.gz`, JSON.stringify({ areas, lineas, costa }))
 console.log('mapa', areas.length, 'áreas', lineas.length, 'líneas')
+
+const n = nombres(limites, JSON.parse(readFileSync(`${CRUDOS}mapa.json`, 'utf8')).elements, proyectar, RECT)
+escribirGz(`${SALIDA}nombres.json.gz`, JSON.stringify(n))
+console.log('nombres', n.length, '(', [0, 1, 2].map((k) => n.filter((x) => x.l === k).length).join(' / '), ')')
 
 writeFileSync(`${SALIDA}meta.json`, JSON.stringify({ rect: RECT, paso: PASO, nu: NU, nv: NV }))
 console.log('listo')

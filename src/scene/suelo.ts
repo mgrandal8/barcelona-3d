@@ -3,10 +3,12 @@
 // dibujar en un worker, el hilo principal con canvas normales.
 import { aleatorio, ESCALA, metrosAY } from './geo'
 import { crearAlturaM, type Meta } from './relieve'
+import { crearCosta } from './costa'
 
 export type Area = { t: string; r: number[][] }
 export type Linea = { t: string; a: number; p: number[] }
-export type Mapa = { areas: Area[]; lineas: Linea[] }
+/** `costa`: líneas de costa de OSM recortadas (tierra a la izquierda); el área `mar` es el mar que encierran. */
+export type Mapa = { areas: Area[]; lineas: Linea[]; costa?: number[][] }
 
 type Lienzo = OffscreenCanvas | HTMLCanvasElement
 type Ctx2D = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
@@ -39,6 +41,7 @@ const COLOR_LINEA: Record<string, string> = {
   secundaria: '#f1eadd',
   peatonal: '#f5eddc',
   muelle: '#d2cbbd',
+  pantalan: '#d2cbbd',
   rio: '#6aaecd',
 }
 
@@ -98,8 +101,24 @@ function dibujarMapa(ctx: Ctx2D, meta: Meta, mapa: Mapa, metrosPx: number, color
   }
 }
 
-/** Capa base a partir del relieve: mar (o el fondo del mar, si la maqueta pone el agua encima), ciudad y monte. */
-function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array, plano: boolean) {
+/** Traza los anillos de un área (para rellenar o recortar). */
+function trazar(ctx: Ctx2D, meta: Meta, a: Area, metrosPx: number) {
+  const { uMin, vMin } = meta.rect
+  ctx.beginPath()
+  for (const r of a.r) {
+    ctx.moveTo((r[0] - uMin) / metrosPx, (r[1] - vMin) / metrosPx)
+    for (let i = 2; i < r.length; i += 2) ctx.lineTo((r[i] - uMin) / metrosPx, (r[i + 1] - vMin) / metrosPx)
+    ctx.closePath()
+  }
+}
+
+const areaMar = (mapa: Mapa) => (mapa.costa ? mapa.areas.find((a) => a.t === 'mar') : undefined)
+
+/**
+ * Capa base a partir del relieve: mar (o el fondo del mar, si la maqueta pone el agua encima), ciudad y monte.
+ * `solo`: 'tierra' pinta todo como tierra y 'mar' todo como mar (para recortarlas con la costa real).
+ */
+function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array, plano: boolean, solo?: 'tierra' | 'mar') {
   const { nu, nv } = meta
   const c = crear(nu, nv)
   const ctx = ctx2d(c)
@@ -108,7 +127,7 @@ function capaRelieve(crear: CrearLienzo, meta: Meta, alturas: Int16Array, plano:
   for (let i = 0; i < nu * nv; i++) {
     const h = alturas[i] / 10
     let col: number[]
-    if (h <= 0.3) col = plano ? mezcla(COLOR_MAR, COLOR_MAR_HONDO, Math.min(1, -h / 30)) : mezcla(COLOR_ARENA_MAR, COLOR_FONDO_MAR, Math.min(1, -h / 15))
+    if (solo === 'mar' || (solo !== 'tierra' && h <= 0.3)) col = plano ? mezcla(COLOR_MAR, COLOR_MAR_HONDO, Math.min(1, Math.max(0, -h / 30))) : mezcla(COLOR_ARENA_MAR, COLOR_FONDO_MAR, Math.min(1, Math.max(0, -h / 15)))
     else col = mezcla(CIUDAD, MONTE, Math.min(1, Math.max(0, (h - 120) / 120)))
     img.data.set([col[0], col[1], col[2], 255], i * 4)
   }
@@ -128,7 +147,17 @@ export function pintarSuelo(crear: CrearLienzo, meta: Meta, alturas: Int16Array,
   const { c, metrosPx } = lienzoMaqueta(crear, meta, ancho)
   const ctx = ctx2d(c)
   ctx.imageSmoothingEnabled = true
-  ctx.drawImage(capaRelieve(crear, meta, alturas, plano), 0, 0, c.width, c.height)
+  const mar = areaMar(mapa)
+  if (!mar) ctx.drawImage(capaRelieve(crear, meta, alturas, plano), 0, 0, c.width, c.height)
+  else {
+    // tierra en todo el lienzo y el fondo del mar recortado con la costa de OSM
+    ctx.drawImage(capaRelieve(crear, meta, alturas, plano, 'tierra'), 0, 0, c.width, c.height)
+    ctx.save()
+    trazar(ctx, meta, mar, metrosPx)
+    ctx.clip('evenodd')
+    ctx.drawImage(capaRelieve(crear, meta, alturas, plano, 'mar'), 0, 0, c.width, c.height)
+    ctx.restore()
+  }
   dibujarMapa(ctx, meta, mapa, metrosPx, (t) => COLOR_AREA[t], (t) => COLOR_LINEA[t])
   return c
 }
@@ -144,21 +173,38 @@ function pintarLuces(crear: CrearLienzo, meta: Meta, mapa: Mapa, ancho: number) 
   return c
 }
 
-/** Máscara a 10 m/px: 0 nada, 1 bosque, 2 parque, 3 agua. */
-export type Mascara = { ancho: number; alto: number; metrosPx: number; clases: Uint8Array }
+/** Máscara a 10 m/px: 0 nada, 1 bosque, 2 parque, 3 agua. `conMar`: el mar sale de la costa de OSM, no del relieve. */
+export type Mascara = { ancho: number; alto: number; metrosPx: number; clases: Uint8Array; conMar: boolean }
 
-function crearMascara(crear: CrearLienzo, meta: Meta, mapa: Mapa): Mascara {
+function crearMascara(crear: CrearLienzo, meta: Meta, mapa: Mapa, alturaM?: AlturaM): Mascara {
   const { uMin, uMax, vMin, vMax } = meta.rect
   const metrosPx = 10
   const c = crear(Math.round((uMax - uMin) / metrosPx), Math.round((vMax - vMin) / metrosPx))
   const ctx = ctx2d(c, { willReadFrequently: true })
   ctx.fillStyle = '#000'
   ctx.fillRect(0, 0, c.width, c.height)
-  dibujarMapa(ctx, meta, mapa, metrosPx, (t) => (t === 'bosque' ? '#ff0000' : t === 'parque' ? '#00ff00' : t === 'agua' ? '#0000ff' : t === 'deporte' ? '#000000' : null), null)
+  const mar = areaMar(mapa)
+  if (mar) {
+    ctx.fillStyle = '#0000ff'
+    trazar(ctx, meta, mar, metrosPx)
+    ctx.fill('evenodd')
+  }
+  dibujarMapa(ctx, meta, mapa, metrosPx, (t) => (t === 'bosque' ? '#ff0000' : t === 'parque' ? '#00ff00' : t === 'agua' ? '#0000ff' : t === 'deporte' || t === 'muelle' ? '#000000' : null), null)
+  // diques y espigones: tierra (en OSM son líneas dentro del mar)
+  if (mar) dibujarMapa(ctx, meta, { areas: [], lineas: mapa.lineas }, metrosPx, () => null, (t) => (t === 'muelle' ? '#000000' : null), 2.4)
   const px = ctx.getImageData(0, 0, c.width, c.height).data
   const clases = new Uint8Array(c.width * c.height)
   for (let i = 0; i < clases.length; i++) clases[i] = px[i * 4] > 128 ? 1 : px[i * 4 + 1] > 128 ? 2 : px[i * 4 + 2] > 128 ? 3 : 0
-  return { ancho: c.width, alto: c.height, metrosPx, clases }
+  // los muelles que OSM deja dentro del mar (ver crearCosta): donde el relieve pasa de 1,5 m es tierra
+  if (mar && alturaM) {
+    const { uMin: u0, vMin: v0 } = meta.rect
+    for (let j = 0; j < c.height; j++)
+      for (let i = 0; i < c.width; i++) {
+        const k = j * c.width + i
+        if (clases[k] === 3 && alturaM((u0 + (i + 0.5) * metrosPx) / ESCALA, (v0 + (j + 0.5) * metrosPx) / ESCALA) >= 1.5) clases[k] = 0
+      }
+  }
+  return { ancho: c.width, alto: c.height, metrosPx, clases, conMar: !!mar }
 }
 
 /** Clase de la máscara en metros (u, v) del marco de la maqueta. */
@@ -171,12 +217,16 @@ export function claseEn(m: Mascara, meta: Meta, u: number, v: number) {
 
 type AlturaM = (x: number, z: number) => number
 
-/** El relieve no trae batimetría: el mar y las dársenas se hunden a mano. */
+/** Mar, dársenas y lagos. Con datos antiguos (sin costa), el mar es lo que queda por debajo de 0,3 m. */
 export const esAguaEn = (m: Mascara, meta: Meta, alturaM: AlturaM, x: number, z: number) =>
-  alturaM(x, z) <= 0.3 || claseEn(m, meta, x * ESCALA, z * ESCALA) === 3
+  claseEn(m, meta, x * ESCALA, z * ESCALA) === 3 || (!m.conMar && alturaM(x, z) <= 0.3)
 
 const FONDO_ZOCALO = -1.6
 const FONDO_MAR = -0.16
+/** Nivel del agua (el mismo que NIVEL_MAR en CiudadReal.tsx). */
+const NIVEL_AGUA = -0.03
+/** Metros a cada lado de la costa en los que el suelo baja en rampa hasta el agua. */
+const RAMPA = 40
 const PASO_MALLA = 20
 
 const rejilla = (meta: Meta) => ({
@@ -211,7 +261,7 @@ function normales(pos: Float32Array, idx: Uint32Array) {
   return n
 }
 
-function mallaTerreno(meta: Meta, alturaM: AlturaM, m: Mascara) {
+function mallaTerreno(meta: Meta, alturaM: AlturaM, m: Mascara, costa: ReturnType<typeof crearCosta>) {
   const { rect } = meta
   const { nu, nv } = rejilla(meta)
   const pos = new Float32Array(nu * nv * 3)
@@ -222,7 +272,15 @@ function mallaTerreno(meta: Meta, alturaM: AlturaM, m: Mascara) {
       const x = (rect.uMin + i * PASO_MALLA) / ESCALA
       const z = (rect.vMin + j * PASO_MALLA) / ESCALA
       pos[k * 3] = x
-      pos[k * 3 + 1] = esAguaEn(m, meta, alturaM, x, z) ? FONDO_MAR : metrosAY(alturaM(x, z))
+      if (!costa) pos[k * 3 + 1] = esAguaEn(m, meta, alturaM, x, z) ? FONDO_MAR : metrosAY(alturaM(x, z))
+      else {
+        // el suelo cruza el nivel del agua justo en la costa de OSM: por triángulo, el corte sigue la línea real
+        const s = costa(x * ESCALA, z * ESCALA)
+        const tierra = metrosAY(Math.max(alturaM(x, z), 0.5))
+        if (s >= RAMPA) pos[k * 3 + 1] = claseEn(m, meta, x * ESCALA, z * ESCALA) === 3 ? FONDO_MAR : tierra
+        else if (s >= 0) pos[k * 3 + 1] = NIVEL_AGUA + (tierra - NIVEL_AGUA) * (s / RAMPA)
+        else pos[k * 3 + 1] = NIVEL_AGUA + (NIVEL_AGUA - FONDO_MAR) * Math.max(-1, s / RAMPA)
+      }
       pos[k * 3 + 2] = z
       uv[k * 2] = i / (nu - 1)
       uv[k * 2 + 1] = j / (nv - 1)
@@ -310,8 +368,9 @@ export type Suelo = {
 /** Todo el suelo de la maqueta. `anchoTextura`: px de la textura del suelo (la de luces, la mitad). */
 export function construirSuelo(crear: CrearLienzo, aImagen: AImagen, meta: Meta, alturas: Int16Array, mapa: Mapa, anchoTextura: number): Suelo {
   const alturaM = crearAlturaM(meta, alturas)
-  const mascara = crearMascara(crear, meta, mapa)
-  const terreno = mallaTerreno(meta, alturaM, mascara)
+  const mascara = crearMascara(crear, meta, mapa, alturaM)
+  const costa = crearCosta(mapa, RAMPA, (u, v) => claseEn(mascara, meta, u, v) === 3, (u, v) => alturaM(u / ESCALA, v / ESCALA))
+  const terreno = mallaTerreno(meta, alturaM, mascara, costa)
   return {
     terreno,
     zocalo: zocalo(meta, terreno.pos),

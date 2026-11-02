@@ -1,0 +1,23 @@
+{
+  "_comentario": "Límites que comprueba scripts/presupuesto.mjs (kB con gzip, salvo los datos, que ya van comprimidos). Al subir uno, explicar el porqué en el commit.",
+  "peso": {
+    "inicial": 125,
+    "css": 8,
+    "js_total": 640,
+    "chunks": {
+      "three": 195,
+      "postpro": 165,
+      "r3f": 80,
+      "Experience": 34,
+      "Compartir": 4
+    },
+    "workers": 45,
+    "datos": 2700
+  },
+  "sin_precarga": ["three", "postpro", "r3f", "Experience"],
+  "carga": {
+    "primer_pintado_ms": 2500,
+    "red_MB": 3.2,
+    "listo_ms": 60000
+  }
+}

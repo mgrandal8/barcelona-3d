@@ -1,7 +1,7 @@
 // Formato de edificios.bin.gz (v2), pensado para que gzip lo comprima bien:
 //   cabecera   'BCN2', Uint32 n, Uint32 total de puntos
 //   columnas   Uint16 nPts[n], Uint16 altura en dm[n], Uint16 base en dm[n],
-//              Int16 (u, v)[total] en medios metros, Uint8 tipo[n]
+//              Int16 (u, v)[total] en medios metros, Uint8 tipo[n] (tipo | zona << 4)
 // Las coordenadas van en deltas: el primer punto de cada edificio respecto al primero del anterior,
 // y los demás respecto al punto anterior. Los edificios vecinos van seguidos, así que casi todo son números pequeños.
 import { writeFileSync } from 'node:fs'

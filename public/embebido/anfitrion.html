@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Página anfitriona de ejemplo</title>
+    <style>
+      :root { color-scheme: light; --borde: #d9d2c5; --texto: #2a2622; --suave: #6b6359; --acento: #1d6b48; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: #f6f2ea; color: var(--texto); }
+      header, main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+      h1 { font-size: 20px; margin: 0; }
+      header p { margin: 4px 0 0; color: var(--suave); }
+      main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+      iframe { width: 100%; height: 620px; border: 1px solid var(--borde); border-radius: 12px; background: #dfe8ec; }
+      aside { display: flex; flex-direction: column; gap: 12px; }
+      section { background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 12px; }
+      h2 { font-size: 14px; margin: 0 0 8px; }
+      button { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--borde); background: #fff; cursor: pointer; margin: 0 4px 6px 0; }
+      #registro { list-style: none; margin: 0; padding: 0; font: 12px/1.4 ui-monospace, monospace; max-height: 260px; overflow: auto; }
+      #registro li { padding: 4px 0; border-bottom: 1px solid #eee; overflow-wrap: anywhere; }
+      #reserva { display: none; border-color: var(--acento); }
+      #reserva.visible { display: block; }
+      @media (max-width: 800px) { main { grid-template-columns: 1fr; } iframe { height: 520px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Página anfitriona de ejemplo</h1>
+      <p>La guía en un iframe con <code>?embed=1</code>, sus datos de <code>ejemplo.json</code> y los mensajes que se cruzan las dos páginas.</p>
+    </header>
+    <main>
+      <iframe id="guia" title="Guía 3D de Barcelona" allow="geolocation; web-share; fullscreen"></iframe>
+      <aside>
+        <section id="reserva" aria-live="polite">
+          <h2>Reserva (simulada)</h2>
+          <p id="reserva-texto"></p>
+          <button id="reserva-cerrar">Cerrar</button>
+        </section>
+        <section>
+          <h2>Órdenes a la guía</h2>
+          <button data-msg='{"tipo":"abrir","lugar":"sagrada-familia"}'>Abrir Sagrada Família</button>
+          <button data-msg='{"tipo":"abrir","lugar":null}'>Cerrar ficha</button>
+          <button data-msg='{"tipo":"tour","id":"modernista"}'>Tour modernista</button>
+          <button data-msg='{"tipo":"hora","momento":"noche"}'>Noche</button>
+          <button data-msg='{"tipo":"idioma","idioma":"en"}'>EN</button>
+          <button data-msg='{"tipo":"idioma","idioma":"es"}'>ES</button>
+        </section>
+        <section>
+          <h2>Mensajes recibidos</h2>
+          <ul id="registro"></ul>
+        </section>
+      </aside>
+    </main>
+    <script>
+      // La guía está en la carpeta de arriba (la raíz de la web); el JSON, junto a esta página.
+      const guia = new URL('../', location.href)
+      // los parámetros de esta página pasan a la guía (p. ej. ?modo=ligero o ?lang=en para probar)
+      const p = new URLSearchParams(location.search)
+      p.set('embed', '1')
+      if (!p.has('datos')) p.set('datos', new URL('ejemplo.json', location.href).href)
+      p.set('origen', location.origin)
+      guia.search = p.toString()
+      const iframe = document.getElementById('guia')
+      iframe.src = guia.href
+      const registro = document.getElementById('registro')
+      // los mensajes de la guía llegan solo de su origen y con fuente «barcelona-3d»
+      window.mensajes = []
+      addEventListener('message', (e) => {
+        if (e.origin !== guia.origin || e.source !== iframe.contentWindow || e.data?.fuente !== 'barcelona-3d') return
+        window.mensajes.push(e.data)
+        const li = document.createElement('li')
+        li.textContent = JSON.stringify(e.data)
+        registro.prepend(li)
+        if (e.data.tipo === 'reservar') {
+          const d = e.data
+          document.getElementById('reserva-texto').textContent =
+            `Aquí iría el proceso de reserva de «${d.reserva ?? '(sin id)'}»` + (d.tour ? ` (tour ${d.tour})` : ` (lugar ${d.lugar})`) + `, en ${d.idioma}.`
+          document.getElementById('reserva').classList.add('visible')
+        }
+      })
+      document.getElementById('reserva-cerrar').onclick = () => document.getElementById('reserva').classList.remove('visible')
+      for (const b of document.querySelectorAll('[data-msg]')) b.onclick = () => iframe.contentWindow.postMessage(JSON.parse(b.dataset.msg), guia.origin)
+    </script>
+  </body>
+</html>

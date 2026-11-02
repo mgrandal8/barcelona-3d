@@ -6,6 +6,7 @@ import { ESCALA } from '../scene/geo'
 import { sondeo } from '../calidad'
 import { Icono } from './Icono'
 import { Pin } from './Pin'
+import { tamNombre, useNombres } from '../nombres'
 
 // Versión ligera, sin three: el mapa del suelo en 2D (el mismo que pinta la maqueta), con los lugares,
 // la ruta del tour y tu posición. La lista, las fichas, los tours y la ayuda son los de siempre.
@@ -152,6 +153,27 @@ export function VersionLigera() {
   const { setSeleccionado, setHover } = useEstado.getState()
   const paradas = tour?.paradas.map((p) => p.id) ?? []
 
+  // nombres: distritos con el plano entero y barrios al acercar; sin pisar los pines ni otros nombres
+  const nombres = useNombres()
+  const acerca = v.s / encajar(iw, ih, tam.w, tam.h).s
+  const visibles: { n: string; l: number; left: number; top: number }[] = []
+  if (plano && nombres) {
+    const ocupado = lugares.map((m) => {
+      const p = enPantalla(m.pos[0], m.pos[1])
+      return [p.left - 20, p.top - 42, p.left + 20, p.top + 2]
+    })
+    for (const n of nombres) {
+      if (n.l === 2 || (n.l === 0 && acerca > 3) || (n.l === 1 && acerca < 1.8)) continue
+      const { left, top } = enPantalla(n.x, n.z)
+      const [w, h] = tamNombre(n)
+      const c = [left - w / 2, top - h / 2, left + w / 2, top + h / 2]
+      if (c[0] < 0 || c[1] < 0 || c[2] > tam.w || c[3] > tam.h) continue
+      if (ocupado.some((o) => c[0] < o[2] && o[0] < c[2] && c[1] < o[3] && o[1] < c[3])) continue
+      ocupado.push(c)
+      visibles.push({ n: n.n, l: n.l, left, top })
+    }
+  }
+
   return (
     <div
       ref={caja}
@@ -166,6 +188,13 @@ export function VersionLigera() {
       onWheel={rueda}
     >
       <canvas ref={lienzo} style={{ width: tam.w, height: tam.h }} aria-hidden="true" />
+      <div className="plano-nombres" aria-hidden="true">
+        {visibles.map((n) => (
+          <span key={n.n + n.left} className={n.l === 0 ? 'nombre-distrito' : 'nombre-barrio'} style={{ left: n.left, top: n.top }}>
+            {n.n}
+          </span>
+        ))}
+      </div>
       {plano &&
         lugares.map((m, i) => (
           <Pin

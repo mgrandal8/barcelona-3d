@@ -1,8 +1,8 @@
 import type { Monumento } from '../data/monumentos'
 import type { Textos } from './es'
 
-export type Idioma = 'es' | 'en'
-export const IDIOMAS: Idioma[] = ['es', 'en']
+export type Idioma = 'es' | 'ca' | 'en'
+export const IDIOMAS: Idioma[] = ['es', 'ca', 'en']
 
 type TextoLugar = Pick<Monumento, 'nombre' | 'etiqueta' | 'descripcion' | 'horario' | 'precio' | 'duracion' | 'consejo'>
 
@@ -16,10 +16,11 @@ export type Traduccion = {
 const CLAVE = 'bcn3d-idioma'
 const esIdioma = (x: string | null | undefined): x is Idioma => IDIOMAS.includes(x as Idioma)
 
-/** ?lang= manda; si no, la última elección y, si no, el idioma del navegador. */
-export function idiomaInicial(): Idioma {
+/** ?lang= manda; después, el idioma de la ruta (/en/, /ca/); si no, la última elección y, si no, el idioma del navegador. */
+export function idiomaInicial(deRuta?: Idioma | null): Idioma {
   const url = new URLSearchParams(location.search).get('lang')
   if (esIdioma(url)) return url
+  if (deRuta) return deRuta
   try {
     const guardado = localStorage.getItem(CLAVE)
     if (esIdioma(guardado)) return guardado
@@ -27,7 +28,8 @@ export function idiomaInicial(): Idioma {
     // sin almacenamiento se decide por el navegador
   }
   const nav = navigator.language?.slice(0, 2)
-  return esIdioma(nav) ? nav : nav === 'ca' ? 'es' : 'en'
+  // con gallego o euskera, mejor el español que el inglés
+  return esIdioma(nav) ? nav : nav === 'gl' || nav === 'eu' ? 'es' : 'en'
 }
 
 export function guardarIdioma(i: Idioma) {
