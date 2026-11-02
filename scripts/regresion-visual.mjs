@@ -122,5 +122,7 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.join('\n'))
 }
 const malos = resultados.filter((r) => !r.bien)
+// en Actions, un aviso por vista que cambia: sale en la página del run sin abrir el log
+if (process.env.GITHUB_ACTIONS) for (const r of malos) console.log(`::warning title=Regresión visual::${r.nombre}: ${r.pct === null ? 'error ' + r.errores[0] : r.pct + ' % de píxeles distintos'}`)
 console.log(malos.length ? `\n${malos.length} vista(s) cambian: mira ${salida}/informe.html` : `\nSin cambios visibles (informe en ${salida}/informe.html)`)
 process.exit(malos.length ? 1 : 0)

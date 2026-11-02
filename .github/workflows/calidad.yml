@@ -75,7 +75,7 @@ jobs:
           node scripts/prueba-analitica.mjs "http://$IP:4174/"
       - name: Registros del servidor
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: pruebas-registros
           path: preview*.log
@@ -119,7 +119,7 @@ jobs:
           bash scripts/esperar-url.sh http://localhost:4173/ http://localhost:4175/
       - name: Regresión visual
         run: node scripts/regresion-visual.mjs http://localhost:4175/ http://localhost:4173/ regresion-visual
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: regresion-visual

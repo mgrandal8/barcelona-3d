@@ -73,6 +73,9 @@ for (const nombre of lista) {
 const icono = { bien: '✅', inestable: '⚠️', falla: '❌' }
 console.log('\nResumen:')
 for (const r of resultados) console.log(`  ${r.estado.padEnd(9)} ${r.nombre.padEnd(10)} ${r.s} s${r.fallos.length ? '  · ' + r.fallos.join(' · ') : ''}`)
+// en Actions, cada fallo como anotación: sale en la página del run sin abrir el log
+if (process.env.GITHUB_ACTIONS)
+  for (const r of resultados) for (const f of r.fallos.slice(0, 10)) console.log(`::${r.estado === 'falla' ? 'error' : 'warning'} title=Pruebas · ${r.nombre}::${f.replace(/\r?\n/g, ' ')}`)
 if (process.env.GITHUB_STEP_SUMMARY) {
   const md = ['### Pruebas', '', '| | Suite | Tiempo | Fallos |', '|---|---|---:|---|', ...resultados.map((r) => `| ${icono[r.estado]} | ${r.nombre} | ${r.s} s | ${r.fallos.join('<br>').replace(/\|/g, '\\|')} |`), '']
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.join('\n'))

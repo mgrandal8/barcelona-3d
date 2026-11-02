@@ -74,6 +74,7 @@ if (url) {
 
 const ancho = Math.max(...filas.map((f) => f.nombre.length))
 for (const f of filas) console.log(`${f.bien ? 'OK ' : 'PASA'} ${f.nombre.padEnd(ancho)}  ${String(f.valor).padStart(8)} ${f.unidad}  (límite ${f.limite})`)
+if (process.env.GITHUB_ACTIONS) for (const f of filas.filter((x) => !x.bien)) console.log(`::error title=Presupuesto::${f.nombre}: ${f.valor} ${f.unidad} (límite ${f.limite})`)
 if (process.env.GITHUB_STEP_SUMMARY) {
   const md = ['### Presupuesto de peso y carga', '', '| | Medida | Límite |', '|---|---:|---:|', ...filas.map((f) => `| ${f.bien ? '✅' : '❌'} ${f.nombre} | ${f.valor} ${f.unidad} | ${f.limite} ${f.unidad} |`), '']
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.join('\n'))
