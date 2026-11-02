@@ -67,7 +67,7 @@ if (url) {
   const errores = await page.evaluate(() => window.__errores?.length ?? 0)
   await browser.close()
   fila('Primer pintado (portada)', Math.round(fcp), P.carga.primer_pintado_ms, 'ms')
-  fila('Red hasta la ciudad lista', +(bytes / 1e6).toFixed(2), P.carga.red_MB, 'MB')
+  fila('Red de la página hasta la ciudad lista (sin workers)', +(bytes / 1e6).toFixed(2), P.carga.red_MB, 'MB')
   fila('Ciudad lista (por software)', listo, P.carga.listo_ms, 'ms')
   fila('Errores registrados', errores, 0, '')
 }

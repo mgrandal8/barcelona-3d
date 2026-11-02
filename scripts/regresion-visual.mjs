@@ -18,7 +18,7 @@ if (!ref || !nueva) {
 }
 const salida = process.argv[4] ?? 'capturas/regresion'
 const filtro = process.argv[5]?.split(',')
-const UMBRAL = { interfaz: Number(process.env.UMBRAL_INTERFAZ ?? 0.2), maqueta: Number(process.env.UMBRAL_MAQUETA ?? 1) }
+const UMBRAL = { interfaz: Number(process.env.UMBRAL_INTERFAZ ?? 0.2), maqueta: Number(process.env.UMBRAL_MAQUETA ?? 0.5) }
 // diferencia por canal a partir de la cual un píxel cuenta como distinto (el antialiasing por software baila un poco)
 const TOLERANCIA = Number(process.env.TOLERANCIA ?? 32)
 

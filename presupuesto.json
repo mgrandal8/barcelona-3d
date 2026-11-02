@@ -16,8 +16,8 @@
   },
   "sin_precarga": ["three", "postpro", "r3f", "Experience"],
   "carga": {
-    "primer_pintado_ms": 4000,
-    "red_MB": 5.2,
-    "listo_ms": 120000
+    "primer_pintado_ms": 2500,
+    "red_MB": 3.2,
+    "listo_ms": 60000
   }
 }

@@ -15,8 +15,8 @@ import type { Textos } from '../i18n/es'
 
 const ANCHO = 1200
 const ALTO = 630
-/** Parámetros que no se comparten: son de pruebas o de este dispositivo. */
-const PRIVADOS = ['captura', 'entrada', 'cam', 'vista', 'modo', 'calidad', 'postpro', 'nombres', 'dominio']
+/** Parámetros que no se comparten: son de pruebas, de este dispositivo o del modo embebido (el enlace abre la guía normal). */
+const PRIVADOS = ['captura', 'entrada', 'cam', 'vista', 'modo', 'calidad', 'postpro', 'nombres', 'dominio', 'embed', 'datos', 'origen', 'reloj']
 
 function enlaceCompartir() {
   const url = new URL(location.href)
