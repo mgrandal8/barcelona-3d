@@ -161,6 +161,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .panel-consejo { background: #fdf0d2; border-radius: 14px; padding: 12px 14px; }
 .panel-consejo strong { font-size: 13px; }
 .panel-consejo p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+/* modo embebido: reserva en la web anfitriona (verde, para no confundirlo con la navegación) */
+.panel-reservar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin: 0 0 12px; border: 0; border-radius: 999px; padding: 11px 16px; font-size: 15px; font-weight: 700; background: #1d6b48; color: #fff; }
+.panel-reservar:hover { background: #17573a; }
+.tour footer button.tour-reservar { flex: 1 0 100%; background: #1d6b48; color: #fff; }
 .panel-nav { display: flex; gap: 6px; margin-top: 16px; }
 .panel-nav button { flex: 1; border: 1px solid var(--borde); background: #fff8; border-radius: 999px; padding: 8px 6px; font-size: 13px; }
 .panel-nav button.primario { background: var(--acento); color: #fff; border-color: transparent; flex: 1.3; }

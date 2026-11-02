@@ -2,9 +2,11 @@ import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
 import { fechaLarga, traducirLugar, useLugares, useT, useTours } from '../i18n'
 import { CONSULTADO, porId } from '../data/monumentos'
 import { ANALITICA } from '../analitica'
+import { REGISTRO_REMOTO } from '../registro'
 import { useEstado } from '../store'
 import { SinConexion } from './AvisoRed'
 import { Icono } from './Icono'
+import { EMBEBIDO, reservar, toursPropios } from '../embebido'
 import { ICONO_MOMENTO } from '../scene/momento'
 
 const ENFOCABLES = 'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
@@ -61,8 +63,8 @@ function Tours() {
   const tx = useT()
   const horas = { dia: tx.hora.tourDia, atardecer: tx.hora.tourAtardecer, noche: tx.hora.tourNoche }
   return (
-    <Dialogo titulo={tx.tours.titulo} ancho={960}>
-      <p className="dialogo-intro">{tx.tours.intro}</p>
+    <Dialogo titulo={toursPropios ? tx.tours.tituloPropios : tx.tours.titulo} ancho={960}>
+      <p className="dialogo-intro">{toursPropios ? tx.tours.introPropios : tx.tours.intro}</p>
       <div className="tours">
         {useTours().map((t) => (
           <article key={t.id} className="tour" style={{ ['--color' as string]: t.color }}>
@@ -91,6 +93,11 @@ function Tours() {
               <button className="primario" onClick={() => empezarTour(t.id)}>
                 {tx.tours.empezar}
               </button>
+              {EMBEBIDO && t.reserva && (
+                <button className="tour-reservar" onClick={() => reservar(t.reserva!, null, t.id)} aria-label={tx.tours.reservarEtiqueta(t.nombre)}>
+                  {tx.panel.reservar}
+                </button>
+              )}
             </footer>
           </article>
         ))}
@@ -193,6 +200,7 @@ function Legal() {
             <li key={p}>{p}</li>
           ))}
           <li>{ANALITICA ? t.analiticaSi(ANALITICA) : t.analiticaNo}</li>
+          {REGISTRO_REMOTO && <li>{t.errores}</li>}
           <li>
             {t.alojamiento}{' '}
             <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" {...fuera}>

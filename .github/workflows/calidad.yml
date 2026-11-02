@@ -1,0 +1,126 @@
+# Calidad continua: en cada push y en cada PR a main.
+#   comprobar  lint, tipos, build y presupuesto de peso (un par de minutos)
+#   pruebas    las pruebas de Playwright sobre el build (WebGL por software), el presupuesto de carga y la analítica
+#   visual     regresión visual contra la base (el punto de main del que sale la rama, la base del PR o, en main,
+#              el commit anterior); avisa, no bloquea
+# Cada job deja su tabla en la pestaña Summary del run; la regresión visual sube sus imágenes como artefacto.
+name: Calidad
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: calidad-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # versión del build en los informes de error
+  VITE_VERSION: ${{ github.sha }}
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      - run: npm run lint
+      - run: npm run build
+      - name: Presupuesto de peso
+        run: node scripts/presupuesto.mjs
+
+  pruebas:
+    # un PR desde una rama de este repo ya se prueba con su push
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Servidor (vite preview)
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          bash scripts/esperar-url.sh http://localhost:4173/
+      - name: Pruebas
+        run: node scripts/pruebas.mjs http://localhost:4173/
+      - name: Presupuesto de carga
+        if: ${{ !cancelled() }}
+        run: node scripts/presupuesto.mjs http://localhost:4173/
+      - name: Analítica y registro de errores (build propio, servido fuera de localhost)
+        if: ${{ !cancelled() }}
+        run: |
+          VITE_ANALITICA_URL=https://analitica.prueba/api/event VITE_ANALITICA_DOMINIO=prueba VITE_ERRORES_URL=https://errores.prueba/api npx vite build --outDir dist-analitica
+          npx vite preview --outDir dist-analitica --host 0.0.0.0 --port 4174 --strictPort > preview-analitica.log 2>&1 &
+          IP=$(hostname -I | awk '{print $1}')
+          bash scripts/esperar-url.sh "http://$IP:4174/"
+          node scripts/prueba-analitica.mjs "http://$IP:4174/"
+      - name: Registros del servidor
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pruebas-registros
+          path: preview*.log
+          if-no-files-found: ignore
+
+  visual:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    # un cambio visual puede ser a propósito: se avisa en el resumen y se miran las imágenes, pero no rompe el run
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Base con la que comparar
+        id: base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then BASE="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then BASE="$(git rev-parse HEAD~1)"
+          # una rama se compara con el punto de main del que sale (lo que cambiaría al fusionarla)
+          else BASE="$(git merge-base origin/main HEAD)"; fi
+          echo "sha=$BASE" >> "$GITHUB_OUTPUT"
+          echo "Base: $BASE"
+      - name: Build de la rama y de la base
+        run: |
+          npm run build
+          git worktree add ../base ${{ steps.base.outputs.sha }}
+          ln -s "$PWD/node_modules" ../base/node_modules
+          (cd ../base && npx vite build --outDir "$GITHUB_WORKSPACE/dist-base")
+      - name: Servidores
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          npx vite preview --outDir dist-base --port 4175 --strictPort > preview-base.log 2>&1 &
+          bash scripts/esperar-url.sh http://localhost:4173/ http://localhost:4175/
+      - name: Regresión visual
+        run: node scripts/regresion-visual.mjs http://localhost:4175/ http://localhost:4173/ regresion-visual
+      - uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: regresion-visual
+          path: regresion-visual/

@@ -6,6 +6,7 @@ import { distanciaM, formatoDistancia, minutosAPie } from '../ubicacion'
 import { useTransporte } from '../transporte'
 import { EstacionCercana } from './Lineas'
 import { Icono } from './Icono'
+import { EMBEBIDO, reservar } from '../embebido'
 
 export function PanelInfo() {
   const id = useEstado((s) => s.seleccionado)
@@ -123,6 +124,11 @@ export function PanelInfo() {
               <dd>{m.duracion}</dd>
             </div>
           </dl>
+          {EMBEBIDO && (tour?.reserva || m.reserva) && (
+            <button className="panel-reservar" onClick={() => reservar((tour?.reserva ?? m.reserva)!, m.id, tour?.reserva ? tour.id : null)}>
+              <Icono nombre="check" /> {tour?.reserva ? t.reservarTour : t.reservar}
+            </button>
+          )}
           <div className="panel-consejo">
             <strong>{t.consejo}</strong>
             <p>{m.consejo}</p>
@@ -159,6 +165,8 @@ export function PanelInfo() {
                 </a>
                 , {t.consultado(fechaLarga(CONSULTADO, idioma))}
               </>
+            ) : m.fuenteDatos ? (
+              t.datosDe(m.fuenteDatos)
             ) : (
               t.calle
             )}

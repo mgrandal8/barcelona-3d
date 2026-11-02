@@ -3,6 +3,7 @@ import { useT } from '../i18n'
 import { useEstado, type Fallo } from '../store'
 import { reiniciarDatos } from '../scene/datos'
 import { sondeo } from '../calidad'
+import { registrarError } from '../registro'
 
 /** Qué ha fallado, por el mensaje: un chunk que no llega, el contexto WebGL o, si no, los datos. */
 function tipoDeFallo(e: unknown): Fallo {
@@ -23,6 +24,7 @@ export class ErrorMaqueta extends Component<{ children: ReactNode }, { error: bo
   }
   componentDidCatch(e: unknown) {
     console.error(e)
+    registrarError('maqueta', e)
     useEstado.getState().setFallo(tipoDeFallo(e))
   }
   render() {

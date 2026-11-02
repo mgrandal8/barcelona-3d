@@ -5,6 +5,9 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { vivo } from './hora'
 import { azar } from './monumentos/comun'
 
+// en las capturas con ?reloj= (regresión visual), las nubes no se mueven
+const QUIETAS = new URLSearchParams(location.search).has('captura') && new URLSearchParams(location.search).has('reloj')
+
 // Nubes low-poly que cruzan la maqueta con el viento de poniente (+x) y dan la vuelta al salir.
 const X_MIN = -75
 const X_MAX = 85
@@ -49,7 +52,7 @@ export function Nubes() {
     camera.getWorldPosition(camPos)
     grupo.current!.children.forEach((m, i) => {
       const n = nubes[i]
-      n.x += n.vel * Math.min(dt, 0.1)
+      if (!QUIETAS) n.x += n.vel * Math.min(dt, 0.1)
       if (n.x > X_MAX) n.x = X_MIN
       m.position.x = n.x
       // se desvanece al acercarse la cámara (vuelos bajos) y en los extremos del recorrido

@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "anfitrion": "Agencia de ejemplo",
+  "lugares": {
+    "sagrada-familia": {
+      "precio": "34 € con guía de la agencia (entrada incluida)",
+      "horario": "Visitas guiadas a las 9:00, 12:00 y 16:00",
+      "reserva": { "id": "lk-sf-guiada", "url": "https://example.com/reservas/sagrada-familia" },
+      "ca": { "precio": "34 € amb guia de l’agència (entrada inclosa)", "horario": "Visites guiades a les 9:00, 12:00 i 16:00" },
+      "en": { "precio": "€34 with the agency’s guide (ticket included)", "horario": "Guided visits at 9:00, 12:00 and 16:00" }
+    },
+    "park-guell": {
+      "reserva": { "id": "lk-pg-amanecer" }
+    }
+  },
+  "tours": [
+    {
+      "id": "modernista",
+      "nombre": "Ruta modernista",
+      "icono": "lagarto",
+      "color": "#c2543a",
+      "resumen": "Tres joyas del modernismo en una mañana, con entradas sin colas.",
+      "duracion": "4 h",
+      "precio": "79 € por persona",
+      "momento": "dia",
+      "reserva": { "id": "lk-tour-modernista", "url": "https://example.com/reservas/ruta-modernista" },
+      "paradas": [
+        { "id": "sagrada-familia", "nota": "Quedamos frente a la fachada del Nacimiento." },
+        { "id": "casa-batllo", "nota": "Paseo por el Eixample hasta el Passeig de Gràcia." },
+        { "id": "casa-mila", "nota": "Terminamos en la azotea de La Pedrera." }
+      ],
+      "ca": {
+        "nombre": "Ruta modernista",
+        "resumen": "Tres joies del modernisme en un matí, amb entrades sense cues.",
+        "precio": "79 € per persona",
+        "notas": ["Quedem davant la façana del Naixement.", "Passeig per l’Eixample fins al passeig de Gràcia.", "Acabem al terrat de la Pedrera."]
+      },
+      "en": {
+        "nombre": "Modernist route",
+        "resumen": "Three modernist gems in one morning, with skip-the-line tickets.",
+        "precio": "€79 per person",
+        "notas": ["We meet in front of the Nativity façade.", "A walk through the Eixample to Passeig de Gràcia.", "We finish on the rooftop of La Pedrera."]
+      }
+    },
+    {
+      "id": "puerto-atardecer",
+      "nombre": "Puerto al atardecer",
+      "icono": "velero",
+      "color": "#2f7fa8",
+      "resumen": "Del mirador de Colón a la playa de la Barceloneta mientras se pone el sol.",
+      "duracion": "2 h",
+      "precio": "35 € por persona",
+      "momento": "atardecer",
+      "reserva": { "id": "lk-tour-puerto" },
+      "paradas": [
+        { "id": "colom", "nota": "Subimos al mirador para ver el puerto desde arriba." },
+        { "id": "barceloneta", "nota": "Bajamos hasta el mar por el Moll de la Fusta." }
+      ]
+    }
+  ]
+}

@@ -18,7 +18,9 @@ function permitida() {
   const nav = navigator as Navigator & { globalPrivacyControl?: boolean }
   if (nav.doNotTrack === '1' || nav.globalPrivacyControl) return false
   if (/^(localhost|127\.|\[::1\])/.test(location.hostname)) return false
-  return !new URLSearchParams(location.search).has('captura')
+  // embebida, la cuenta la lleva la web anfitriona
+  const p = new URLSearchParams(location.search)
+  return !p.has('captura') && !p.has('embed')
 }
 
 /** Manda un evento; `props` son datos agregables (id del lugar, del tour…), nunca datos de la persona. */

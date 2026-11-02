@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node scripts/pruebas.mjs http://localhost:4173/",
+    "test:rapidas": "node scripts/pruebas.mjs http://localhost:4173/ rapidas",
+    "presupuesto": "node scripts/presupuesto.mjs",
+    "visual": "node scripts/regresion-visual.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

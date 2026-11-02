@@ -78,6 +78,9 @@ export const es = {
     calle: 'Monumento en la calle, sin entrada',
     consultado: (f: string) => `consultados el ${f}. Pueden cambiar: confírmalos antes de ir.`,
     foto: 'Foto',
+    reservar: 'Reservar',
+    reservarTour: 'Reservar este tour',
+    datosDe: (n: string) => `Horario y precio facilitados por ${n}. Pueden cambiar: confírmalos antes de ir.`,
   },
   tours: {
     titulo: 'Tours de ejemplo',
@@ -85,6 +88,9 @@ export const es = {
     empezar: 'Empezar tour',
     reproducir: 'Reproducir',
     reproducirEtiqueta: (n: string) => `Reproducir el tour «${n}»: la maqueta pasa sola de parada en parada`,
+    tituloPropios: 'Tours',
+    introPropios: 'Rutas con guía. Al empezar una, la maqueta te lleva de parada en parada.',
+    reservarEtiqueta: (n: string) => `Reservar el tour «${n}»`,
   },
   reproductor: {
     etiqueta: 'Tour automático',
@@ -216,6 +222,7 @@ export const es = {
     analiticaSi: (p: string) =>
       `Contamos las visitas y qué lugares y tours se abren, de forma agregada, con ${p}: sin cookies, sin guardar tu IP y sin seguirte entre webs. Si tu navegador pide «No rastrear» o «Control global de privacidad», no se cuenta nada.`,
     analiticaNo: 'No hay analítica: no se mide nada de lo que haces en la guía.',
+    errores: 'Si algo falla, se envía un informe técnico del error (el mensaje, la versión de la guía, la ficha abierta y el navegador) para poder arreglarlo; sin cookies ni datos tuyos.',
     creditos: 'Créditos',
     mapa: 'Mapa, calles y edificios',
     relieve: 'Relieve',

@@ -81,6 +81,9 @@ const textos: Textos = {
     calle: 'Monument al carrer, sense entrada',
     consultado: (f: string) => `consultats el ${f}. Poden canviar: confirma’ls abans d’anar-hi.`,
     foto: 'Foto',
+    reservar: 'Reserva',
+    reservarTour: 'Reserva aquest tour',
+    datosDe: (n: string) => `Horari i preu facilitats per ${n}. Poden canviar: confirma’ls abans d’anar-hi.`,
   },
   tours: {
     titulo: 'Tours d’exemple',
@@ -88,6 +91,9 @@ const textos: Textos = {
     empezar: 'Comença el tour',
     reproducir: 'Reprodueix',
     reproducirEtiqueta: (n: string) => `Reprodueix el tour «${n}»: la maqueta passa sola de parada en parada`,
+    tituloPropios: 'Tours',
+    introPropios: 'Rutes amb guia. Quan en comences una, la maqueta et porta de parada en parada.',
+    reservarEtiqueta: (n: string) => `Reserva el tour «${n}»`,
   },
   reproductor: {
     etiqueta: 'Tour automàtic',
@@ -219,6 +225,7 @@ const textos: Textos = {
     analiticaSi: (p: string) =>
       `Comptem les visites i quins llocs i tours s’obren, de manera agregada, amb ${p}: sense galetes, sense desar la teva IP i sense seguir-te entre webs. Si el teu navegador demana «No rastrejar» o «Control global de privadesa», no es compta res.`,
     analiticaNo: 'No hi ha analítica: no es mesura res del que fas a la guia.',
+    errores: 'Si alguna cosa falla, s’envia un informe tècnic de l’error (el missatge, la versió de la guia, la fitxa oberta i el navegador) per poder-lo arreglar; sense galetes ni dades teves.',
     creditos: 'Crèdits',
     mapa: 'Mapa, carrers i edificis',
     relieve: 'Relleu',

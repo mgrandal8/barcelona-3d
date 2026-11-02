@@ -31,6 +31,10 @@ jobs:
       - run: npm run build
         env:
           BASE: /barcelona-3d/
+          # versión del build en los informes de error (y, si se configuran, dónde se mandan: VITE_ERRORES_URL)
+          VITE_VERSION: ${{ github.sha }}
+      # no se publica un build que se pase del presupuesto de peso (presupuesto.json)
+      - run: node scripts/presupuesto.mjs
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

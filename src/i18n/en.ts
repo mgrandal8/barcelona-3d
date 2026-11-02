@@ -81,6 +81,9 @@ const textos: Textos = {
     calle: 'Street monument, no ticket needed',
     consultado: (f: string) => `checked on ${f}. They may change: confirm them before you go.`,
     foto: 'Photo',
+    reservar: 'Book',
+    reservarTour: 'Book this tour',
+    datosDe: (n: string) => `Opening hours and price provided by ${n}. They may change: check before you go.`,
   },
   tours: {
     titulo: 'Sample tours',
@@ -88,6 +91,9 @@ const textos: Textos = {
     empezar: 'Start tour',
     reproducir: 'Play',
     reproducirEtiqueta: (n: string) => `Play the “${n}” tour: the model moves from stop to stop by itself`,
+    tituloPropios: 'Tours',
+    introPropios: 'Guided routes. Start one and the model takes you from stop to stop.',
+    reservarEtiqueta: (n: string) => `Book the “${n}” tour`,
   },
   reproductor: {
     etiqueta: 'Self-playing tour',
@@ -219,6 +225,7 @@ const textos: Textos = {
     analiticaSi: (p: string) =>
       `We count visits and which places and tours are opened, in aggregate, with ${p}: no cookies, your IP is not stored and you are not followed across websites. If your browser sends “Do Not Track” or “Global Privacy Control”, nothing is counted.`,
     analiticaNo: 'There is no analytics: nothing you do in the guide is measured.',
+    errores: 'If something breaks, a technical error report (the message, the guide version, the open page and the browser) is sent so it can be fixed; no cookies and no personal data.',
     creditos: 'Credits',
     mapa: 'Map, streets and buildings',
     relieve: 'Terrain',

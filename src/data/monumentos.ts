@@ -9,6 +9,9 @@ export const CONSULTADO = '2026-11-01'
 
 export type Foto = { archivo: string; ancho: number; alto: number; autor: string; licencia: string; urlLicencia: string | null; pagina: string; titulo: string; recortada?: boolean }
 
+/** Reserva de un lugar o un tour en el modo embebido: `id` vuelve a la página anfitriona; `url`, si la guía no está en un iframe. */
+export type Reserva = { id?: string; url?: string }
+
 export type Monumento = {
   id: string
   nombre: string
@@ -35,6 +38,10 @@ export type Monumento = {
   foto?: Foto
   duracion: string
   consejo: string
+  /** Modo embebido: se puede reservar (botón «Reservar»). */
+  reserva?: Reserva
+  /** Modo embebido: quién da el horario y el precio si los cambia el JSON externo (sustituye a «web oficial»). */
+  fuenteDatos?: string
 }
 
 const LUGARES: Omit<Monumento, 'pos' | 'foto'>[] = [

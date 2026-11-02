@@ -25,6 +25,9 @@ const POSTPRO = params.get('postpro') !== '0'
 const CAPTURA = params.has('captura')
 // las entradas (portada, enlace a un lugar o a una vista) llegan volando; en capturas no, salvo con ?entrada=1 (pruebas)
 const ENTRADA = !CAPTURA || params.has('entrada')
+// ?reloj=<s> (capturas de la regresión visual): el reloj de las animaciones (barcos, gaviotas, luces) se queda quieto en ese
+// segundo; dt sigue corriendo, así que los vuelos y el cambio de hora funcionan igual
+const RELOJ = CAPTURA && params.has('reloj') ? Number(params.get('reloj')) || 0 : null
 // el postproceso no retrasa la ciudad: se descarga cuando ya está dibujada
 const Postpro = lazy(() => import('./Postpro'))
 
@@ -375,8 +378,16 @@ export function Experience() {
       gl={{ antialias: false, alpha: true, preserveDrawingBuffer: params.has('captura') }}
       camera={{ position: [...VISTA_GENERAL.pos], fov: 35, near: 0.2, far: 600 }}
       onPointerMissed={() => useEstado.getState().setHover(null)}
-      onCreated={({ gl }) => {
+      onCreated={({ gl, clock }) => {
         gl.toneMapping = THREE.NeutralToneMapping
+        if (RELOJ !== null) {
+          const delta = clock.getDelta.bind(clock)
+          clock.getDelta = () => {
+            const d = delta()
+            clock.elapsedTime = RELOJ
+            return d
+          }
+        }
       }}
     >
       {/* si va a tirones se baja un nivel (no se vuelve a subir: así no oscila); mientras carga no se mide */}

@@ -1,5 +1,6 @@
 import type { Momento } from '../scene/momento'
 import type { NombreIcono } from '../ui/Icono'
+import type { Reserva } from './monumentos'
 
 // Tours de ejemplo para la demo: ni la guía ni los precios de los tours son reales (los de los lugares sí: monumentos.ts).
 
@@ -15,6 +16,8 @@ export type Tour = {
   /** Hora a la que se pone la maqueta al empezar. */
   momento: Momento
   paradas: { id: string; nota: string }[]
+  /** Modo embebido: se puede reservar (botón «Reservar»). */
+  reserva?: Reserva
 }
 
 export const TOURS: Tour[] = [

@@ -95,7 +95,8 @@ export const useEstado = create<Estado>((set, get) => ({
   reproduciendo: false,
   dialogo: null,
   // con un enlace a un lugar o a una vista, o en modo captura, se entra directo al mapa
-  portada: !inicial && (!params.has('captura') || params.has('entrada')) && !params.has('vista'),
+  // embebida en otra web, tampoco: la anfitriona ya pone su presentación
+  portada: !inicial && (!params.has('captura') || params.has('entrada')) && !params.has('vista') && !params.has('embed'),
   carga: { progreso: 0, texto: 'preparando', listo: false },
   idioma: idiomaInicial(ruta.idioma),
   ubicacion: null,
